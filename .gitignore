@@ -1,0 +1,112 @@
+# Project specific
+.cursor/
+.cursorrules
+PROJECT_CONTEXT.md
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.bun/
+vendor/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.env/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+secrets/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+dist/
+web-build/
+expo-env.d.ts
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+*.orig.*
+ios/Pods/
+ios/build/
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+*.apk
+*.aab
+*.ipa
+
+# Bun / Node / TypeScript
+*.tsbuildinfo
+.turbo/
+.cache/
+coverage/
+.nyc_output/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+
+# Python / CV
+*.pt
+*.onnx
+*.tflite
+*.h5
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+runs/
+weights/
+
+# Media & large datasets (keep samples via !exceptions if needed)
+*.mp4
+*.mov
+*.avi
+*.mkv
+data/raw/
+data/videos/
+datasets/
+
+# Cloudflare tunnel
+.cloudflared/
+*.pem
+
+# Supabase local
+supabase/.branches
+supabase/.temp
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+*.swo
+*~
+
+# Build / misc
+build/
+out/
+tmp/
+temp/
+*.local
+.direnv/

@@ -19,7 +19,7 @@ Aligned with Team Odyssey’s Software Requirements Specification (SRS) v1.0 (09
 | **Vision** | *Take the guesswork out of it* |
 | **SRS Version** | 1.0 |
 | **SRS Date** | 09/08/2026 |
-| **Authors** | Ayaan Syed, Josh White, Rashid Amer, Sai Saragadam, Sujeeth Muruganandam, Philip Abraham, Sebastian John |
+| **Authors** | Ayaan , Josh , Rashid , Sai , Sujeeth , Philip , Sebastian |
 
 ### Purpose
 

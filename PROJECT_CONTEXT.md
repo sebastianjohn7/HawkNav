@@ -8,18 +8,20 @@ Aligned with Team Odyssey’s Software Requirements Specification (SRS) v1.0 (09
 
 ## 1. Project Overview & Meta Information
 
-| Field | Value |
-| --- | --- |
-| **Project Name** | HawkNav (Hawk Nav) |
-| **Tagline** | An All-in-One Campus Mobility App for UHCL |
-| **Problem** | UHCL students lack timely, accurate information about shuttle status, accessible routes, parking, and emergency closures |
-| **Course & Term** | CSCI 4388 Senior Project, Fall 2026, University of Houston–Clear Lake (UHCL) |
-| **Team Name** | Team Odyssey |
-| **Motto** | *From 20 years to 20 seconds* |
-| **Vision** | *Take the guesswork out of it* |
-| **SRS Version** | 1.0 |
-| **SRS Date** | 09/08/2026 |
-| **Authors** | Ayaan , Josh , Rashid , Sai , Sujeeth , Philip , Sebastian |
+
+| Field             | Value                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Project Name**  | HawkNav (Hawk Nav)                                                                                                       |
+| **Tagline**       | An All-in-One Campus Mobility App for UHCL                                                                               |
+| **Problem**       | UHCL students lack timely, accurate information about shuttle status, accessible routes, parking, and emergency closures |
+| **Course & Term** | CSCI 4388 Senior Project, Fall 2026, University of Houston–Clear Lake (UHCL)                                             |
+| **Team Name**     | Team Odyssey                                                                                                             |
+| **Motto**         | *From 20 years to 20 seconds*                                                                                            |
+| **Vision**        | *Take the guesswork out of it*                                                                                           |
+| **SRS Version**   | 1.0                                                                                                                      |
+| **SRS Date**      | 09/08/2026                                                                                                               |
+| **Authors**       | Ayaan , Josh , Rashid , Sai , Sujeeth , Philip , Sebastian                                                               |
+
 
 ### Purpose
 
@@ -31,11 +33,13 @@ HawkNav serves UHCL’s commuter majority — especially international students 
 
 ### Stakeholders
 
-| Role | Who |
-| --- | --- |
-| **Customers** | Parking & Transportation Department |
-| **End users** | Students, Faculty/Staff, Community Members/Visitors |
-| **Developers / Testers** | Team Odyssey |
+
+| Role                     | Who                                                 |
+| ------------------------ | --------------------------------------------------- |
+| **Customers**            | Parking & Transportation Department                 |
+| **End users**            | Students, Faculty/Staff, Community Members/Visitors |
+| **Developers / Testers** | Team Odyssey                                        |
+
 
 Intended audience includes UHCL students and visitors unfamiliar with campus layout. Park & Transportation may also use HawkNav to improve parking and shuttle efficiency.
 
@@ -57,15 +61,17 @@ Intended audience includes UHCL students and visitors unfamiliar with campus lay
 
 Seven CS majors, organized into specialized sub-teams:
 
-| Member Name | Meeting Roles | Technical Sub-Team | Core Focus Area |
-| --- | --- | --- | --- |
-| **Sebastian** | Coordinator | Shuttle Team | Driver app, GPS location streaming, realtime shuttle updates |
-| **Saikiran** | Facilitator | Shuttle Team | Shuttle backend algorithms, predictive ETA calculation |
-| **Josh** | Timekeeper | Map & AR Team | ArcGIS/Mapbox routing graph, ViroReact AR wayfinding |
-| **Ayaan** | Scribe | Map Team | Accessible pathfinding graph, UHCL GeoJSON overlays |
-| **Rashid** | Timekeeper | AR Team | AR camera overlay, directional vector anchors |
-| **Philip** | Scribe | Parking CV Team | Computer Vision gate counter, OpenCV vehicle detection |
-| **Sujeeth** | Coordinator | Parking CV Team | Parking occupancy engine, class-schedule density model |
+
+| Member Name   | Meeting Roles | Technical Sub-Team | Core Focus Area                                              |
+| ------------- | ------------- | ------------------ | ------------------------------------------------------------ |
+| **Sebastian** | Coordinator   | Shuttle Team       | Driver app, GPS location streaming, realtime shuttle updates |
+| **Saikiran**  | Facilitator   | Shuttle Team       | Shuttle backend algorithms, predictive ETA calculation       |
+| **Josh**      | Timekeeper    | Map & AR Team      | ArcGIS/Mapbox routing graph, ViroReact AR wayfinding         |
+| **Ayaan**     | Scribe        | Map Team           | Accessible pathfinding graph, UHCL GeoJSON overlays          |
+| **Rashid**    | Timekeeper    | AR Team            | AR camera overlay, directional vector anchors                |
+| **Philip**    | Scribe        | Parking CV Team    | Computer Vision gate counter, OpenCV vehicle detection       |
+| **Sujeeth**   | Coordinator   | Parking CV Team    | Parking occupancy engine, class-schedule density model       |
+
 
 ---
 
@@ -73,11 +79,13 @@ Seven CS majors, organized into specialized sub-teams:
 
 This clone (`HawkNav-seb`) is **Sebastian John’s** working tree.
 
-| | |
-| --- | --- |
-| **Default focus** | **Shuttle Team** — driver app, GPS streaming every 3–5s via `expo-location` / `TaskManager`, Supabase `shuttle_positions` realtime, Hono ETA service |
-| **Product (full app)** | UHCL campus mobility — shuttle tracking, accessible navigation + AR, parking congestion, emergency alerts |
-| **Do not** | Commit `.env` / secrets; expand into Map / AR / Parking modules unless asked; invent hardware beacon requirements (use QR / image anchors indoors) |
+
+|                        |                                                                                                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Default focus**      | **Shuttle Team** — driver app, GPS streaming every 3–5s via `expo-location` / `TaskManager`, Supabase `shuttle_positions` realtime, Hono ETA service |
+| **Product (full app)** | UHCL campus mobility — shuttle tracking, accessible navigation + AR, parking congestion, emergency alerts                                            |
+| **Do not**             | Commit `.env` / secrets; expand into Map / AR / Parking modules unless asked; invent hardware beacon requirements (use QR / image anchors indoors)   |
+
 
 Prefer Shuttle Team–scoped changes unless the user explicitly asks for cross-team work.
 
@@ -87,16 +95,18 @@ Prefer Shuttle Team–scoped changes unless the user explicitly asks for cross-t
 
 Designed to minimize hardware dependencies while supporting cross-platform mobile access, spatial graph processing, and real-time streaming.
 
-| Layer | Choice | Notes |
-| --- | --- | --- |
-| Mobile frontend | React Native + Expo Go | Native access for background GPS, AR camera, push alerts |
-| Maps & wayfinding | Mapbox SDK / ArcGIS SDK | Custom GeoJSON for walkways, buildings, ADA ramps, parking lots |
-| Augmented reality | ViroReact | Bridged to iOS ARKit and Android ARCore; floating 3D directional vectors |
-| Database & spatial | Supabase (PostgreSQL + PostGIS) | Weighted graphs, geofenced lots, roles; WebSocket shuttle coords |
-| Backend runtime | Bun + Hono | A* pathfinding, predictive ETAs, API endpoints |
-| Parking CV | Python + OpenCV + YOLOv8-nano / TensorFlow Lite | Stationary drone / camera clips of lot entrance/exit (e.g. Delta & Arbor) |
-| Dev tunneling | Cloudflare Tunnels (`cloudflared`) | HTTPS exposure of local backends for mobile device testing |
-| Push alerts | Expo Push Notifications + Twilio SMS fallback | Emergency, weather, and service disruption alerts |
+
+| Layer              | Choice                                          | Notes                                                                     |
+| ------------------ | ----------------------------------------------- | ------------------------------------------------------------------------- |
+| Mobile frontend    | React Native + Expo Go                          | Native access for background GPS, AR camera, push alerts                  |
+| Maps & wayfinding  | Mapbox SDK / ArcGIS SDK                         | Custom GeoJSON for walkways, buildings, ADA ramps, parking lots           |
+| Augmented reality  | ViroReact                                       | Bridged to iOS ARKit and Android ARCore; floating 3D directional vectors  |
+| Database & spatial | Supabase (PostgreSQL + PostGIS)                 | Weighted graphs, geofenced lots, roles; WebSocket shuttle coords          |
+| Backend runtime    | Bun + Hono                                      | A* pathfinding, predictive ETAs, API endpoints                            |
+| Parking CV         | Python + OpenCV + YOLOv8-nano / TensorFlow Lite | Stationary drone / camera clips of lot entrance/exit (e.g. Delta & Arbor) |
+| Dev tunneling      | Cloudflare Tunnels (`cloudflared`)              | HTTPS exposure of local backends for mobile device testing                |
+| Push alerts        | Expo Push Notifications + Twilio SMS fallback   | Emergency, weather, and service disruption alerts                         |
+
 
 ---
 
@@ -119,31 +129,37 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 **Description:** Realtime data for recent updates on shuttle, parking, and alerts.
 
-| | |
-| --- | --- |
-| **Input** | User position, shuttle position, parking lot vehicle-detection data |
+
+|                |                                                                             |
+| -------------- | --------------------------------------------------------------------------- |
+| **Input**      | User position, shuttle position, parking lot vehicle-detection data         |
 | **Processing** | Backend data loader aggregates inputs into update payloads for the frontend |
-| **Output** | Per-section data streams: parking, indoor navigation, shuttle |
+| **Output**     | Per-section data streams: parking, indoor navigation, shuttle               |
+
 
 ### FR-3: Map — Priority: High
 
 **Description:** Centralized map for shuttle tracking, parking availability, and indoor navigation.
 
-| | |
-| --- | --- |
-| **Input** | Map SDK building locations; live shuttle path / position |
+
+|                |                                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| **Input**      | Map SDK building locations; live shuttle path / position                                               |
 | **Processing** | Pathfinding to selected buildings; shuttle pinged with realtime location and proximity to nearest stop |
-| **Output** | Easier building navigation; accurate shuttle position and arrival timing for riders |
+| **Output**     | Easier building navigation; accurate shuttle position and arrival timing for riders                    |
+
 
 ### FR-4: Augmented Reality — Priority: High
 
 **Description:** AR camera view (via the map) for indoor navigation to classrooms, offices, or accessible features.
 
-| | |
-| --- | --- |
-| **Input** | Camera feed; indoor floor plan / waypoints; selected destination |
-| **Processing** | Localize user on indoor map; render best route with directional arrows |
-| **Output** | Camera-guided geospatial overlay; quickest path; guiding arrows and key-area highlights (UI subject to change) |
+
+|                |                                                                                                                |
+| -------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Input**      | Camera feed; indoor floor plan / waypoints; selected destination                                               |
+| **Processing** | Localize user on indoor map; render best route with directional arrows                                         |
+| **Output**     | Camera-guided geospatial overlay; quickest path; guiding arrows and key-area highlights (UI subject to change) |
+
 
 **Implementation notes:** GPS + magnetometer heading outdoors. Indoors: QR / image markers at entrances anchor origin `(0,0,0)` — no ceiling beacons.
 
@@ -151,11 +167,13 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 **Description:** Periodically update shuttle location and status during operations.
 
-| | |
-| --- | --- |
-| **Input** | Shuttle driver’s phone |
-| **Processing** | Track shuttle by receiving location from the driver device |
-| **Output** | Current position, proximity to nearest stop, operational timings |
+
+|                |                                                                  |
+| -------------- | ---------------------------------------------------------------- |
+| **Input**      | Shuttle driver’s phone                                           |
+| **Processing** | Track shuttle by receiving location from the driver device       |
+| **Output**     | Current position, proximity to nearest stop, operational timings |
+
 
 **Implementation notes:**
 
@@ -165,59 +183,67 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ### FR-6: Campus Indoor Navigation — Priority: High
 
-**Description:** Interactive indoor campus map; routes via Dijkstra and A\*.
+**Description:** Interactive indoor campus map; routes via Dijkstra and A.
 
-| | |
-| --- | --- |
-| **Input** | User current location; destination room / office |
-| **Processing** | Build and compare available routes |
-| **Output** | Quickest path to destination |
+
+|                |                                                  |
+| -------------- | ------------------------------------------------ |
+| **Input**      | User current location; destination room / office |
+| **Processing** | Build and compare available routes               |
+| **Output**     | Quickest path to destination                     |
+
 
 **Implementation notes:**
 
 - UHCL pathways in PostGIS as weighted graph `(N, E)`.
-- **Mobility mode:** Stairs and steep inclines (`>8.33%` grade) get infinite weight (`w = ∞`) so A\* prefers elevators, ADA ramps, and automatic doors.
+- **Mobility mode:** Stairs and steep inclines (`>8.33%` grade) get infinite weight (`w = ∞`) so A prefers elevators, ADA ramps, and automatic doors.
 - **2D Map UI:** Mapbox overlays for accessible entrances, single-occupancy restrooms, and rest points.
 
 ### FR-7: Parking Congestion — Priority: High
 
 **Description:** Determine available parking and traffic through lots.
 
-| | |
-| --- | --- |
-| **Input** | Camera feed over Delta & Arbor parking lots |
-| **Processing** | Computer vision on camera feed |
-| **Output** | Predicted available parking / occupancy |
+
+|                |                                             |
+| -------------- | ------------------------------------------- |
+| **Input**      | Camera feed over Delta & Arbor parking lots |
+| **Processing** | Computer vision on camera feed              |
+| **Output**     | Predicted available parking / occupancy     |
+
 
 **Implementation notes:**
 
 - **Phase 1 — Schedule density & geofencing:** Cross-reference UHCL course schedules with building-to-lot mappings; combine with geofenced crowdsourced check-ins.
-- **Phase 2 — Gate counter:** Looped stationary clips of entrance/exit chokepoints. Two virtual tripwires (`Line_In`, `Line_Out`): `In → Out` = entry, `Out → In` = exit. Sync occupancy % → Supabase levels `LOW` \| `MEDIUM` \| `HIGH` \| `FULL`.
+- **Phase 2 — Gate counter:** Looped stationary clips of entrance/exit chokepoints. Two virtual tripwires (`Line_In`, `Line_Out`): `In → Out` = entry, `Out → In` = exit. Sync occupancy % → Supabase levels `LOW`  `MEDIUM`  `HIGH`  `FULL`.
 - **Permit warning:** Push when a student’s GPS enters a Faculty/Staff lot polygon during enforcement hours.
 
 ### FR-8: Emergency Alert System — Priority: Medium
 
 **Description:** Campus-wide emergency notifications to students, faculty/staff, and visitors/community members.
 
-| | |
-| --- | --- |
-| **Input** | Rapid incidents; student reports vs administrative reports |
+
+|                |                                                                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Input**      | Rapid incidents; student reports vs administrative reports                                                                       |
 | **Processing** | Student direct reporting for smaller incidents; admin console distinguishes lower vs higher priority (locational vs campus-wide) |
-| **Output** | Mobile push for fire/safety, power, weather, road closures, etc. |
+| **Output**     | Mobile push for fire/safety, power, weather, road closures, etc.                                                                 |
+
 
 ---
 
 ## 6. Nonfunctional Requirements (SRS)
 
-| Area | Requirement |
-| --- | --- |
-| **Performance** | Responsive features; realtime information reloads promptly |
-| **Reliability** | Support concurrent sessions on the order of 1,000+ devices |
-| **Availability** | 24/7 except scheduled maintenance windows published ≥48 hours in advance |
-| **Security** | Role-based access control; multi-factor authentication |
+
+| Area                | Requirement                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| **Performance**     | Responsive features; realtime information reloads promptly                  |
+| **Reliability**     | Support concurrent sessions on the order of 1,000+ devices                  |
+| **Availability**    | 24/7 except scheduled maintenance windows published ≥48 hours in advance    |
+| **Security**        | Role-based access control; multi-factor authentication                      |
 | **Maintainability** | Primary features as separate components / microservices for fault tolerance |
-| **Usability** | Straightforward UI; map of buildings; search for classrooms and buildings |
-| **Scalability** | Test with ~10–20 users; aim for campus-wide UHCL rollout |
+| **Usability**       | Straightforward UI; map of buildings; search for classrooms and buildings   |
+| **Scalability**     | Test with ~10–20 users; aim for campus-wide UHCL rollout                    |
+
 
 ---
 
@@ -235,17 +261,19 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ## 8. Definitions, Acronyms, and Abbreviations
 
-| Term | Definition |
-| --- | --- |
-| SRS | Software Requirements Specification |
-| UI | User Interface |
-| API | Application Programming Interface |
-| ETA | Estimated Time of Arrival |
-| GPS | Global Positioning System |
-| UHCL | University of Houston–Clear Lake |
-| MVP | Minimum Viable Product |
-| AR | Augmented Reality |
-| ArcGIS | Geospatial software / SDK |
+
+| Term   | Definition                          |
+| ------ | ----------------------------------- |
+| SRS    | Software Requirements Specification |
+| UI     | User Interface                      |
+| API    | Application Programming Interface   |
+| ETA    | Estimated Time of Arrival           |
+| GPS    | Global Positioning System           |
+| UHCL   | University of Houston–Clear Lake    |
+| MVP    | Minimum Viable Product              |
+| AR     | Augmented Reality                   |
+| ArcGIS | Geospatial software / SDK           |
+
 
 ---
 
@@ -269,3 +297,4 @@ When starting a new session on this repo:
 5. Prefer HTTPS-reachable local backends via `cloudflared` when mobile devices need to hit APIs.
 6. Prefer small, reviewable commits only when the user asks to commit.
 7. Indoors: QR / image anchors only — do not invent hardware beacon requirements.
+

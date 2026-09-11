@@ -66,9 +66,9 @@ Seven CS majors, organized into specialized sub-teams:
 | ------------- | ------------- | ------------------ | ------------------------------------------------------------ |
 | **Sebastian** | Coordinator   | Shuttle Team       | Driver app, GPS location streaming, realtime shuttle updates |
 | **Saikiran**  | Facilitator   | Shuttle Team       | Shuttle backend algorithms, predictive ETA calculation       |
-| **Josh**      | Timekeeper    | Map & AR Team      | ArcGIS/Mapbox routing graph, ViroReact AR wayfinding         |
-| **Ayaan**     | Scribe        | Map Team           | Accessible pathfinding graph, UHCL GeoJSON overlays          |
-| **Rashid**    | Timekeeper    | AR Team            | AR camera overlay, directional vector anchors                |
+| **Josh**      | Timekeeper    | Map & AR Team      | ArcGIS/Mapbox routing graph, indoor node graph, 360° path view |
+| **Ayaan**     | Scribe        | Map Team           | Accessible pathfinding graph, UHCL GeoJSON overlays            |
+| **Rashid**    | Timekeeper    | AR Team            | 360° panoramas at path nodes, directional arrows, 2D minimap   |
 | **Philip**    | Scribe        | Parking CV Team    | Computer Vision gate counter, OpenCV vehicle detection       |
 | **Sujeeth**   | Coordinator   | Parking CV Team    | Parking occupancy engine, class-schedule density model       |
 
@@ -83,8 +83,8 @@ This clone (`HawkNav-seb`) is **Sebastian John’s** working tree.
 |                        |                                                                                                                                                      |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Default focus**      | **Shuttle Team** — driver app, GPS streaming every 3–5s via `expo-location` / `TaskManager`, Supabase `shuttle_positions` realtime, Hono ETA service |
-| **Product (full app)** | UHCL campus mobility — shuttle tracking, accessible navigation + AR, parking congestion, emergency alerts                                            |
-| **Do not**             | Commit `.env` / secrets; expand into Map / AR / Parking modules unless asked; invent hardware beacon requirements (use QR / image anchors indoors)   |
+| **Product (full app)** | UHCL campus mobility — shuttle tracking, accessible navigation + 360° indoor path view, parking congestion, emergency alerts                         |
+| **Do not**             | Commit `.env` / secrets; expand into Map / AR / Parking modules unless asked; invent live-camera AR or hardware beacons for indoor nav                |
 
 
 Prefer Shuttle Team–scoped changes unless the user explicitly asks for cross-team work.
@@ -96,16 +96,16 @@ Prefer Shuttle Team–scoped changes unless the user explicitly asks for cross-t
 Designed to minimize hardware dependencies while supporting cross-platform mobile access, spatial graph processing, and real-time streaming.
 
 
-| Layer              | Choice                                          | Notes                                                                     |
-| ------------------ | ----------------------------------------------- | ------------------------------------------------------------------------- |
-| Mobile frontend    | React Native + Expo Go                          | Native access for background GPS, AR camera, push alerts                  |
-| Maps & wayfinding  | Mapbox SDK / ArcGIS SDK                         | Custom GeoJSON for walkways, buildings, ADA ramps, parking lots           |
-| Augmented reality  | ViroReact                                       | Bridged to iOS ARKit and Android ARCore; floating 3D directional vectors  |
-| Database & spatial | Supabase (PostgreSQL + PostGIS)                 | Weighted graphs, geofenced lots, roles; WebSocket shuttle coords          |
-| Backend runtime    | Bun + Hono                                      | A* pathfinding, predictive ETAs, API endpoints                            |
-| Parking CV         | Python + OpenCV + YOLOv8-nano / TensorFlow Lite | Stationary drone / camera clips of lot entrance/exit (e.g. Delta & Arbor) |
-| Dev tunneling      | Cloudflare Tunnels (`cloudflared`)              | HTTPS exposure of local backends for mobile device testing                |
-| Push alerts        | Expo Push Notifications + Twilio SMS fallback   | Emergency, weather, and service disruption alerts                         |
+| Layer                                   | Choice                                          | Notes                                                                     |
+| --------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
+| Mobile frontend                         | React Native + Expo Go                          | Native access for background GPS, 360° panorama viewer, push alerts       |
+| Maps & wayfinding                       | Mapbox SDK / ArcGIS SDK                         | Existing campus map + custom indoor path graph (nodes/edges), GeoJSON     |
+| Indoor 360° path view                   | Panorama viewer (Google Street View–style)      | Pre-captured 360° photos at path nodes; arrows + 2D minimap along route   |
+| Database & spatial                      | Supabase (PostgreSQL + PostGIS)                 | Weighted graphs, geofenced lots, roles; WebSocket shuttle coords          |
+| Backend runtime                         | Bun + Hono                                      | A* pathfinding, predictive ETAs, API endpoints                            |
+| Parking CV                              | Python + OpenCV + YOLOv8-nano / TensorFlow Lite | Stationary drone / camera clips of lot entrance/exit (e.g. Delta & Arbor) |
+| Dev tunneling                           | Cloudflare Tunnels (`cloudflared`)              | HTTPS exposure of local backends for mobile device testing                |
+| Push alerts                             | Expo Push Notifications + Twilio SMS fallback   | Emergency, weather, and service disruption alerts                         |
 
 
 ---
@@ -149,19 +149,23 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 | **Output**     | Easier building navigation; accurate shuttle position and arrival timing for riders                    |
 
 
-### FR-4: Augmented Reality — Priority: High
+### FR-4: Indoor 360° Path View — Priority: High
 
-**Description:** AR camera view (via the map) for indoor navigation to classrooms, offices, or accessible features.
+**Description:** After the user searches a path to an area, room, or office, navigation uses pre-captured **360° pictures** at nodes along a custom indoor path on the existing campus map — similar to Google Maps Street View — not a live AR camera overlay.
 
+|                |                                                                 |
+| -------------- | --------------------------------------------------------------- |
+| **Input**      | Selected destination; custom indoor path graph; 360° photo per node |
+| **Processing** | 2D map computes shortest route node-to-node; user steps through panoramas along that path with directional arrows |
+| **Output**     | 360° view at each node + guiding arrows + 2D minimap confirming they are on the correct route |
 
-|                |                                                                                                                |
-| -------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Input**      | Camera feed; indoor floor plan / waypoints; selected destination                                               |
-| **Processing** | Localize user on indoor map; render best route with directional arrows                                         |
-| **Output**     | Camera-guided geospatial overlay; quickest path; guiding arrows and key-area highlights (UI subject to change) |
+**Implementation notes:**
 
-
-**Implementation notes:** GPS + magnetometer heading outdoors. Indoors: QR / image markers at entrances anchor origin `(0,0,0)` — no ceiling beacons.
+- Path authors place **nodes** through building interiors on the existing map; each node stores a 360° photo.
+- Edges between nodes form the walkable indoor graph used for shortest-path routing.
+- UX is Street View–like: look around the panorama, follow arrows to the next node, advance along the computed route.
+- A **2D minimap** stays visible so the user can see position on the route and confirm direction.
+- No live-camera ARKit/ARCore overlay and no hardware beacons required for this mode.
 
 ### FR-5: Shuttle Service — Priority: High
 
@@ -183,21 +187,20 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ### FR-6: Campus Indoor Navigation — Priority: High
 
-**Description:** Interactive indoor campus map; routes via Dijkstra and A.
-
+**Description:** Interactive indoor campus map; shortest route via Dijkstra / A\* over the custom node graph, then handoff to the 360° path view (FR-4).
 
 |                |                                                  |
 | -------------- | ------------------------------------------------ |
-| **Input**      | User current location; destination room / office |
-| **Processing** | Build and compare available routes               |
-| **Output**     | Quickest path to destination                     |
-
+| **Input**      | User start / current location; destination area, room, or office |
+| **Processing** | Build and compare routes across indoor path nodes |
+| **Output**     | Shortest node sequence; 2D route preview; entry into 360° step-through |
 
 **Implementation notes:**
 
-- UHCL pathways in PostGIS as weighted graph `(N, E)`.
-- **Mobility mode:** Stairs and steep inclines (`>8.33%` grade) get infinite weight (`w = ∞`) so A prefers elevators, ADA ramps, and automatic doors.
-- **2D Map UI:** Mapbox overlays for accessible entrances, single-occupancy restrooms, and rest points.
+- UHCL indoor walkways as a weighted graph of authored **nodes** and **edges** in PostGIS / GeoJSON on top of the existing map.
+- Destinations (rooms, offices, areas) resolve to nearest path node(s).
+- **Mobility mode:** Stairs and steep inclines (`>8.33%` grade) get infinite weight (`w = ∞`) so A\* prefers elevators, ADA ramps, and automatic doors.
+- **2D Map UI:** Overlays for accessible entrances, single-occupancy restrooms, and rest points; shows the computed route before / during 360° navigation.
 
 ### FR-7: Parking Congestion — Priority: High
 
@@ -254,7 +257,7 @@ Format below follows the SRS. Implementation notes from the team’s technical p
                                                 │
 [OpenCV Gate Counter] ──(HTTP POST)─────> [Hono Backend] ───────(SQL)─────> [PostGIS Spatial DB]
                                                 │
-[User Search Query]  ──(API Request)────> [A* Routing Engine] ─(GeoJSON)─> [Mapbox / ViroReact]
+[User Search Query]  ──(API Request)────> [A* on node graph] ─(node path)─> [2D Map + 360° node viewer]
 ```
 
 ---
@@ -271,8 +274,10 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 | GPS    | Global Positioning System           |
 | UHCL   | University of Houston–Clear Lake    |
 | MVP    | Minimum Viable Product              |
-| AR     | Augmented Reality                   |
+| AR     | Legacy SRS label; indoor nav is 360° node panoramas (not live camera AR) |
 | ArcGIS | Geospatial software / SDK           |
+| Node   | Authored waypoint on the indoor path graph; holds a 360° photo |
+| Minimap| Small 2D map overlay during 360° navigation showing route progress |
 
 
 ---
@@ -293,8 +298,8 @@ When starting a new session on this repo:
 1. Prefer Shuttle Team work (driver app, GPS streaming, `shuttle_positions`, ETA APIs) unless asked otherwise.
 2. Match the stack: Expo / React Native clients, Bun + Hono services, Supabase / PostGIS for persistence and realtime.
 3. Do not commit secrets (`.env`, keys, credentials). Use `.env.example` patterns only.
-4. Keep changes scoped; do not invent unrelated modules (parking CV, AR) unless the user requests them.
+4. Keep changes scoped; do not invent unrelated modules (parking CV, indoor 360°) unless the user requests them.
 5. Prefer HTTPS-reachable local backends via `cloudflared` when mobile devices need to hit APIs.
 6. Prefer small, reviewable commits only when the user asks to commit.
-7. Indoors: QR / image anchors only — do not invent hardware beacon requirements.
+7. Indoors: custom path nodes + 360° photos + 2D minimap — do not invent live-camera AR or hardware beacons.
 

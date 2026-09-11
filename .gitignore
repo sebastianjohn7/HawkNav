@@ -1,3 +1,7 @@
+# Project Specific
+PROJECT_CONTEXT.md
+*.cursor
+
 # Dependencies
 node_modules/
 .pnp

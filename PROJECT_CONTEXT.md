@@ -67,8 +67,8 @@ Seven CS majors, organized into specialized sub-teams:
 | **Sebastian** | Coordinator   | Shuttle Team       |
 | **Saikiran**  | Facilitator   | Shuttle Team       |
 | **Josh**      | Timekeeper    | Map & AR Team      |
-| **Ayaan**     | Scribe        | Map Team           |
-| **Rashid**    | Timekeeper    | AR Team            |
+| **Ayaan**     | Scribe        | Map & AR Team      |
+| **Rashid**    | Timekeeper    | Map & AR Team      |
 | **Philip**    | Scribe        | Parking CV Team    |
 | **Sujeeth**   | Coordinator   | Parking CV Team    |
 

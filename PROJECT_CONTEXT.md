@@ -82,12 +82,20 @@ This clone (`HawkNav-seb`) is **Sebastian John’s** working tree.
 
 |                        |                                                                                                                                                      |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Default focus**      | **Shuttle Team** — driver app, GPS streaming every 3–5s via `expo-location` / `TaskManager`, Supabase `shuttle_positions` realtime, Hono ETA service |
+| **Default focus**      | **Entire Shuttle module (FR-5)** — everything riders and drivers need for live campus shuttles (see breakdown below)                                 |
 | **Product (full app)** | UHCL campus mobility — shuttle tracking, accessible navigation + 360° indoor path view, parking congestion, emergency alerts                         |
 | **Do not**             | Commit `.env` / secrets; expand into Map / AR / Parking modules unless asked; invent live-camera AR or hardware beacons for indoor nav                |
 
 
-Prefer Shuttle Team–scoped changes unless the user explicitly asks for cross-team work.
+**Shuttle module includes (in scope by default):**
+
+- Driver app: GPS stream every 3–5s (`expo-location` / `TaskManager`) → `shuttle_positions`
+- Rider / student UI: live position via Supabase Realtime, nearest stop, operational status
+- Routes, stops, and schedules (on-campus + off-campus / Pearland references in `shuttle-pdfs/`)
+- Predictive ETA (Hono): segment traversal history + moving average
+- Shuttle-related alerts / service disruption hooks when they affect routes
+
+Prefer full Shuttle-scoped changes unless the user explicitly asks for Map, indoor 360°, or Parking work.
 
 ---
 
@@ -295,7 +303,7 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 When starting a new session on this repo:
 
-1. Prefer Shuttle Team work (driver app, GPS streaming, `shuttle_positions`, ETA APIs) unless asked otherwise.
+1. Prefer the **entire Shuttle module** (driver GPS, realtime rider UI, routes/stops/schedules, ETA service, shuttle status/alerts) unless asked otherwise.
 2. Match the stack: Expo / React Native clients, Bun + Hono services, Supabase / PostGIS for persistence and realtime.
 3. Do not commit secrets (`.env`, keys, credentials). Use `.env.example` patterns only.
 4. Keep changes scoped; do not invent unrelated modules (parking CV, indoor 360°) unless the user requests them.

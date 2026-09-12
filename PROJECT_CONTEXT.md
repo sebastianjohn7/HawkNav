@@ -62,15 +62,15 @@ Intended audience includes UHCL students and visitors unfamiliar with campus lay
 Seven CS majors, organized into specialized sub-teams:
 
 
-| Member Name   | Meeting Roles | Technical Sub-Team | Core Focus Area                                              |
-| ------------- | ------------- | ------------------ | ------------------------------------------------------------ |
-| **Sebastian** | Coordinator   | Shuttle Team       | Driver app, GPS location streaming, realtime shuttle updates |
-| **Saikiran**  | Facilitator   | Shuttle Team       | Shuttle backend algorithms, predictive ETA calculation       |
-| **Josh**      | Timekeeper    | Map & AR Team      | ArcGIS/Mapbox routing graph, indoor node graph, 360° path view |
-| **Ayaan**     | Scribe        | Map Team           | Accessible pathfinding graph, UHCL GeoJSON overlays            |
-| **Rashid**    | Timekeeper    | AR Team            | 360° panoramas at path nodes, directional arrows, 2D minimap   |
-| **Philip**    | Scribe        | Parking CV Team    | Computer Vision gate counter, OpenCV vehicle detection       |
-| **Sujeeth**   | Coordinator   | Parking CV Team    | Parking occupancy engine, class-schedule density model       |
+| Member Name   | Meeting Roles | Technical Sub-Team |
+| ------------- | ------------- | ------------------ |
+| **Sebastian** | Coordinator   | Shuttle Team       |
+| **Saikiran**  | Facilitator   | Shuttle Team       |
+| **Josh**      | Timekeeper    | Map & AR Team      |
+| **Ayaan**     | Scribe        | Map Team           |
+| **Rashid**    | Timekeeper    | AR Team            |
+| **Philip**    | Scribe        | Parking CV Team    |
+| **Sujeeth**   | Coordinator   | Parking CV Team    |
 
 
 ---

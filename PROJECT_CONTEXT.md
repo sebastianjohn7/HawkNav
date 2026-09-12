@@ -54,6 +54,7 @@ Intended audience includes UHCL students and visitors unfamiliar with campus lay
 - *Applied Software Project Management* (Stellman & Greene)
 - Team Charter
 - Team Odyssey SRS v1.0
+- [UHCL ArcGIS Indoors Viewer](https://uhclhawks.maps.arcgis.com/apps/indoors/index.html?appid=3517c44201534a1b9d0f40acc86903a7) — official campus GIS / floor plans
 
 ---
 
@@ -107,14 +108,42 @@ Designed to minimize hardware dependencies while supporting cross-platform mobil
 | Layer                                   | Choice                                          | Notes                                                                     |
 | --------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
 | Mobile frontend                         | React Native + Expo Go                          | Native access for background GPS, 360° panorama viewer, push alerts       |
-| Maps & wayfinding                       | Mapbox SDK / ArcGIS SDK                         | Existing campus map + custom indoor path graph (nodes/edges), GeoJSON     |
-| Indoor 360° path view                   | Panorama viewer (Google Street View–style)      | Pre-captured 360° photos at path nodes; arrows + 2D minimap along route   |
+| Maps & wayfinding                       | Mapbox SDK / ArcGIS SDK                         | Prefer UHCL ArcGIS Indoors as campus spatial source of truth; custom indoor path graph + GeoJSON on top |
+| Indoor 360° path view                   | Panorama at path nodes (Street View–style)      | **2D map guides** node-to-node (incl. across floors); **360° is only** “look around where you are” at the current node — not the primary navigator |
+
+### Shared campus map (one MapView)
+
+Shuttle, parking, outdoor walk, and indoor path all share **one map instance** as layer stacks (show/hide / restyle). Indoor is a layer mode + floor filter on that same map — do not remount a second map for indoor nav. The 360° viewer is a UI overlay/panel on top; the 2D map (or minimap) remains the route guide.
 | Database & spatial                      | Supabase (PostgreSQL + PostGIS)                 | Weighted graphs, geofenced lots, roles; WebSocket shuttle coords          |
 | Backend runtime                         | Bun + Hono                                      | A* pathfinding, predictive ETAs, API endpoints                            |
 | Parking CV                              | Python + OpenCV + YOLOv8-nano / TensorFlow Lite | Stationary drone / camera clips of lot entrance/exit (e.g. Delta & Arbor) |
 | Dev tunneling                           | Cloudflare Tunnels (`cloudflared`)              | HTTPS exposure of local backends for mobile device testing                |
 | Push alerts                             | Expo Push Notifications + Twilio SMS fallback   | Emergency, weather, and service disruption alerts                         |
 
+
+### UHCL ArcGIS Indoors (campus GIS reference)
+
+Official UHCL floor-aware campus map — use as the institutional spatial backbone; do **not** wrap the web app as HawkNav.
+
+- **Viewer:** [UHCL Indoors Viewer](https://uhclhawks.maps.arcgis.com/apps/indoors/index.html?appid=3517c44201534a1b9d0f40acc86903a7)
+- **Org portal:** `uhclhawks.maps.arcgis.com` (UHCL ArcGIS Online)
+
+**Useful layers observed in the viewer**
+
+| Layer | HawkNav use |
+| --- | --- |
+| Facilities / Units / Levels | Building footprints, rooms, floor-aware indoor destinations |
+| Sidewalks | Outdoor walk graph (prefer over inventing paths from imagery) |
+| Entrances, Elevators, Restrooms | Accessible routing filters / ADA preferences |
+| Parking Lots | Lot polygons for occupancy and permit geofences |
+| Sites / UHCLBasemap | Campus extent and basemap context under live overlays |
+
+**How teams should treat it**
+
+- **Map / indoor 360°:** Source of truth for 2D campus geometry and floors; HawkNav still owns custom path nodes + 360° photos + minimap UX.
+- **Parking:** Reuse lot polygons where export/API access allows.
+- **Shuttle:** Basemap + stop placement near real entrances; live GPS, routes, schedules, and ETA stay in HawkNav (`shuttle_positions`, `shuttle-pdfs/`, Hono ETA). This Indoors app is not a shuttle tracker.
+- **Access:** Feature-layer export or SDK use may need UHCL ArcGIS credentials — confirm with Facilities/GIS before depending on live services for the senior project.
 
 ---
 
@@ -159,20 +188,21 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ### FR-4: Indoor 360° Path View — Priority: High
 
-**Description:** After the user searches a path to an area, room, or office, navigation uses pre-captured **360° pictures** at nodes along a custom indoor path on the existing campus map — similar to Google Maps Street View — not a live AR camera overlay.
+**Description:** Indoor wayfinding is **node-to-node along a 2D path inside buildings** (Google Maps–style). The system computes a path from a start node to a destination node, including **across floors** when needed (e.g. via elevator edges). The **2D map is the primary guide** (point → next point along the route). Each node has a pre-captured **360° photo** so the user can look around and confirm “this is where I am” — the panorama is situational awareness, not a live AR camera and not the thing that computes the route.
 
 |                |                                                                 |
 | -------------- | --------------------------------------------------------------- |
-| **Input**      | Selected destination; custom indoor path graph; 360° photo per node |
-| **Processing** | 2D map computes shortest route node-to-node; user steps through panoramas along that path with directional arrows |
-| **Output**     | 360° view at each node + guiding arrows + 2D minimap confirming they are on the correct route |
+| **Input**      | Selected destination; indoor node/edge graph (per floor + vertical links); 360° photo per node |
+| **Processing** | Shortest path over the node graph (may span multiple floors); UI advances current-node along that sequence |
+| **Output**     | Highlighted 2D route + step-to-next-node guidance; optional 360° look-around at the current node |
 
 **Implementation notes:**
 
-- Path authors place **nodes** through building interiors on the existing map; each node stores a 360° photo.
-- Edges between nodes form the walkable indoor graph used for shortest-path routing.
-- UX is Street View–like: look around the panorama, follow arrows to the next node, advance along the computed route.
-- A **2D minimap** stays visible so the user can see position on the route and confirm direction.
+- Path authors place **nodes** on the shared campus map inside buildings; each node stores one 360° picture of that spot.
+- **Edges** connect nodes along hallways; **vertical edges** (elevators / accessible links) connect floors so one route can go Bayou L1 → elevator → L2 → room.
+- **2D map role:** draws the full path, shows progress, and guides the user from the current node to the next (primary navigator).
+- **360° role:** swap/view the photo for the current node so they can orient visually — like Street View standing still at a point; arrows may hint which way the next node is.
+- Same MapView as shuttle/parking (indoor path = another layer); floor picker filters which indoor geometry is visible.
 - No live-camera ARKit/ARCore overlay and no hardware beacons required for this mode.
 
 ### FR-5: Shuttle Service — Priority: High
@@ -195,20 +225,20 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ### FR-6: Campus Indoor Navigation — Priority: High
 
-**Description:** Interactive indoor campus map; shortest route via Dijkstra / A\* over the custom node graph, then handoff to the 360° path view (FR-4).
+**Description:** Interactive indoor campus map on the **shared MapView**; shortest route via Dijkstra / A\* over the custom node graph (including multi-floor links). The 2D route is the guide; FR-4’s 360° view is available at the current node for orientation.
 
 |                |                                                  |
 | -------------- | ------------------------------------------------ |
 | **Input**      | User start / current location; destination area, room, or office |
-| **Processing** | Build and compare routes across indoor path nodes |
-| **Output**     | Shortest node sequence; 2D route preview; entry into 360° step-through |
+| **Processing** | Build and compare routes across indoor path nodes (and floors) |
+| **Output**     | Shortest node sequence; 2D route on the shared map; optional 360° at current node |
 
 **Implementation notes:**
 
 - UHCL indoor walkways as a weighted graph of authored **nodes** and **edges** in PostGIS / GeoJSON on top of the existing map.
 - Destinations (rooms, offices, areas) resolve to nearest path node(s).
 - **Mobility mode:** Stairs and steep inclines (`>8.33%` grade) get infinite weight (`w = ∞`) so A\* prefers elevators, ADA ramps, and automatic doors.
-- **2D Map UI:** Overlays for accessible entrances, single-occupancy restrooms, and rest points; shows the computed route before / during 360° navigation.
+- **2D Map UI:** Overlays for accessible entrances, single-occupancy restrooms, and rest points; draws and follows the computed route (primary indoor UX).
 
 ### FR-7: Parking Congestion — Priority: High
 
@@ -284,8 +314,8 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 | MVP    | Minimum Viable Product              |
 | AR     | Legacy SRS label; indoor nav is 360° node panoramas (not live camera AR) |
 | ArcGIS | Geospatial software / SDK           |
-| Node   | Authored waypoint on the indoor path graph; holds a 360° photo |
-| Minimap| Small 2D map overlay during 360° navigation showing route progress |
+| Node   | Authored waypoint on the indoor path graph; holds a 360° photo of that spot |
+| Minimap / 2D guide | Same campus map (or compact chrome) showing the route; **primary** indoor navigator — 360° only shows the current node |
 
 
 ---
@@ -309,5 +339,5 @@ When starting a new session on this repo:
 4. Keep changes scoped; do not invent unrelated modules (parking CV, indoor 360°) unless the user requests them.
 5. Prefer HTTPS-reachable local backends via `cloudflared` when mobile devices need to hit APIs.
 6. Prefer small, reviewable commits only when the user asks to commit.
-7. Indoors: custom path nodes + 360° photos + 2D minimap — do not invent live-camera AR or hardware beacons.
+7. Indoors: **2D path guides** node-to-node (multi-floor); **360° is view-at-node only** — do not invent live-camera AR or hardware beacons.
 

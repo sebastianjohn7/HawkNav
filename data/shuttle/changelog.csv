@@ -1,0 +1,3 @@
+version,date,author,summary
+1,2026-09-12,Sebastian,Initial off_campus + pearland from Fall PDFs; on_campus + medical_center scaffolds
+2,2026-09-12,Sebastian,Switched source of truth to CSV; stops.csv with lat/lng for add/update/remove

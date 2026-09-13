@@ -27,6 +27,7 @@ Build the **Shuttle Team** slice only (per [PROJECT_CONTEXT.md](PROJECT_CONTEXT.
 
 ```text
 HawkNav-seb/
+  data/shuttle/     # CSV schedules + stops lat/lng (step 0)
   mobile/           # Expo Go (React Native) — driver + rider screens
   api/              # Bun + Hono — health + ETA stub
   supabase/         # SQL schema for shuttle_positions + realtime
@@ -36,6 +37,17 @@ HawkNav-seb/
 
 No packages/, shared libs, or deep nesting until something is reused twice.
 
+## 0. Shuttle schedule CSVs — [`data/shuttle/`](data/shuttle/)
+
+Do this **before** wiring ETA to live GPS.
+
+- **Source of truth = CSV** (edit in Excel → Save As CSV). No workbook required.
+- [`stops.csv`](data/shuttle/stops.csv): every stop’s `stop_id` + **lat/lng**. Add / update / remove stops by editing this file (exact coordinates).
+- Route files: `off_campus.csv`, `on_campus.csv`, `pearland.csv`, `medical_center.csv` — times join on `stop_id`.
+- [`meta.json`](data/shuttle/meta.json) / `meta.csv`: term + version string for the app.
+- Validate: `python3 data/shuttle/validate_stops.py`
+- Details: [`data/shuttle/README.md`](data/shuttle/README.md)
+
 ## Data flow
 
 ```mermaid
@@ -44,6 +56,7 @@ flowchart LR
   Supabase -->|"Realtime WS"| RiderApp["Rider Expo screen"]
   RiderApp -->|"GET /eta?stop=..."| HonoApi["Bun Hono api"]
   HonoApi -->|"read recent positions"| Supabase
+  HonoApi -->|"read schedule CSVs + stops lat/lng"| Schedules["data/shuttle/*.csv"]
 ```
 
 ## 1. Supabase schema — [`supabase/schema.sql`](supabase/schema.sql)
@@ -51,7 +64,7 @@ flowchart LR
 - Table `shuttle_positions`: `id`, `shuttle_id`, `lat`, `lng`, `heading`, `updated_at`
 - Enable Realtime on that table
 - Simple RLS: authenticated write for drivers later; for MVP allow service-role / anon insert with a comment that production tightens this
-- Optional `shuttle_stops` stub table for ETA later
+- Optional `shuttle_stops` stub table for ETA later (seed from `data/shuttle/stops.csv`)
 
 ## 2. Expo app — [`mobile/`](mobile/)
 
@@ -66,6 +79,7 @@ flowchart LR
 ## 3. Hono API — [`api/`](api/)
 
 - Bun + Hono: `GET /health`, `GET /eta?shuttle_id=&stop_id=` returning a stub ETA (moving-average placeholder)
+- Read schedule next-departure from `data/shuttle/*.csv`; map pins from `stops.csv` lat/lng; show `meta.json` version
 - Read-only Supabase client using service role from env (never ship that key in the mobile app)
 - `bun run dev` script
 

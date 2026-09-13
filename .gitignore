@@ -34,5 +34,5 @@ temp/
 .direnv/
 .vendor/
 .tmp-pdf-shots/
-#.cursor/rules/authorship-and-style.mdc
-#PROJECT_CONTEXT.md
+.cursor/rules/authorship-and-style.mdc
+PROJECT_CONTEXT.md

@@ -1,35 +1,16 @@
-day_group,stop_id,stop_name,sequence,t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21,t22,t23,t24,t25,t26,t27,t28,t29,t30,status,updated,notes
-mon_thu,bay_area_park_ride,Bay Area Park & Ride,1,06:20,06:55,10:20,11:00,16:20,17:00,18:20,19:00,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,united_way_houston,United Way of Houston,2,06:25,07:00,09:15,10:25,11:05,12:25,13:00,15:15,16:25,17:05,18:25,19:05,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,coastal_flow,Coastal Flow Measurement Co,3,06:30,07:05,09:20,10:30,11:10,12:30,13:05,15:20,16:30,17:10,18:30,19:10,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,anytime_fitness,Anytime Fitness,4,06:35,07:10,08:30,08:50,09:25,10:35,11:15,12:35,13:10,14:30,14:50,15:25,16:35,17:15,18:35,19:15,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,university_forest_apts,University Forest Apts,5,06:35,07:10,07:30,08:30,08:50,09:25,10:35,11:15,11:35,12:35,13:15,13:30,14:30,14:50,15:25,16:35,17:15,17:35,18:35,19:15,19:35,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,delta_front,Delta (@Front),6,06:40,07:15,07:30,08:35,08:55,09:30,10:40,11:20,11:35,12:40,13:15,13:30,14:35,14:55,15:30,16:40,17:20,17:35,18:40,19:20,19:35,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,arbor,Arbor,7,06:40,07:15,07:30,08:35,08:55,09:30,10:40,11:20,11:35,12:40,13:15,13:30,14:35,14:55,15:30,16:40,17:20,17:35,18:40,19:20,19:35,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,police_building,Police Building,8,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,recreation_center,Recreation Center,9,06:45,07:20,DROP_OFF,08:40,09:00,DROP_OFF,10:45,11:25,DROP_OFF,12:45,13:20,DROP_OFF,14:40,15:00,DROP_OFF,16:45,17:25,DROP_OFF,18:45,19:25,DROP_OFF,20:20,20:45,21:10,21:55,22:20,22:45,23:05,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,hunter_hall,Hunter Hall,10,06:45,07:20,DROP_OFF,08:40,09:00,DROP_OFF,10:45,11:25,DROP_OFF,12:45,13:20,DROP_OFF,14:40,15:00,DROP_OFF,16:45,17:25,DROP_OFF,18:45,19:25,DROP_OFF,20:20,20:45,21:10,21:55,22:20,22:45,23:05,DROP_OFF,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,sscb_entrance,SSCB Entrance,11,06:50,07:25,DROP_OFF,08:45,09:05,DROP_OFF,10:50,11:30,DROP_OFF,12:50,13:25,DROP_OFF,14:45,15:05,DROP_OFF,16:50,17:30,DROP_OFF,18:50,19:30,DROP_OFF,20:25,20:50,21:15,22:00,22:25,22:50,23:10,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,bayou_student_entrance,Bayou Student Entrance,12,06:50,07:25,DROP_OFF,08:45,09:05,DROP_OFF,10:50,11:30,DROP_OFF,12:50,13:25,DROP_OFF,14:45,15:05,DROP_OFF,16:50,17:30,DROP_OFF,18:50,19:30,DROP_OFF,20:25,20:50,21:15,22:00,22:25,22:50,23:10,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-mon_thu,delta_front,Delta (@Front) — return loop,13,09:10,10:55,12:55,15:10,16:55,18:55,20:30,20:55,21:20,22:05,22:30,22:55,23:15,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; later_pass_same_stop
-mon_thu,arbor,Arbor — return loop,14,09:10,10:55,12:55,15:10,16:55,18:55,20:30,20:55,21:20,22:05,22:30,22:55,23:15,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; later_pass_same_stop
-fri,bay_area_park_ride,Bay Area Park & Ride,1,06:20,06:55,10:20,11:00,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,united_way_houston,United Way of Houston,2,06:25,07:00,09:15,10:25,11:05,12:25,13:00,15:15,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,coastal_flow,Coastal Flow Measurement Co,3,06:30,07:05,09:20,10:30,11:10,12:30,13:05,15:20,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,anytime_fitness,Anytime Fitness,4,06:35,07:10,08:30,08:50,09:25,10:35,11:15,12:35,13:10,14:30,14:50,15:25,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,university_forest_apts,University Forest Apts,5,06:35,07:10,07:30,08:30,08:50,09:25,10:35,11:15,11:35,12:35,13:15,13:30,14:30,14:50,15:25,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,delta_front,Delta (@Front),6,06:40,07:15,07:30,08:35,08:55,09:30,10:40,11:20,11:35,12:40,13:15,13:30,14:35,14:55,15:30,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,arbor,Arbor,7,06:40,07:15,07:30,08:35,08:55,09:30,10:40,11:20,11:35,12:40,13:15,13:30,14:35,14:55,15:30,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,police_building,Police Building,8,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,recreation_center,Recreation Center,9,06:45,07:20,DROP_OFF,08:40,09:00,DROP_OFF,10:45,11:25,DROP_OFF,12:45,13:20,DROP_OFF,14:40,15:00,DROP_OFF,16:20,16:45,17:10,18:05,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,hunter_hall,Hunter Hall,10,06:45,07:20,DROP_OFF,08:40,09:00,DROP_OFF,10:45,11:25,DROP_OFF,12:45,13:20,DROP_OFF,14:40,15:00,DROP_OFF,16:20,16:45,17:10,DROP_OFF,DROP_OFF,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,sscb_entrance,SSCB Entrance,11,06:50,07:25,DROP_OFF,08:45,09:05,DROP_OFF,10:50,11:30,DROP_OFF,12:50,13:25,DROP_OFF,14:45,15:05,DROP_OFF,16:25,16:50,17:15,18:05,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,bayou_student_entrance,Bayou Student Entrance,12,06:50,07:25,DROP_OFF,08:45,09:05,DROP_OFF,10:50,11:30,DROP_OFF,12:50,13:25,DROP_OFF,14:45,15:05,DROP_OFF,16:25,16:50,17:15,18:05,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard
-fri,delta_front,Delta (@Front) — return loop,13,09:10,10:55,12:55,15:10,16:30,16:55,17:20,18:10,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; later_pass_same_stop
-fri,arbor,Arbor — return loop,14,09:10,10:55,12:55,15:10,16:30,16:55,17:20,18:10,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; later_pass_same_stop
-sat,united_way_houston,United Way of Houston,1,DROP_OFF,12:00,12:20,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; grocery_heb_1030_1130
-sat,coastal_flow,Coastal Flow Measurement Co,2,DROP_OFF,12:05,12:25,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; grocery_heb_1030_1130
-sat,anytime_fitness,Anytime Fitness,3,DROP_OFF,12:10,12:30,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; grocery_heb_1030_1130; grocery_heb_pickup_window_on_pdf
-sat,university_forest_apts,University Forest Apts,4,DROP_OFF,12:10,12:30,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; grocery_heb_1030_1130
-sat,hunter_hall,Hunter Hall,5,DROP_OFF,12:15,12:35,DROP_OFF,DROP_OFF,,,,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; grocery_heb_1030_1130
-sat,bayou_student_entrance,Bayou Student Entrance,6,12:15,DROP_OFF,13:35,13:50,,,,,,,,,,,,,,,,,,,,,,,,,,,active,2026-09-12,arrive_5_min_early; DROP_OFF=stop only if riders onboard; grocery_heb_1030_1130; grocery_heb_1030_1130_noted_on_pdf
+day_group,stop_id,times
+mon_thu,bay_area_park_ride,"06:20,06:55,10:20,11:00,16:20,17:00,18:20,19:00,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+mon_thu,united_way_houston,"06:25,07:00,09:15,10:25,11:05,12:25,13:00,15:15,16:25,17:05,18:25,19:05,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+mon_thu,coastal_flow,"06:30,07:05,09:20,10:30,11:10,12:30,13:05,15:20,16:30,17:10,18:30,19:10,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+mon_thu,anytime_fitness,"06:35,07:10,08:30,08:50,09:25,10:35,11:15,12:35,13:10,14:30,14:50,15:25,16:35,17:15,18:35,19:15,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+mon_thu,university_forest_apts,"06:35,07:10,07:30,08:30,08:50,09:25,10:35,11:15,11:35,12:35,13:15,13:30,14:30,14:50,15:25,16:35,17:15,17:35,18:35,19:15,19:35,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+fri,bay_area_park_ride,"06:20,06:55,10:20,11:00,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+fri,united_way_houston,"06:25,07:00,09:15,10:25,11:05,12:25,13:00,15:15,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+fri,coastal_flow,"06:30,07:05,09:20,10:30,11:10,12:30,13:05,15:20,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+fri,anytime_fitness,"06:35,07:10,08:30,08:50,09:25,10:35,11:15,12:35,13:10,14:30,14:50,15:25,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+fri,university_forest_apts,"06:35,07:10,07:30,08:30,08:50,09:25,10:35,11:15,11:35,12:35,13:15,13:30,14:30,14:50,15:25,DROP_OFF,DROP_OFF,DROP_OFF,DROP_OFF"
+sat,united_way_houston,"DROP_OFF,12:00,12:20,DROP_OFF,DROP_OFF"
+sat,coastal_flow,"DROP_OFF,12:05,12:25,DROP_OFF,DROP_OFF"
+sat,anytime_fitness,"DROP_OFF,12:10,12:30,DROP_OFF,DROP_OFF"
+sat,university_forest_apts,"DROP_OFF,12:10,12:30,DROP_OFF,DROP_OFF"
+sat,heb,"10:30,11:30"

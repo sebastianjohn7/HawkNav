@@ -1,13 +1,2 @@
-key,value
-term,Fall 2026
-timezone,America/Chicago
-version,2
-updated_at,2026-09-12
-updated_by,Sebastian
-arrive_early_off_campus_min,5
-arrive_early_pearland_min,3
-notes,"CSV is source of truth. Edit in Excel then Save As CSV. Stops live in stops.csv with lat/lng."
-source_off_campus,shuttle-pdfs/fall-off-campus-shuttle-scheduled.pdf
-source_pearland,shuttle-pdfs/pearland-shuttle-schedule--.pdf
-source_on_campus,PENDING route map PDF
-source_medical_center,PENDING no TMC Hawk Express PDF
+term,updated_at,name,email
+Fall 2026,2026-09-14,Sebastian John,johns3818@uhcl.edu

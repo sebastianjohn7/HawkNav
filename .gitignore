@@ -32,7 +32,5 @@ tmp/
 temp/
 *.local
 .direnv/
-.vendor/
-.tmp-pdf-shots/
 .cursor/rules/authorship-and-style.mdc
 PROJECT_CONTEXT.md

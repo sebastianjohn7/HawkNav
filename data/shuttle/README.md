@@ -1,62 +1,33 @@
-# HawkNav shuttle schedules (CSV)
+# HawkNav shuttle data (CSV)
 
-**CSV is the source of truth.** Open any file in Excel / Google Sheets, edit, then **Save As → CSV** (UTF-8) back into this folder. No `.xlsx` in the repo.
+Edit in Excel → **Save As CSV (UTF-8)**. App reads these files directly.
 
 ## Files
 
-| File | Role |
+| File | Columns |
 | --- | --- |
-| [`stops.csv`](stops.csv) | **Master stops** — `stop_id`, name, **lat**, **lng**, status |
-| [`off_campus.csv`](off_campus.csv) | Blue Route times (references `stop_id`) |
-| [`on_campus.csv`](on_campus.csv) | On-campus scaffold |
-| [`pearland.csv`](pearland.csv) | Green Route times |
-| [`medical_center.csv`](medical_center.csv) | TMC scaffold (`no_service`) |
-| [`meta.csv`](meta.csv) / [`meta.json`](meta.json) | term, version, timezone |
-| [`changelog.csv`](changelog.csv) | Bump notes each semester |
-| [`validate_stops.py`](validate_stops.py) | Checks schedule `stop_id`s exist; reminds lat/lng CRUD |
+| [`meta.csv`](meta.csv) | `term`, `updated_at`, `name`, `email` |
+| [`stops.csv`](stops.csv) | `stop_id`, `name`, `lat`, `lng`, `routes`, `status` |
+| [`off_campus.csv`](off_campus.csv) | Bay Area P&R, United Way, Coastal Flow, Anytime Fitness, University Forest, Sat HEB grocery |
+| [`on_campus.csv`](on_campus.csv) | Campus stops (Delta, Arbor, Police, Rec, Hunter, SSCB, Bayou, …) |
+| [`pearland.csv`](pearland.csv) | Pearland route |
 
-App/API should: load `stops.csv` for map pins, join schedules on `stop_id`.
+Schedule columns: `day_group`, `stop_id`, `times`
 
-## Stops: add / update / remove
+`times` is a comma-separated list of `HH:mm` values and/or `DROP_OFF` (one row per stop per day group).
 
-All location changes happen in **`stops.csv`**.
+**Sat HEB grocery:** `off_campus.csv` stop `heb` with `10:30,11:30` (window). Bayou Student Entrance sat times also include `10:30,11:30` as on the UHCL PDF.
 
-| Action | What to do |
+Medical Center: no schedule CSV yet; stop can live in `stops.csv` (`status=inactive` until service exists).
+
+## Stops
+
+| Action | Edit `stops.csv` |
 | --- | --- |
-| **Add** | New row: unique `stop_id`, `name`, exact `lat`, `lng`, `coord_status=verified`, `status=active`. Then add rows to the route CSV using that `stop_id`. |
-| **Update** | Same `stop_id`, change `lat`/`lng` (and/or `name`). Set `coord_status=verified`, bump `updated`. Map/ETA pick up new coordinates automatically. |
-| **Remove** | Set `status=removed` (keep row for history) **or** delete the row; delete matching rows from route CSVs. |
+| Add | New `stop_id` + exact `lat`/`lng` + `status=active`, then add schedule rows |
+| Update | Change `lat`/`lng` (or `name`) on that `stop_id` |
+| Remove | Set `status=inactive` or delete the row; delete matching schedule rows |
 
-`coord_status` values: `verified` | `approx` | `missing`
+Set `updated_at`, `name`, and `email` in `meta.csv` when you publish a schedule change.
 
-Campus stops ship with **approx** coords so the map can render; replace with curb-accurate GPS when you survey. Off-campus apartment/P&R rows may be `missing` until you paste exact coordinates.
-
-## Schedule CSV columns
-
-```text
-day_group, stop_id, stop_name, sequence, t01…t30, status, updated, notes
-```
-
-- Times: 24h `HH:mm`, or `DROP_OFF`, or empty
-- `day_group`: `mon_thu` | `fri` | `sat` | `all` | `none`
-- `stop_name` is for human editing; **lat/lng always come from `stops.csv`**
-
-## Excel round-trip
-
-1. Open e.g. `stops.csv` in Excel.
-2. Edit cells (don’t rename header row).
-3. **File → Save As → CSV UTF-8** (overwrite the same path).
-4. Run `python3 data/shuttle/validate_stops.py`
-5. Bump `version` in `meta.csv` + `meta.json`, add a `changelog.csv` line.
-
-## Validate
-
-```bash
-python3 data/shuttle/validate_stops.py
-```
-
-## Sources (v2)
-
-- `shuttle-pdfs/fall-off-campus-shuttle-scheduled.pdf` → `off_campus.csv`
-- `shuttle-pdfs/pearland-shuttle-schedule--.pdf` → `pearland.csv`
-- On-campus / Medical Center: scaffolds until PDFs exist
+Loader/validator will live in the Bun API later (TypeScript) — not a separate Python script.

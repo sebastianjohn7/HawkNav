@@ -30,4 +30,6 @@ Medical Center: no schedule CSV yet; stop can live in `stops.csv` (`status=inact
 
 Set `updated_at`, `name`, and `email` in `meta.csv` when you publish a schedule change.
 
-Loader/validator will live in the Bun API later (TypeScript) — not a separate Python script.
+Loader/validator lives in the Bun API: `cd api && bun run check` / `bun run dev`.
+
+Off-campus lat/lng were filled from public addresses (METRO Bay Area P&R, United Way Bay Area Center, Coastal Flow on Bay Area Blvd, Anytime Fitness 2416 Bay Area Blvd, HEB Webster). Re-pin in the field if a stop moves.

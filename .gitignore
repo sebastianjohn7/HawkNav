@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.bun/
+vendor/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.env/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+!.env.*.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+secrets/
+
+# Build / misc
+build/
+out/
+tmp/
+temp/
+*.local
+.direnv/
+.cursor/rules/authorship-and-style.mdc
+PROJECT_CONTEXT.md
+.DS_Store
+.DS_Store
+
+arcgis_maps_core/

@@ -1,0 +1,4 @@
+day_group,stop_id,times
+mon_thu,sscb_entrance,"09:00,DROP_OFF,15:00,DROP_OFF,18:00,DROP_OFF,21:20,DROP_OFF"
+mon_thu,pearland_arrival,"09:30,15:30,18:30,21:50"
+mon_thu,pearland_departure,"09:35,15:35,18:35,21:55"

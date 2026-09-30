@@ -85,12 +85,13 @@ This clone (`HawkNav-seb`) is **Sebastian John’s** working tree.
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Default focus**      | **Entire Shuttle module (FR-5)** — everything riders and drivers need for live campus shuttles (see breakdown below)                                 |
 | **Product (full app)** | UHCL campus mobility — shuttle tracking, accessible navigation + 360° indoor path view, parking congestion, emergency alerts                         |
+| **Mobile client**      | Expo under `mobile/`; prior Flutter / ArcGIS experiment in `archive/mobile-flutter/`                                                                      |
 | **Do not**             | Commit `.env` / secrets; expand into Map / AR / Parking modules unless asked; invent live-camera AR or hardware beacons for indoor nav                |
 
 
 **Shuttle module includes (in scope by default):**
 
-- Driver app: GPS stream every 3–5s (`expo-location` / `TaskManager`) → `shuttle_positions`
+- Driver app: GPS stream every 3–5s (`geolocator`) → `shuttle_positions`
 - Rider / student UI: live position via Supabase Realtime, nearest stop, operational status
 - Routes, stops, and schedules (on-campus + off-campus / Pearland references in `shuttle-pdfs/`)
 - Predictive ETA (Hono): segment traversal history + moving average
@@ -107,8 +108,8 @@ Designed to minimize hardware dependencies while supporting cross-platform mobil
 
 | Layer                                   | Choice                                          | Notes                                                                     |
 | --------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
-| Mobile frontend                         | React Native + Expo Go                          | Native access for background GPS, 360° panorama viewer, push alerts       |
-| Maps & wayfinding                       | Mapbox SDK / ArcGIS SDK                         | Prefer UHCL ArcGIS Indoors as campus spatial source of truth; custom indoor path graph + GeoJSON on top |
+| Mobile frontend                         | Expo (React Native)                             | Cross-platform UI via Expo Go; Flutter experiment archived under `archive/mobile-flutter/` |
+| Maps & wayfinding                       | react-native-maps + GeoJSON corridors           | Indoor Delta paths as GeoJSON overlays; ArcGIS Indoors remains campus GIS reference |
 | Indoor 360° path view                   | Panorama at path nodes (Street View–style)      | **2D map guides** node-to-node (incl. across floors); **360° is only** “look around where you are” at the current node — not the primary navigator |
 
 ### Shared campus map (one MapView)
@@ -118,7 +119,7 @@ Shuttle, parking, outdoor walk, and indoor path all share **one map instance** a
 | Backend runtime                         | Bun + Hono                                      | A* pathfinding, predictive ETAs, API endpoints                            |
 | Parking CV                              | Python + OpenCV + YOLOv8-nano / TensorFlow Lite | Stationary drone / camera clips of lot entrance/exit (e.g. Delta & Arbor) |
 | Dev tunneling                           | Cloudflare Tunnels (`cloudflared`)              | HTTPS exposure of local backends for mobile device testing                |
-| Push alerts                             | Expo Push Notifications + Twilio SMS fallback   | Emergency, weather, and service disruption alerts                         |
+| Push alerts                             | Flutter local/FCM push + Twilio SMS fallback    | Emergency, weather, and service disruption alerts                         |
 
 
 ### UHCL ArcGIS Indoors (campus GIS reference)
@@ -219,7 +220,7 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 **Implementation notes:**
 
-- **Driver app:** `expo-location` + `TaskManager` streams GPS (`lat`, `lng`, `heading`) every 3–5 seconds.
+- **Driver app:** `geolocator` streams GPS (`lat`, `lng`, `heading`) every 3–5 seconds (background isolate later if needed).
 - **Realtime:** Writes `shuttle_positions` in Supabase; student apps subscribe via WebSockets.
 - **Predictive ETA:** Hono microservice estimates arrival along route segments from historical traversal logs and a moving average.
 
@@ -291,7 +292,7 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 ## 7. System Data Flow
 
 ```text
-[Shuttle Driver Phone] ──(GPS HTTP/WS)──> [Supabase Realtime] ──(WS Sub)──> [Student Expo App]
+[Shuttle Driver Phone] ──(GPS HTTP/WS)──> [Supabase Realtime] ──(WS Sub)──> [Student Flutter App]
                                                 │
 [OpenCV Gate Counter] ──(HTTP POST)─────> [Hono Backend] ───────(SQL)─────> [PostGIS Spatial DB]
                                                 │
@@ -334,7 +335,7 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 When starting a new session on this repo:
 
 1. Prefer the **entire Shuttle module** (driver GPS, realtime rider UI, routes/stops/schedules, ETA service, shuttle status/alerts) unless asked otherwise.
-2. Match the stack: Expo / React Native clients, Bun + Hono services, Supabase / PostGIS for persistence and realtime.
+2. Match the stack: Flutter clients (`supabase_flutter`, `geolocator`; ArcGIS MapView next), Bun + Hono services, Supabase / PostGIS for persistence and realtime. See [`docs/flutter-mobile.md`](docs/flutter-mobile.md).
 3. Do not commit secrets (`.env`, keys, credentials). Use `.env.example` patterns only.
 4. Keep changes scoped; do not invent unrelated modules (parking CV, indoor 360°) unless the user requests them.
 5. Prefer HTTPS-reachable local backends via `cloudflared` when mobile devices need to hit APIs.

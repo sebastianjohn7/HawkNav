@@ -30,7 +30,10 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files / secrets
+.env
+.env.*
+!.env.example
 .env*.local
 
 # typescript
@@ -39,3 +42,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Full UHCL Indoors dump (~118MB) — keep local; app uses extracted delta_floorplan.json
+assets/maps/UHCL_Campus_Map_Public_WFL1.geojson
+assets/maps/*.geojson.zip

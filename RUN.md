@@ -1,75 +1,65 @@
 # How to run HawkNav (Shuttle MVP)
 
-Everyday boot guide. Phone and Mac must be on the **same Wi‑Fi**. Use **Expo Go** on your phone.
-
-You only need to set up Supabase once (keys in `mobile/.env`, schema already run). Don’t commit `.env` files.
+Everyday boot guide. Don’t commit `.env` files. Node/npm must be on your `PATH`.
 
 ---
 
-## 1. Start the API (schedules / ETA)
+## Phone (physical device) — recommended
 
-Open a terminal:
+`bun run dev` starts the API **and** a Cloudflare quick tunnel, then writes the public URL into `mobile/.env` as `EXPO_PUBLIC_API_URL`. Expo reads that file — no copy/paste.
+
+**Terminal 1 — API + tunnel**
 
 ```bash
-cd ~/Coding/HawkNav-seb/api
+cd api
 bun run dev
 ```
 
-Leave it open. You should see it listening on port **8787**.
+Wait until you see `Tunnel Active: https://….trycloudflare.com`.
 
-Optional check on the Mac:
-
-```bash
-curl http://localhost:8787/health
-```
-
----
-
-## 2. Start Expo (phone app)
-
-Open a **second** terminal:
+**Terminal 2 — Expo**
 
 ```bash
-cd ~/Coding/HawkNav-seb/mobile
+cd mobile
+npm install
 npx expo start
 ```
 
-Scan the QR code with Expo Go. Wait for the app to load.
+Scan the QR code with Expo Go (or press `i` / `a` for simulator).
 
-If you changed `mobile/.env`, stop Expo (`Ctrl+C`) and run `npx expo start` again.
-
----
-
-## 3. Test on the phone
-
-1. **Driver** tab → **Start** → allow location → status should say **Streaming**
-2. **Rider** tab → lat/lng should update every few seconds
-3. Pick a stop → schedule ETA should appear (needs step 1 still running)
+When you stop the API (`Ctrl+C`), the tunnel stops and `EXPO_PUBLIC_API_URL` is restored to `http://localhost:8787`.
 
 ---
 
-## If stops / ETA fail but GPS works
-
-The phone cannot use `localhost`. In [`mobile/.env`](mobile/.env), set:
-
-```text
-EXPO_PUBLIC_API_URL=http://YOUR_MAC_LAN_IP:8787
-```
-
-Find your Mac’s IP:
+## Simulator / Mac only (no tunnel)
 
 ```bash
-ipconfig getifaddr en0
+cd api
+bun run dev:local
 ```
 
-Save `.env`, restart Expo, reload the app.
+```bash
+cd mobile
+npx expo start
+```
 
-Driver/Rider live GPS talks to Supabase; only schedules/ETA need the API URL.
+`EXPO_PUBLIC_API_URL=http://localhost:8787` in `mobile/.env` is fine for the simulator.
+
+---
+
+## Test checklist
+
+1. **Get Started** → **Sign In** → bottom nav  
+2. **Shuttle** → map shows campus; **Driver** → Start / Check in → green marker tracks live GPS  
+3. **Rider** → same map updates via Realtime; pick a stop for ETA  
+4. **Find** → Delta corridor overlay on standard map  
+5. **News & Alerts** → placeholder  
+
+Live GPS uses Supabase. Stops/ETA use the API (`EXPO_PUBLIC_API_URL`).
 
 ---
 
 ## Shut down
 
-In each terminal: `Ctrl+C`.
-
-Next time: API → Expo → scan QR → Driver Start → Rider.
+- Expo: `Ctrl+C` in the Expo terminal  
+- API: `Ctrl+C` (also stops the tunnel)

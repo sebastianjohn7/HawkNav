@@ -1,0 +1,38 @@
+name: hawknav_mobile
+description: HawkNav Shuttle — Driver GPS + Rider realtime (Flutter)
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  supabase_flutter: ^2.17.2
+  geolocator: ^14.0.3
+  http: ^1.6.0
+  flutter_dotenv: ^6.0.1
+  arcgis_maps: ^300.1.0+5042
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  # ArcGIS Maps SDK for Flutter requires Swift Package Manager (iOS 18+).
+  config:
+    enable-swift-package-manager: true
+  # Copy .env.example → .env and fill keys before flutter run (file is gitignored).
+  assets:
+    - .env
+    - .env.example
+    - assets/img/busicon.jpg
+    - assets/img/email.jpg
+    - assets/img/hawknav_logo.jpg
+    - assets/img/lock.png
+    - assets/img/navicon.jpg
+    - assets/img/uhclLogo.jpg

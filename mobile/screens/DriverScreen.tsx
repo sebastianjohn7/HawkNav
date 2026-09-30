@@ -10,7 +10,16 @@ import * as Location from "expo-location";
 import { DEFAULT_SHUTTLE_ID, hasSupabaseConfig, supabase } from "../lib/config";
 import "../lib/backgroundLocationStub";
 
-export function DriverScreen() {
+type Props = {
+  /** Optimistic map update before Realtime echoes the upsert. */
+  onLocalPosition?: (p: {
+    lat: number;
+    lng: number;
+    heading: number | null;
+  }) => void;
+};
+
+export function DriverScreen({ onLocalPosition }: Props) {
   const [streaming, setStreaming] = useState(false);
   const [status, setStatus] = useState("Idle");
   const [last, setLast] = useState<{
@@ -49,7 +58,9 @@ export function DriverScreen() {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         const heading = pos.coords.heading;
-        setLast({ lat, lng, heading });
+        const point = { lat, lng, heading };
+        setLast(point);
+        onLocalPosition?.(point);
         const { error } = await client.from("shuttle_positions").upsert(
           {
             shuttle_id: DEFAULT_SHUTTLE_ID,
@@ -77,7 +88,7 @@ export function DriverScreen() {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>Driver</Text>
+      <Text style={styles.title}>Driver check-in</Text>
       {!hasSupabaseConfig && (
         <Text style={styles.warn}>
           Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY after
@@ -95,7 +106,9 @@ export function DriverScreen() {
         style={[styles.btn, streaming && styles.btnOff]}
         onPress={streaming ? stop : start}
       >
-        <Text style={styles.btnText}>{streaming ? "Stop" : "Start"}</Text>
+        <Text style={styles.btnText}>
+          {streaming ? "Stop" : "Start / Check in"}
+        </Text>
       </Pressable>
       {!streaming && status === "Streaming" && <ActivityIndicator />}
     </View>
@@ -103,8 +116,8 @@ export function DriverScreen() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, padding: 20, gap: 12, justifyContent: "center" },
-  title: { fontSize: 22, fontWeight: "700" },
+  wrap: { flex: 1, padding: 16, gap: 12 },
+  title: { fontSize: 18, fontWeight: "700" },
   meta: { fontSize: 14, color: "#333" },
   warn: { color: "#8a4b08", backgroundColor: "#fff4e5", padding: 10 },
   btn: {

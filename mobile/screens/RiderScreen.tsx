@@ -126,12 +126,10 @@ export function RiderScreen() {
       <Text style={styles.meta}>Realtime: {rtStatus}</Text>
       {position ? (
         <Text style={styles.meta}>
-          Shuttle: {position.lat.toFixed(5)}, {position.lng.toFixed(5)} heading=
-          {position.heading?.toFixed?.(0) ?? position.heading ?? "—"}
-          {"\n"}Updated: {position.updated_at}
+          Updated: {position.updated_at}
         </Text>
       ) : (
-        <Text style={styles.meta}>No position yet</Text>
+        <Text style={styles.meta}>Waiting for driver check-in on map…</Text>
       )}
 
       <Text style={styles.sub}>Pick a stop for schedule ETA</Text>
@@ -157,12 +155,12 @@ export function RiderScreen() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, padding: 20, paddingTop: 48, gap: 8 },
-  title: { fontSize: 22, fontWeight: "700" },
+  wrap: { flex: 1, padding: 16, gap: 8 },
+  title: { fontSize: 18, fontWeight: "700" },
   sub: { marginTop: 8, fontWeight: "600" },
   meta: { fontSize: 14, color: "#333" },
   warn: { color: "#8a4b08", backgroundColor: "#fff4e5", padding: 10 },
-  list: { flexGrow: 0, maxHeight: 220 },
+  list: { flexGrow: 0, maxHeight: 180 },
   row: { paddingVertical: 10, paddingHorizontal: 8, borderBottomWidth: 1, borderColor: "#eee" },
   rowSelected: { backgroundColor: "#e8f5ef" },
   eta: { marginTop: 8, fontSize: 15 },

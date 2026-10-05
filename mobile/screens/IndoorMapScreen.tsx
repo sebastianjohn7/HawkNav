@@ -25,26 +25,35 @@ type FC = GeoJSON.FeatureCollection;
 export function IndoorMapScreen() {
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
-  const { walls, units } = useMemo(() => {
+  const { walls, units, movePoints } = useMemo(() => {
     const features = (deltaFloorplan.features as GeoJSON.Feature[]).filter(
       (f) => (f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID === level,
     );
     const wallFeats: GeoJSON.Feature[] = [];
     const unitFeats: GeoJSON.Feature[] = [];
+    const moveFeats: GeoJSON.Feature[] = [];
     for (const f of features) {
       const t = f.geometry?.type;
-      if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
+      if(f.properties?.USE_TYPE === "movePoint" && (t === "Polygon" || t === "MultiPolygon" || t === "Point")) {
+        moveFeats.push(f);
+        console.log(`\n\n YERRRRRRRRRRRRRRRRRRR ${f.properties?.NAME}`);
+      }
+      else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
         unitFeats.push(f);
       } else if (
         t === "LineString" ||
         t === "MultiLineString"
       ) {
+        if(f.properties?.USE_TYPE === 'movePoint'){
+          console.log(`ERROR: ${f} inside of 'walls'`);
+        }
         wallFeats.push(f);
       }
     }
     return {
       walls: { type: "FeatureCollection", features: wallFeats } as FC,
       units: { type: "FeatureCollection", features: unitFeats } as FC,
+      movePoints: { type: "FeatureCollection", features: moveFeats } as FC,
     };
   }, [level]);
 
@@ -78,16 +87,25 @@ export function IndoorMapScreen() {
         initialRegion={DELTA_REGION}
         mapType="standard"
       >
+        // Points
         <Geojson
           geojson={units}
           strokeColor="#1E3A8A"
           strokeWidth={1}
           fillColor="rgba(147, 197, 253, 0.35)"
-          color="#1E40AF"
+          color= "#9094a0"
         />
+        {/* UNCOMMENT THIS TO VIEW MOVEPOINTS
+        <Geojson
+          geojson={movePoints}
+          strokeColor="#021209"
+          strokeWidth={1.5}
+          fillColor= "transparent"
+        />
+        */}
         <Geojson
           geojson={walls}
-          strokeColor="#334155"
+          strokeColor="#33553a"
           strokeWidth={1.5}
           fillColor="transparent"
         />

@@ -8,7 +8,7 @@ The full UHCL GeoJSON (~118MB) stays local/gitignored; Find loads the extracted 
 python3 scripts/extract_delta_floorplan.py
 ```
 
-Boot: [`../README.md`](../README.md).
+Boot: [`../RUN.md`](../RUN.md).
 
 ```bash
 cp .env.example .env   # EXPO_PUBLIC_SUPABASE_* and EXPO_PUBLIC_API_URL

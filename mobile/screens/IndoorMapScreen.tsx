@@ -95,14 +95,14 @@ export function IndoorMapScreen() {
           fillColor="rgba(147, 197, 253, 0.35)"
           color= "#9094a0"
         />
-        {/* UNCOMMENT THIS TO VIEW MOVEPOINTS
+        {
         <Geojson
           geojson={movePoints}
           strokeColor="#021209"
           strokeWidth={1.5}
           fillColor= "transparent"
         />
-        */}
+        }
         <Geojson
           geojson={walls}
           strokeColor="#33553a"

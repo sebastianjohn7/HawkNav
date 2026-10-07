@@ -58,4 +58,4 @@ supabase/                  # schema.sql
 
 ## Run (archived)
 
-See [`../../RUN.md`](../../RUN.md) for current Expo boot. For this tree: `SUPABASE_*`, `API_URL`, `ARCGIS_API_KEY` in `.env` (never commit).
+See [`../../README.md`](../../README.md) for current Expo boot. For this tree: `SUPABASE_*`, `API_URL`, `ARCGIS_API_KEY` in `.env` (never commit).

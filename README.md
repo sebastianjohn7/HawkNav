@@ -4,29 +4,9 @@ UHCL campus mobility — this clone focuses on the **Shuttle** module..
 
 Mobile client is **Expo** under [`mobile/`](mobile/). Earlier Flutter work is archived at [`archive/mobile-flutter/`](archive/mobile-flutter/).
 
-Everyday boot guide below. Don’t commit `.env` files. Node/npm must be on your `PATH`.
+Don’t commit `.env` files. Node/npm must be on your `PATH`.
 
-## Phase 1A — API only (no Supabase)
-
-Schedules live in [`data/shuttle/`](data/shuttle/). The Bun API serves them locally.
-
-```bash
-cd api
-bun install
-bun run check       # validate CSVs
-bun run dev:local   # http://localhost:8787 (no Cloudflare)
-```
-
-Try:
-
-```bash
-curl http://localhost:8787/health
-curl 'http://localhost:8787/stops?route=on_campus'
-curl 'http://localhost:8787/schedules?route=off_campus&day_group=mon_thu'
-curl 'http://localhost:8787/eta?stop_id=bayou_student_entrance'
-```
-
-### Layout
+## Layout
 
 ```text
 data/shuttle/              # CSV schedules + stops
@@ -37,29 +17,47 @@ archive/mobile-flutter/    # Previous Flutter / ArcGIS experiment
 .env.example               # placeholders only (root)
 ```
 
-## Phase 1B — Supabase setup gate (before live GPS)
-
-You need a free Supabase project before Driver/Rider realtime works:
-
-1. Create a project at [supabase.com](https://supabase.com)
-2. Copy **Project URL** and **anon key** into `mobile/.env` (from [`mobile/.env.example`](mobile/.env.example)) as `EXPO_PUBLIC_SUPABASE_*` — never commit secrets
-3. In the SQL editor, run [`supabase/schema.sql`](supabase/schema.sql) (creates `shuttle_positions`, RLS demo policies, Realtime)
-4. Confirm Realtime is enabled for `shuttle_positions` (Dashboard → Database → Publications, or the SQL already adds it)
-
-Then use **Phone (physical device)** below, or `bun run dev:local` for simulator-only.
-
-- **Driver** tab streams GPS every ~4s into `shuttle_positions`
-- **Rider** tab subscribes via Realtime and can call `GET /eta`
-
-Requires [Node/npm](https://nodejs.org/), [Expo Go](https://expo.dev/go), and `cloudflared` for phone testing.
-
 ---
 
 ## How to run
 
-### Install Cloudflare quick tunnel (`cloudflared`) — macOS or Windows
+Do these in order the first time. After that, jump to **step 5** (phone) or **step 6** (localhost).
 
-Phone testing needs a public HTTPS URL for the local API. Works on **both macOS and Windows**. `bun run dev` starts Cloudflare’s **quick tunnel** — no Cloudflare account or dashboard login required, just the `cloudflared` CLI plus the matching tunnel script for your OS.
+### 1. Prerequisites
+
+- [Node/npm](https://nodejs.org/)
+- [Bun](https://bun.sh) (for the API)
+- Phone testing also needs Expo + `cloudflared` (steps 2–3)
+
+### 2. Expo account and CLI
+
+1. Sign up at [expo.dev/signup](https://expo.dev/signup)
+2. Install **Expo Go** on your phone from the [App Store / Play Store](https://expo.dev/go)
+3. Log in with the Expo CLI (`npx` — no global install required):
+
+```bash
+cd mobile
+npm install
+npx expo login
+npx expo whoami    # confirm you’re logged in
+```
+
+Useful Expo commands:
+
+```bash
+cd mobile
+npx expo start           # start Metro; scan QR with Expo Go
+npx expo start --clear   # clear Metro cache if something’s stuck
+npx expo start --ios     # iOS simulator (macOS)
+npx expo start --android # Android emulator
+npx expo logout          # sign out of the CLI
+```
+
+`npm start` / `npm run ios` / `npm run android` in `mobile/` map to the same scripts in [`mobile/package.json`](mobile/package.json).
+
+### 3. Cloudflare quick tunnel (`cloudflared`) — macOS or Windows
+
+Phone testing needs a public HTTPS URL for the local API. Works on **both macOS and Windows**. `bun run dev` starts Cloudflare’s **quick tunnel** — no Cloudflare account required, just the CLI plus the matching tunnel script for your OS.
 
 | Your OS | Install `cloudflared` | Tunnel script | Set `api/package.json` `"dev"` to |
 | --- | --- | --- | --- |
@@ -68,7 +66,7 @@ Phone testing needs a public HTTPS URL for the local API. Works on **both macOS 
 
 You do **not** run `cloudflared tunnel ...` by hand — the `.sh` or `.ps1` does that when you `bun run dev`.
 
-**1. Install `cloudflared`**
+**3a. Install `cloudflared`**
 
 macOS (Homebrew):
 
@@ -105,34 +103,47 @@ cloudflared --version
 
 Other OS: download from [Cloudflare’s install docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), put `cloudflared` on your `PATH`, then run `cloudflared --version`.
 
-**2. Point `bun run dev` at the right script**
+**3b. Point `bun run dev` at the right script**
 
-Edit [`api/package.json`](api/package.json) so the `"dev"` script matches your machine.
+Edit [`api/package.json`](api/package.json) so `"dev"` matches your machine.
 
-macOS / Linux — use the shell script:
+macOS / Linux:
 
 ```json
 "dev": "./dev-with-tunnel.sh"
 ```
 
-Windows — use the PowerShell script:
+Windows:
 
 ```json
 "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ./dev-with-tunnel.ps1"
 ```
 
-If you switch machines (Mac ↔ Windows), update `"dev"` to the matching line above before running.
+If you switch machines (Mac ↔ Windows), update `"dev"` to the matching line before running.
 
-### Phone (physical device) — recommended
+### 4. Supabase (live GPS only)
 
-`cd api && bun run dev` starts a **Cloudflare quick tunnel** (`cloudflared`) to local port `8787`, writes the public `https://….trycloudflare.com` URL into `mobile/.env` as `EXPO_PUBLIC_API_URL`, then starts the Bun API. Expo reads that env — no copy/paste.
+Skip this if you only need schedules/API. You need a free Supabase project before Driver/Rider realtime works:
 
-**Prerequisite:** `cloudflared` on your `PATH`, and `api/package.json` `"dev"` set to `.sh` (macOS/Linux) or `.ps1` (Windows) as above.
+1. Create a project at [supabase.com](https://supabase.com)
+2. Copy `mobile/.env.example` → `mobile/.env` and set `EXPO_PUBLIC_SUPABASE_*` from the project **URL** and **anon key** — never commit secrets
+3. In the SQL editor, run [`supabase/schema.sql`](supabase/schema.sql) (creates `shuttle_positions`, RLS demo policies, Realtime)
+4. Confirm Realtime is enabled for `shuttle_positions` (Dashboard → Database → Publications, or the SQL already adds it)
+
+- **Driver** tab streams GPS every ~4s into `shuttle_positions`
+- **Rider** tab subscribes via Realtime and can call `GET /eta`
+
+### 5. Phone (physical device) — recommended everyday boot
+
+Starts a Cloudflare quick tunnel to port `8787`, writes `https://….trycloudflare.com` into `mobile/.env` as `EXPO_PUBLIC_API_URL`, then runs the Bun API. Expo reads that env — no copy/paste.
+
+**Before this:** steps 2–3 done (`cloudflared` on `PATH`, `"dev"` set to `.sh` or `.ps1`).
 
 **Terminal 1 — API + Cloudflare tunnel**
 
 ```bash
 cd api
+bun install          # first time only
 bun run dev          # → dev-with-tunnel.sh (Mac) or .ps1 (Windows)
 ```
 
@@ -147,23 +158,25 @@ Wrote EXPO_PUBLIC_API_URL into mobile/.env
 
 ```bash
 cd mobile
-npm install
+npm install          # first time only
+npx expo login       # first time only (step 2)
 npx expo start
 ```
 
 Scan the QR code with Expo Go (or press `i` / `a` for simulator).
 
-When you stop the API (`Ctrl+C`), the script tears down the Cloudflare tunnel and restores `EXPO_PUBLIC_API_URL` to `http://localhost:8787`.
+When you stop the API (`Ctrl+C`), the script tears down the tunnel and restores `EXPO_PUBLIC_API_URL` to `http://localhost:8787`.
 
-### Without Cloudflare (localhost only)
+### 6. Without Cloudflare (localhost / API-only)
 
-Use this after a fresh clone if you **don’t** install `cloudflared` and don’t need a public API URL. Simulator / Expo on the same machine can reach `http://localhost:8787`. A physical phone **cannot** use `localhost` (use Cloudflare above, or set `EXPO_PUBLIC_API_URL` to your machine’s LAN IP on the same Wi‑Fi).
+Use this if you **don’t** need a public API URL (simulator on the same machine, or curl-only). A physical phone **cannot** use `localhost` — use step 5, or set `EXPO_PUBLIC_API_URL` to your machine’s LAN IP on the same Wi‑Fi.
 
 **Terminal 1 — API on localhost**
 
 ```bash
 cd api
 bun install
+bun run check        # optional: validate CSVs
 bun run dev:local    # → bun run --hot src/index.ts (no tunnel)
 ```
 
@@ -176,9 +189,18 @@ bun run --hot src/index.ts
 # or: bun run start
 ```
 
-You should see the API on `http://localhost:8787`. Do **not** run `bun run dev` unless you have `cloudflared` — that script starts the Cloudflare tunnel.
+API smoke checks:
 
-**Terminal 2 — Expo**
+```bash
+curl http://localhost:8787/health
+curl 'http://localhost:8787/stops?route=on_campus'
+curl 'http://localhost:8787/schedules?route=off_campus&day_group=mon_thu'
+curl 'http://localhost:8787/eta?stop_id=bayou_student_entrance'
+```
+
+Do **not** run `bun run dev` unless you have `cloudflared` — that script starts the Cloudflare tunnel.
+
+**Terminal 2 — Expo (optional)**
 
 ```bash
 cd mobile
@@ -190,13 +212,15 @@ npm install
 npx expo start
 ```
 
+### Script reference
+
 | Script | What it does |
 | --- | --- |
 | `bun run dev` | Cloudflare tunnel + write `EXPO_PUBLIC_API_URL` + Bun API (needs `cloudflared`; runs `.sh` on Mac or `.ps1` on Windows per `package.json`) |
 | `bun run dev:local` | Bun API on localhost only — **no** Cloudflare |
 | `bun run start` | Bun API on localhost (no hot reload) |
 
-### Test checklist
+### 7. Test checklist
 
 1. **Get Started** → **Sign In** → bottom nav
 2. **Shuttle** → map shows campus; **Driver** → Start / Check in → green marker tracks live GPS
@@ -206,7 +230,7 @@ npx expo start
 
 Live GPS uses Supabase. Stops/ETA use the API (`EXPO_PUBLIC_API_URL`).
 
-### Shut down
+### 8. Shut down
 
 - Expo: `Ctrl+C` in the Expo terminal
 - API (`bun run dev`): `Ctrl+C` (stops Bun **and** the Cloudflare tunnel, restores localhost `EXPO_PUBLIC_API_URL`)

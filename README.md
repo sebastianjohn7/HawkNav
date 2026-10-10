@@ -1,6 +1,6 @@
 # HawkNav
 
-UHCL campus mobility — this clone focuses on the **Shuttle** module.
+UHCL campus mobility — this clone focuses on the **Shuttle** module..
 
 Mobile client is **Expo** under [`mobile/`](mobile/). Earlier Flutter work is archived at [`archive/mobile-flutter/`](archive/mobile-flutter/).
 

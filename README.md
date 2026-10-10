@@ -121,16 +121,17 @@ Windows:
 
 If you switch machines (Mac ↔ Windows), update `"dev"` to the matching line before running.
 
-### 4. Supabase (live GPS only)
+### 4. Supabase (sign-in, roles, live GPS)
 
-Skip this if you only need schedules/API. You need a free Supabase project before Driver/Rider realtime works:
+Skip this if you only need schedules/API. You need a free Supabase project before sign-in and Driver/Rider realtime work:
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Copy `mobile/.env.example` → `mobile/.env` and set `EXPO_PUBLIC_SUPABASE_*` from the project **URL** and **anon key** — never commit secrets
-3. In the SQL editor, run [`supabase/schema.sql`](supabase/schema.sql) (creates `shuttle_positions`, RLS demo policies, Realtime)
+2. Copy `mobile/.env.example` → `mobile/.env` and set `EXPO_PUBLIC_SUPABASE_*` from the project **URL** and **publishable (anon) key** — never commit secrets
+3. In the SQL editor, run these **in order**: [`schema.sql`](supabase/schema.sql), [`profiles.sql`](supabase/profiles.sql), [`shuttle_rls.sql`](supabase/shuttle_rls.sql). They are not carried over by git, so every project needs them. Full details (roles, first admin, allowlist) are in [`supabase/SETUP.md`](supabase/SETUP.md)
 4. Confirm Realtime is enabled for `shuttle_positions` (Dashboard → Database → Publications, or the SQL already adds it)
 
-- **Driver** tab streams GPS every ~4s into `shuttle_positions`
+- **Sign in** with email + password, or **Continue as Visitor** (Delta map only, no account)
+- **Driver** tab (drivers and admins only) streams GPS every ~4s into `shuttle_positions`
 - **Rider** tab subscribes via Realtime and can call `GET /eta`
 
 ### 5. Phone (physical device) — recommended everyday boot

@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { ACCESS } from "./lib/roles";
+import { AdminPage } from "./pages/AdminPage";
 import { LandingPage } from "./pages/LandingPage";
 import { NavModule } from "./pages/NavModule";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -10,9 +12,14 @@ import { SignInPage } from "./pages/SignInPage";
 
 /** Expo port of Josh's Landing → Sign-in → NavModule shell, gated by sign-in. */
 function Screens() {
-  const { session, guest, loading } = useAuth();
+  const { session, guest, role, loading } = useAuth();
   const [started, setStarted] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [screen, setScreen] = useState<"nav" | "settings" | "admin">("nav");
+
+  // After signing out, the next sign-in should start on the main screen.
+  useEffect(() => {
+    if (!session && !guest) setScreen("nav");
+  }, [session, guest]);
 
   // Wait for the saved session check so a signed-in user doesn't flash the login page.
   if (loading) {
@@ -33,11 +40,18 @@ function Screens() {
   }
 
   // Guests have no account, so no settings page; NavModule offers Sign In instead.
-  return settingsOpen && !guest ? (
-    <SettingsPage onBack={() => setSettingsOpen(false)} />
-  ) : (
-    <NavModule onOpenSettings={() => setSettingsOpen(true)} />
-  );
+  if (screen === "admin" && role && ACCESS[role].canUseAdminTools) {
+    return <AdminPage onBack={() => setScreen("settings")} />;
+  }
+  if (screen === "settings" && !guest) {
+    return (
+      <SettingsPage
+        onBack={() => setScreen("nav")}
+        onOpenAdmin={() => setScreen("admin")}
+      />
+    );
+  }
+  return <NavModule onOpenSettings={() => setScreen("settings")} />;
 }
 
 export default function App() {

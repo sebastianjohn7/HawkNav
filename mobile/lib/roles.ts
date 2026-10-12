@@ -10,19 +10,25 @@ type Access = {
   tabs: Tab[];
   /** Can open the Driver GPS screen inside the Shuttle tab. */
   canDrive: boolean;
+  /** Can open Admin tools in Settings (user management now, more tools later). */
+  canUseAdminTools: boolean;
 };
 
-const STUDENT: Access = { tabs: ["shuttle", "find", "alerts"], canDrive: false };
+const STUDENT: Access = {
+  tabs: ["shuttle", "find", "alerts"],
+  canDrive: false,
+  canUseAdminTools: false,
+};
 
 export const ACCESS: Record<Role, Access> = {
   // Visitors (guests, or accounts with a non-UHCL email): Delta map only.
-  visitor: { tabs: ["find"], canDrive: false },
+  visitor: { tabs: ["find"], canDrive: false, canUseAdminTools: false },
   student: STUDENT,
   // Faculty match students for now.
   faculty: STUDENT,
-  driver: { tabs: ["shuttle", "find", "alerts"], canDrive: true },
+  driver: { tabs: ["shuttle", "find", "alerts"], canDrive: true, canUseAdminTools: false },
   // Admin sees everything.
-  admin: { tabs: ["shuttle", "find", "alerts"], canDrive: true },
+  admin: { tabs: ["shuttle", "find", "alerts"], canDrive: true, canUseAdminTools: true },
 };
 
 /** Set to true to require a UHCL email to create an account (also change the

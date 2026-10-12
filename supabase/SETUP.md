@@ -10,8 +10,9 @@ Each teammate runs these in their **own** project. The SQL is not carried over b
    1. [`schema.sql`](schema.sql) — `shuttle_positions` (live GPS) and a `shuttle_stops` stub
    2. [`profiles.sql`](profiles.sql) — `profiles`, `role_allowlist`, `login_log`, and the signup trigger that assigns roles
    3. [`shuttle_rls.sql`](shuttle_rls.sql) — shuttle GPS: any signed-in user reads, only drivers/admins write
+   4. [`admin_roles.sql`](admin_roles.sql) — `set_admin()` so admins can promote / demote accounts from the app, plus a `role_changes` log
 
-   All three are safe to re-run. If Supabase warns about destructive operations (the `drop policy` lines), confirm; if it offers to enable RLS on `shuttle_stops`, choose **Run and enable RLS**.
+   All four are safe to re-run. If Supabase warns about destructive operations (the `drop policy` lines), confirm; if it offers to enable RLS on `shuttle_stops`, choose **Run and enable RLS**.
 4. Database → Publications → confirm `shuttle_positions` is in `supabase_realtime` (the SQL tries to add it)
 5. For testing, turn off Authentication → Providers → Email → **Confirm email** (turn it back on for the demo).
 
@@ -44,19 +45,29 @@ update public.profiles set role = 'admin' where email = 'you@uhcl.edu';
 
 Only admins (or the SQL editor) can change roles; the app can't. Faculty have `@uhcl.edu` emails, so they come out as `student` unless allowlisted; they have the same access as students.
 
-## What each role sees
+## Test accounts (one per role)
 
-Defined in [`mobile/lib/roles.ts`](../mobile/lib/roles.ts).
+Create these to try every role. First add the allowlist rows (SQL editor), **then** sign up each account in the app (**Get Started → New here? Create an account**) with a password you choose.
 
-| Who | Access |
-| --- | --- |
-| Guest (**Continue as Visitor**, no account) and `visitor` accounts | Delta indoor map only |
-| `student`, `faculty` | Shuttle (rider view), Find, Alerts |
-| `driver`, `admin` | Everything above, plus the Driver GPS screen |
+```sql
+insert into public.role_allowlist (email, role) values
+  ('faculty.test@uhcl.edu', 'faculty'),
+  ('driver.test@uhcl.edu',  'driver'),
+  ('admin.test@uhcl.edu',   'admin')
+on conflict (email) do nothing;
+```
 
-Shuttle GPS is locked in the database, not just hidden in the app: only `driver` and `admin` accounts can write `shuttle_positions`, so streaming GPS now needs a signed-in driver or admin account.
+| Email to sign up with | Role you get | Why |
+| --- | --- | --- |
+| `visitor.test@example.com` | `visitor` | Non-UHCL email, not allowlisted |
+| `student.test@uhcl.edu` | `student` | `@uhcl.edu`, not allowlisted |
+| `faculty.test@uhcl.edu` | `faculty` | Allowlisted |
+| `driver.test@uhcl.edu` | `driver` | Allowlisted |
+| `admin.test@uhcl.edu` | `admin` | Allowlisted; `@uhcl.edu`, so it can also be demoted/promoted from Admin tools |
 
-To require UHCL emails for sign-up later, set `UHCL_ONLY_SIGNUP = true` in `mobile/lib/roles.ts` and add the matching check to `handle_new_user()` in `profiles.sql`.
+With **Confirm email** off (step 5 above) these made-up addresses sign up instantly; with it on, only real inboxes work. You can also try **Continue as Visitor** with no account.
+
+Accounts and passwords live only in your Supabase project, not in git. If the team shares one project, share the passwords privately (never in the repo). Delete test accounts from Authentication → Users before the demo.
 
 ## Checking it worked
 

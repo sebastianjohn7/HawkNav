@@ -7,7 +7,7 @@ import { DriverScreen } from "../screens/DriverScreen";
 import { RiderScreen } from "../screens/RiderScreen";
 import { ShuttleMapView } from "../widgets/ShuttleMapView";
 
-type Role = "rider" | "driver";
+type Mode = "rider" | "driver";
 
 type Position = {
   lat: number;
@@ -18,11 +18,11 @@ type Position = {
 
 /** Josh's Shuttle tab — campus map + Rider/Driver; marker tracks live GPS. */
 export function ShuttleModule() {
-  const { role: userRole } = useAuth();
-  const canDrive = userRole ? ACCESS[userRole].canDrive : false;
-  const [pickedView, setRole] = useState<Role>("rider");
+  const { role } = useAuth();
+  const canDrive = role ? ACCESS[role].canDrive : false;
+  const [picked, setMode] = useState<Mode>("rider");
   // Non-drivers always get the rider view, whatever was picked.
-  const role: Role = canDrive ? pickedView : "rider";
+  const mode: Mode = canDrive ? picked : "rider";
   const [position, setPosition] = useState<Position | null>(null);
 
   // Shared Realtime feed so the map updates for both Rider and Driver views.
@@ -71,21 +71,21 @@ export function ShuttleModule() {
       {canDrive && (
         <View style={styles.tabs}>
           <Pressable
-            style={[styles.tab, role === "rider" && styles.tabOn]}
-            onPress={() => setRole("rider")}
+            style={[styles.tab, mode === "rider" && styles.tabOn]}
+            onPress={() => setMode("rider")}
           >
             <Text style={styles.tabText}>Rider</Text>
           </Pressable>
           <Pressable
-            style={[styles.tab, role === "driver" && styles.tabOn]}
-            onPress={() => setRole("driver")}
+            style={[styles.tab, mode === "driver" && styles.tabOn]}
+            onPress={() => setMode("driver")}
           >
             <Text style={styles.tabText}>Driver</Text>
           </Pressable>
         </View>
       )}
       <View style={styles.body}>
-        {role === "rider" ? (
+        {mode === "rider" ? (
           <RiderScreen />
         ) : (
           <DriverScreen

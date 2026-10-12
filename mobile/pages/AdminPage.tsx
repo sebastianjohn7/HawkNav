@@ -6,7 +6,7 @@ type ToolId = "users";
 
 // To add an admin tool: add it here and render it below.
 const TOOLS: Array<{ id: ToolId; label: string; hint: string }> = [
-  { id: "users", label: "Manage users", hint: "Promote or demote admins" },
+  { id: "users", label: "Manage users", hint: "Promote to driver or admin, or demote" },
 ];
 
 type Props = {

@@ -71,7 +71,17 @@ export function DriverScreen({ onLocalPosition }: Props) {
           },
           { onConflict: "shuttle_id" },
         );
-        setStatus(error ? `Upsert error: ${error.message}` : "Streaming");
+        if (error) {
+          // 42501 = row-level security refused the write: the account is no longer a driver.
+          if (error.code === "42501") {
+            stop();
+            setStatus("You no longer have driver access. Ask an admin.");
+          } else {
+            setStatus(`Upsert error: ${error.message}`);
+          }
+          return;
+        }
+        setStatus("Streaming");
       },
     );
     subRef.current = sub;

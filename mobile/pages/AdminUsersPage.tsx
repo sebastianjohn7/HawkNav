@@ -11,15 +11,35 @@ import {
 } from "react-native";
 import { useAuth, type Role } from "../lib/auth";
 import { supabase } from "../lib/config";
-import { UHCL_DOMAIN } from "../lib/roles";
 
 type Row = { id: string; email: string; role: Role };
+type Action = "make_admin" | "make_driver" | "demote";
 
 type Props = {
   onBack: () => void;
 };
 
-/** Admin only: promote UHCL accounts to admin, or demote other admins. */
+/** What each action does, for the confirm dialog. */
+const ACTION_TEXT: Record<Action, (email: string) => string> = {
+  make_admin: (e) => `Make ${e} an admin?`,
+  make_driver: (e) => `Make ${e} a shuttle driver?`,
+  demote: (e) => `Remove ${e}'s admin/driver access?`,
+};
+
+const ACTION_LABEL: Record<Action, string> = {
+  make_admin: "Make admin",
+  make_driver: "Make driver",
+  demote: "Demote",
+};
+
+/** Buttons offered for an account, by its current role. The database re-checks every rule. */
+function actionsFor(role: Role): Action[] {
+  if (role === "admin") return ["demote"];
+  if (role === "driver") return ["make_admin", "demote"];
+  return ["make_driver", "make_admin"];
+}
+
+/** Admin only: promote UHCL accounts to driver or admin, or demote them. */
 export function AdminUsersPage({ onBack }: Props) {
   const { session } = useAuth();
   const myId = session?.user.id;
@@ -49,23 +69,19 @@ export function AdminUsersPage({ onBack }: Props) {
     return () => clearTimeout(t);
   }, [load]);
 
-  function confirmChange(row: Row, makeAdmin: boolean) {
-    const text = makeAdmin
-      ? `Make ${row.email} an admin?`
-      : `Remove admin access from ${row.email}?`;
-    Alert.alert("Confirm", text, [
+  function confirmChange(row: Row, action: Action) {
+    Alert.alert("Confirm", ACTION_TEXT[action](row.email), [
       { text: "Cancel", style: "cancel" },
-      { text: "Confirm", onPress: () => change(row, makeAdmin) },
+      { text: "Confirm", onPress: () => change(row, action) },
     ]);
   }
 
-  async function change(row: Row, makeAdmin: boolean) {
+  async function change(row: Row, action: Action) {
     if (!supabase) return;
     setMessage(null);
-    // The database function re-checks every rule; this is just the call.
-    const { error } = await supabase.rpc("set_admin", {
+    const { error } = await supabase.rpc("change_role", {
       target: row.id,
-      make_admin: makeAdmin,
+      action,
     });
     if (error) setMessage(error.message);
     else await load();
@@ -98,8 +114,6 @@ export function AdminUsersPage({ onBack }: Props) {
           loading ? null : <Text style={styles.empty}>No accounts found.</Text>
         }
         renderItem={({ item }) => {
-          const isAdmin = item.role === "admin";
-          const isUhcl = item.email.toLowerCase().endsWith(UHCL_DOMAIN);
           const isMe = item.id === myId;
           return (
             <View style={styles.row}>
@@ -110,24 +124,19 @@ export function AdminUsersPage({ onBack }: Props) {
                 </Text>
                 <Text style={styles.role}>{item.role}</Text>
               </View>
-              {isAdmin && !isMe && (
-                <Pressable
-                  style={styles.btn}
-                  onPress={() => confirmChange(item, false)}
-                >
-                  <Text style={styles.btnText}>Demote</Text>
-                </Pressable>
-              )}
-              {!isAdmin && isUhcl && (
-                <Pressable
-                  style={styles.btn}
-                  onPress={() => confirmChange(item, true)}
-                >
-                  <Text style={styles.btnText}>Make admin</Text>
-                </Pressable>
-              )}
-              {!isAdmin && !isUhcl && (
-                <Text style={styles.note}>UHCL accounts only</Text>
+              {/* No buttons on your own row: nobody can change their own role. */}
+              {!isMe && (
+                <View style={styles.actions}>
+                  {actionsFor(item.role).map((a) => (
+                    <Pressable
+                      key={a}
+                      style={styles.btn}
+                      onPress={() => confirmChange(item, a)}
+                    >
+                      <Text style={styles.btnText}>{ACTION_LABEL[a]}</Text>
+                    </Pressable>
+                  ))}
+                </View>
               )}
             </View>
           );
@@ -160,17 +169,16 @@ const styles = StyleSheet.create({
   spinner: { marginTop: 12 },
   empty: { textAlign: "center", color: "#666", marginTop: 24 },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ddd",
-    gap: 12,
+    gap: 8,
   },
-  rowText: { flex: 1 },
+  rowText: {},
   email: { fontSize: 15, fontWeight: "600" },
   role: { fontSize: 12, color: "#555", marginTop: 2 },
+  actions: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   btn: {
     borderWidth: 1,
     borderColor: "#1565C0",
@@ -179,5 +187,4 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   btnText: { color: "#1565C0", fontWeight: "600" },
-  note: { fontSize: 12, color: "#888" },
 });

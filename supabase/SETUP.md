@@ -1,78 +1,62 @@
 # Supabase setup
 
-Do this once per Supabase project. Sign-in, roles, and live Driver/Rider GPS all need it. The Phase 1A API alone does not.
+Do this once per Supabase project (ideally one shared project for the team).
 
-Each teammate runs these in their **own** project. The SQL is not carried over by git, so a project that skips a file will be missing that part of the app.
+## Setup
 
-1. Create a free project at https://supabase.com
-2. Project Settings → API Keys → copy the **Project URL** and the **publishable key** (older projects call it the **anon public** key) into `mobile/.env` as `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` (see `mobile/.env.example`). Never use the secret / `service_role` key, and never commit `.env`.
-3. SQL Editor → paste each file's contents and run, **in this order**:
-   1. [`schema.sql`](schema.sql) — `shuttle_positions` (live GPS) and a `shuttle_stops` stub
-   2. [`profiles.sql`](profiles.sql) — `profiles`, `role_allowlist`, `login_log`, and the signup trigger that assigns roles
-   3. [`shuttle_rls.sql`](shuttle_rls.sql) — shuttle GPS: any signed-in user reads, only drivers/admins write
-   4. [`admin_roles.sql`](admin_roles.sql) — `set_admin()` so admins can promote / demote accounts from the app, plus a `role_changes` log
+1. Create a free project at [supabase.com](https://supabase.com).
+2. Project Settings → API Keys → copy the **Project URL** and **publishable key** into `mobile/.env` as `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` 
+3. SQL Editor → paste all of [`schema.sql`](schema.sql) → **Run** (confirm any warning). 
+4. Authentication → Sign In / Providers → Email → password **minimum 8**, require **lowercase, uppercase, digits, symbols**.
+5. Authentication → Email → **Confirm email**: off while testing, **on** for real use. The built-in sender allows only ~2 emails/hour, so real use needs custom SMTP.
 
-   All four are safe to re-run. If Supabase warns about destructive operations (the `drop policy` lines), confirm; if it offers to enable RLS on `shuttle_stops`, choose **Run and enable RLS**.
-4. Database → Publications → confirm `shuttle_positions` is in `supabase_realtime` (the SQL tries to add it)
-5. For testing, turn off Authentication → Providers → Email → **Confirm email** (turn it back on for the demo).
+## Accounts and roles
 
-Then start the API (`cd api && bun run dev`, optional — only the ETA needs it) and Expo (`cd mobile && npx expo start`).
+Everyone uses a real `@uhcl.edu` email. No preset or test accounts.
 
-## Roles
+| Who | How they get in |
+| --- | --- | --- |
+| Visitor | **Continue as Visitor** (no account) | Delta map only |
+| Student | Create account; name has digits (ex. `amerr0500@uhcl.edu`) | 
+| Faculty | Create account; name has no digits |
+| Driver | An admin promotes a UHCL account |
+| Admin | First one via SQL below, then admins promote others | 
 
-Roles: `visitor`, `student`, `faculty`, `driver`, `admin`.
-
-At signup the role is set by a database trigger from the email only:
-
-1. Email in `role_allowlist` → that role
-2. Ends with `@uhcl.edu` → `student`
-3. Anything else → `visitor`
-
-Roles are set when the account is created, so add driver / admin / faculty emails to `role_allowlist` **before** they sign up:
-
-```sql
-insert into public.role_allowlist (email, role) values
-  ('driver@example.com', 'driver'),
-  ('you@uhcl.edu', 'admin')
-on conflict (email) do nothing;
-```
-
-To change an account that already exists, or to make the **first admin** (nobody else can promote one yet):
-
+The database sets the role from the email, and only admins can change it.
+**First admin:** sign up in the app, then run:
 ```sql
 update public.profiles set role = 'admin' where email = 'you@uhcl.edu';
 ```
+After that, use **Settings → Admin tools → Manage users** to promote or demote. Admins can't change their own role.
 
-Only admins (or the SQL editor) can change roles; the app can't. Faculty have `@uhcl.edu` emails, so they come out as `student` unless allowlisted; they have the same access as students.
-
-## Test accounts (one per role)
-
-Create these to try every role. First add the allowlist rows (SQL editor), **then** sign up each account in the app (**Get Started → New here? Create an account**) with a password you choose.
+## Check it worked
 
 ```sql
-insert into public.role_allowlist (email, role) values
-  ('faculty.test@uhcl.edu', 'faculty'),
-  ('driver.test@uhcl.edu',  'driver'),
-  ('admin.test@uhcl.edu',   'admin')
-on conflict (email) do nothing;
+select email, role from public.profiles;                  -- accounts and roles
+select * from public.login_log order by logged_in_at desc; -- every sign-in
+select * from public.role_changes;                        -- every promotion/demotion
 ```
 
-| Email to sign up with | Role you get | Why |
-| --- | --- | --- |
-| `visitor.test@example.com` | `visitor` | Non-UHCL email, not allowlisted |
-| `student.test@uhcl.edu` | `student` | `@uhcl.edu`, not allowlisted |
-| `faculty.test@uhcl.edu` | `faculty` | Allowlisted |
-| `driver.test@uhcl.edu` | `driver` | Allowlisted |
-| `admin.test@uhcl.edu` | `admin` | Allowlisted; `@uhcl.edu`, so it can also be demoted/promoted from Admin tools |
+## Start over
 
-With **Confirm email** off (step 5 above) these made-up addresses sign up instantly; with it on, only real inboxes work. You can also try **Continue as Visitor** with no account.
-
-Accounts and passwords live only in your Supabase project, not in git. If the team shares one project, share the passwords privately (never in the repo). Delete test accounts from Authentication → Users before the demo.
-
-## Checking it worked
+Wipes everything (**including all accounts**). Run it, then run `schema.sql` again.
+Use this only if you ran older versions of these files (`profiles.sql`, `shuttle_rls.sql`), since they left shuttle GPS writable by anyone.
 
 ```sql
-select email, role from public.profiles order by created_at;
-select p.email, l.logged_in_at from public.login_log l
-  join public.profiles p on p.id = l.user_id order by l.logged_in_at desc;
+drop trigger if exists on_auth_user_created on auth.users;
+drop trigger if exists on_auth_user_signed_in on auth.users;
+drop table if exists public.login_log, public.role_changes, public.profiles,
+  public.shuttle_positions, public.shuttle_stops, public.role_allowlist cascade;
+drop function if exists public.change_role(uuid, text);
+drop function if exists public.set_admin(uuid, boolean);
+drop function if exists public.is_admin();
+drop function if exists public.current_role_name();
+drop function if exists public.base_role_for(text);
+drop function if exists public.handle_new_user();
+drop function if exists public.guard_role_change();
+drop function if exists public.block_role_change();
+drop function if exists public.log_sign_in();
+drop function if exists public.set_login_role();
+drop type if exists public.app_role;
+delete from auth.users;
 ```

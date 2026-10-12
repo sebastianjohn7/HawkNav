@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useAuth } from "../lib/auth";
 import { DEFAULT_SHUTTLE_ID, supabase } from "../lib/config";
+import { ACCESS } from "../lib/roles";
 import { DriverScreen } from "../screens/DriverScreen";
 import { RiderScreen } from "../screens/RiderScreen";
 import { ShuttleMapView } from "../widgets/ShuttleMapView";
@@ -16,7 +18,11 @@ type Position = {
 
 /** Josh's Shuttle tab — campus map + Rider/Driver; marker tracks live GPS. */
 export function ShuttleModule() {
-  const [role, setRole] = useState<Role>("rider");
+  const { role: userRole } = useAuth();
+  const canDrive = userRole ? ACCESS[userRole].canDrive : false;
+  const [pickedView, setRole] = useState<Role>("rider");
+  // Non-drivers always get the rider view, whatever was picked.
+  const role: Role = canDrive ? pickedView : "rider";
   const [position, setPosition] = useState<Position | null>(null);
 
   // Shared Realtime feed so the map updates for both Rider and Driver views.
@@ -61,20 +67,23 @@ export function ShuttleModule() {
         shuttleLat={position?.lat}
         shuttleLng={position?.lng}
       />
-      <View style={styles.tabs}>
-        <Pressable
-          style={[styles.tab, role === "rider" && styles.tabOn]}
-          onPress={() => setRole("rider")}
-        >
-          <Text style={styles.tabText}>Rider</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.tab, role === "driver" && styles.tabOn]}
-          onPress={() => setRole("driver")}
-        >
-          <Text style={styles.tabText}>Driver</Text>
-        </Pressable>
-      </View>
+      {/* Only drivers and admins get the Rider/Driver switch. */}
+      {canDrive && (
+        <View style={styles.tabs}>
+          <Pressable
+            style={[styles.tab, role === "rider" && styles.tabOn]}
+            onPress={() => setRole("rider")}
+          >
+            <Text style={styles.tabText}>Rider</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.tab, role === "driver" && styles.tabOn]}
+            onPress={() => setRole("driver")}
+          >
+            <Text style={styles.tabText}>Driver</Text>
+          </Pressable>
+        </View>
+      )}
       <View style={styles.body}>
         {role === "rider" ? (
           <RiderScreen />

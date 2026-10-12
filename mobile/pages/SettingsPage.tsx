@@ -1,11 +1,14 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { useAuth } from "../lib/auth";
+
 type Props = {
-  onSignOut: () => void;
   onBack: () => void;
 };
 
-export function SettingsPage({ onSignOut, onBack }: Props) {
+export function SettingsPage({ onBack }: Props) {
+  const { session, role, signOut } = useAuth();
+
   return (
     <View style={styles.root}>
       <View style={styles.bar}>
@@ -15,8 +18,9 @@ export function SettingsPage({ onSignOut, onBack }: Props) {
         <Text style={styles.title}>Settings</Text>
       </View>
       <View style={styles.body}>
-        <Text style={styles.label}>Settings Page</Text>
-        <Pressable style={styles.btn} onPress={onSignOut}>
+        <Text style={styles.label}>{session?.user.email}</Text>
+        <Text style={styles.label}>Role: {role ?? "loading…"}</Text>
+        <Pressable style={styles.btn} onPress={signOut}>
           <Text>Sign Out</Text>
         </Pressable>
       </View>

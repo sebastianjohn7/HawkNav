@@ -11,7 +11,9 @@ Each teammate runs these in their **own** project. The SQL is not carried over b
    2. [`profiles.sql`](profiles.sql) — `profiles`, `role_allowlist`, `login_log`, and the signup trigger that assigns roles
    3. [`shuttle_rls.sql`](shuttle_rls.sql) — shuttle GPS: any signed-in user reads, only drivers/admins write
 
-   All three are safe to re-run. If Supabase warns about destructive operations (the `drop policy` lines), confirm; if it offers to enable RLS on `shuttle_stops`, choose **Run and enable RLS**.
+   4. [mfa_rls.sql](mfa_rls.sql) — require completed MFA for shuttle data, profile edits, allowlist management, and login history reads
+
+   All four are safe to re-run. If Supabase warns about destructive operations (the `drop policy` lines), confirm; if it offers to enable RLS on `shuttle_stops`, choose **Run and enable RLS**.
 4. Database → Publications → confirm `shuttle_positions` is in `supabase_realtime` (the SQL tries to add it)
 5. For testing, turn off Authentication → Providers → Email → **Confirm email** (turn it back on for the demo).
 
@@ -65,3 +67,25 @@ select email, role from public.profiles order by created_at;
 select p.email, l.logged_in_at from public.login_log l
   join public.profiles p on p.id = l.user_id order by l.logged_in_at desc;
 ```
+
+## MFA verification
+
+For an existing database, run mfa_rls.sql after the other setup scripts.
+The mobile changes alone do not install database policies.
+
+1. Sign in with an account without an authenticator. Start enrollment and add
+   the displayed setup key to Duo Mobile. An incorrect code must stay on setup;
+   a correct code must open the app.
+2. Restart the app midway through enrollment. Start enrollment again and use the
+   new setup key, replacing the old unfinished entry in Duo.
+3. Sign out and sign back in. The app should request a code without enrolling again.
+4. Use "Back to sign in" from enrollment and verification to return to login.
+5. With a signed-in client before MFA (aal1), shuttle reads should return no
+   rows and writes should fail. After MFA (aal2), existing role restrictions
+   still apply: students can read, drivers/admins can write.
+6. Profile reads and login-log inserts remain available before MFA because
+   startup and password sign-in use them. The login log records password sign-in,
+   not proof that MFA was completed.
+
+Run database access checks with ordinary user tokens, not the SQL editor or a
+service-role key, which bypass row-level security.

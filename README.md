@@ -127,7 +127,7 @@ Skip this if you only need schedules/API. You need a free Supabase project befor
 
 1. Create a project at [supabase.com](https://supabase.com)
 2. Copy `mobile/.env.example` → `mobile/.env` and set `EXPO_PUBLIC_SUPABASE_*` from the project **URL** and **publishable (anon) key** — never commit secrets
-3. In the SQL editor, run these **in order**: [`schema.sql`](supabase/schema.sql), [`profiles.sql`](supabase/profiles.sql), [`shuttle_rls.sql`](supabase/shuttle_rls.sql). They are not carried over by git, so every project needs them. Full details (roles, first admin, allowlist) are in [`supabase/SETUP.md`](supabase/SETUP.md)
+3. In the SQL editor, run [`supabase/schema.sql`](supabase/schema.sql) (one file: accounts, roles, shuttle GPS, security). It is not carried over by git, so every project needs it once. Full details (accounts and roles, first admin, email confirmation) are in [`supabase/SETUP.md`](supabase/SETUP.md)
 4. Confirm Realtime is enabled for `shuttle_positions` (Dashboard → Database → Publications, or the SQL already adds it)
 
 - **Sign in** with email + password, or **Continue as Visitor** (Delta map only, no account)

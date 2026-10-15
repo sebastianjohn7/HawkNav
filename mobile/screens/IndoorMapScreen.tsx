@@ -87,7 +87,7 @@ export function IndoorMapScreen() {
         initialRegion={DELTA_REGION}
         mapType="standard"
       >
-        // Points
+        {/* Points */}
         <Geojson
           geojson={units}
           strokeColor="#1E3A8A"

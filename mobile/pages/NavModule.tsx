@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../lib/auth";
+import { ACCESS, type Tab } from "../lib/roles";
 import { IndoorMapScreen } from "../screens/IndoorMapScreen";
 import { AlertsModule } from "./AlertsModule";
 import { ShuttleModule } from "./ShuttleModule";
-
-type Tab = "shuttle" | "find" | "alerts";
 
 type Props = {
   onOpenSettings: () => void;
@@ -23,15 +23,36 @@ const TABS: Array<{
 
 /** Josh's NavModule shell — bottom tabs + settings (Parking removed). */
 export function NavModule({ onOpenSettings }: Props) {
-  const [tab, setTab] = useState<Tab>("shuttle");
+  const { role, guest, signOut } = useAuth();
+  const [picked, setPicked] = useState<Tab | null>(null);
+
+  // The role is read from the profile after sign-in; wait for it.
+  if (!role) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  const allowed = TABS.filter((t) => ACCESS[role].tabs.includes(t.id));
+  // Fall back to the first allowed tab if the picked one isn't allowed (e.g. role changed).
+  const tab = allowed.some((t) => t.id === picked) ? picked : allowed[0].id;
 
   return (
     <View style={styles.root}>
       <View style={styles.appBar}>
         <Text style={styles.appTitle}>HawkNav</Text>
-        <Pressable style={styles.settingsBtn} onPress={onOpenSettings}>
-          <Ionicons name="settings" size={22} color="#fff" />
-        </Pressable>
+        {guest ? (
+          // Guests have no account or settings; this goes back to the sign-in page.
+          <Pressable style={styles.signInBtn} onPress={signOut}>
+            <Text style={styles.signInText}>Sign In</Text>
+          </Pressable>
+        ) : (
+          <Pressable style={styles.settingsBtn} onPress={onOpenSettings}>
+            <Ionicons name="settings" size={22} color="#fff" />
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.body}>
@@ -40,14 +61,16 @@ export function NavModule({ onOpenSettings }: Props) {
         {tab === "alerts" && <AlertsModule />}
       </View>
 
+      {/* One screen (visitors) needs no tab bar. */}
+      {allowed.length > 1 && (
       <View style={styles.bottom}>
-        {TABS.map((t) => {
+        {allowed.map((t) => {
           const on = tab === t.id;
           return (
             <Pressable
               key={t.id}
               style={styles.bottomItem}
-              onPress={() => setTab(t.id)}
+              onPress={() => setPicked(t.id)}
             >
               <Ionicons
                 name={t.icon}
@@ -61,6 +84,7 @@ export function NavModule({ onOpenSettings }: Props) {
           );
         })}
       </View>
+      )}
     </View>
   );
 }
@@ -77,6 +101,14 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ddd",
   },
   appTitle: { fontSize: 18, fontWeight: "700" },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  signInBtn: {
+    backgroundColor: "#1565C0",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  signInText: { color: "#fff", fontWeight: "700" },
   settingsBtn: {
     backgroundColor: "#1565C0",
     padding: 8,

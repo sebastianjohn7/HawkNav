@@ -35,7 +35,3 @@ temp/
 .direnv/
 .cursor/rules/authorship-and-style.mdc
 PROJECT_CONTEXT.md
-.DS_Store
-.DS_Store
-
-arcgis_maps_core/

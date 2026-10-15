@@ -43,32 +43,27 @@ function Screens() {
     );
   }
 
-  // Guests have no account, so no MFA required
+  // Guests only use navigation; account screens require a signed-in session.
   if (!session) {
-    return <NavModule onOpenSettings={() => setSettingsOpen(true)} />;
+    return <NavModule onOpenSettings={() => {}} />;
   }
 
-  // Signed-in users require MFA to access the app
-  return (
-    <MFA key = {session.user.id} >
-      {settingsOpen ? ( <SettingsPage onBack={() => setSettingsOpen(false)} /> ) : (
-      <NavModule onOpenSettings={() => setSettingsOpen(true)} />
-      )}
-    </MFA>
-  );
-  // Guests have no account, so no settings page; NavModule offers Sign In instead.
+  let content;
   if (screen === "admin" && role && ACCESS[role].canUseAdminTools) {
-    return <AdminPage onBack={() => setScreen("settings")} />;
-  }
-  if (screen === "settings" && !guest) {
-    return (
+    content = <AdminPage onBack={() => setScreen("settings")} />;
+  } else if (screen === "settings") {
+    content = (
       <SettingsPage
         onBack={() => setScreen("nav")}
         onOpenAdmin={() => setScreen("admin")}
       />
     );
+  } else {
+    content = <NavModule onOpenSettings={() => setScreen("settings")} />;
   }
-  return <NavModule onOpenSettings={() => setScreen("settings")} />;
+
+  // Every signed-in screen stays behind the same MFA gate.
+  return <MFA key={session.user.id}>{content}</MFA>;
 }
 
 export default function App() {
@@ -88,3 +83,4 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
 });
+

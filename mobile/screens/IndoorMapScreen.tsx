@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, PROVIDER_DEFAULT } from "react-native-maps";
-import deltaFloorplan from "../assets/maps/delta_floorplan.json";
+import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
+import { buildGraphFromGeoJson, findShortestPath } from "../utils/aStarRouting.ts";
 
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";
 
@@ -19,41 +20,60 @@ const DELTA_REGION = {
   longitudeDelta: Math.max((bbox[2] - bbox[0]) * 1.6, 0.001),
 };
 
+const deltaGraph = buildGraphFromGeoJson(deltaFloorplan);
+const startNode = deltaGraph.roomToNode.get("133");
+const endNode = deltaGraph.roomToNode.get("145");
+
+/*
+console.log("Start Node:", startNode);
+console.log("Start Node Edges:", deltaGraph.edges.get(startNode ?? ""));
+console.log("End Node:", endNode);
+console.log("End Node Edges:", deltaGraph.edges.get(endNode ?? ""));
+*/
+//console.log(deltaGraph);
+//console.log(findShortestPath(deltaFloorplan, "133", "145")[0]);
+
 type FC = GeoJSON.FeatureCollection;
 
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
 export function IndoorMapScreen() {
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
-  const { walls, units, movePoints } = useMemo(() => {
+  const { walls, units, hallways } = useMemo(() => {
     const features = (deltaFloorplan.features as GeoJSON.Feature[]).filter(
       (f) => (f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID === level,
     );
     const wallFeats: GeoJSON.Feature[] = [];
     const unitFeats: GeoJSON.Feature[] = [];
     const moveFeats: GeoJSON.Feature[] = [];
+    const hallwayFeats: GeoJSON.Feature[] = [];
     for (const f of features) {
       const t = f.geometry?.type;
       if(f.properties?.USE_TYPE === "movePoint" && (t === "Polygon" || t === "MultiPolygon" || t === "Point")) {
         moveFeats.push(f);
-        console.log(`\n\n YERRRRRRRRRRRRRRRRRRR ${f.properties?.NAME}`);
+        //console.log(`\n\n YERRRRRRRRRRRRRRRRRRR ${f.properties?.NAME}`);
+      }
+      if(f.properties?.USE_TYPE === "HALLWAY"){
+        hallwayFeats.push(f);
       }
       else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
+        //console.log(`${f.properties?.NAME} pushed into UNITS`);
         unitFeats.push(f);
       } else if (
         t === "LineString" ||
         t === "MultiLineString"
       ) {
         if(f.properties?.USE_TYPE === 'movePoint'){
-          console.log(`ERROR: ${f} inside of 'walls'`);
         }
         wallFeats.push(f);
       }
     }
+    console.log("Hallways: ", hallwayFeats);
     return {
       walls: { type: "FeatureCollection", features: wallFeats } as FC,
       units: { type: "FeatureCollection", features: unitFeats } as FC,
       movePoints: { type: "FeatureCollection", features: moveFeats } as FC,
+      hallways: { type: "FeatureCollection", features: hallwayFeats } as FC,
     };
   }, [level]);
 
@@ -97,8 +117,8 @@ export function IndoorMapScreen() {
         />
         {
         <Geojson
-          geojson={movePoints}
-          strokeColor="#021209"
+          geojson={hallways}
+          strokeColor="#f4f9f6"
           strokeWidth={1.5}
           fillColor= "transparent"
         />

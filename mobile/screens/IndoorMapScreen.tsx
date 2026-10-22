@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import MapView, { Geojson, PROVIDER_DEFAULT } from "react-native-maps";
+import MapView, { Geojson, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
 import { buildGraphFromGeoJson, findShortestPath } from "../utils/aStarRouting.ts";
+import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
+import type { LatLng } from "react-native-maps";
 
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";
 
@@ -20,9 +22,8 @@ const DELTA_REGION = {
   longitudeDelta: Math.max((bbox[2] - bbox[0]) * 1.6, 0.001),
 };
 
+
 const deltaGraph = buildGraphFromGeoJson(deltaFloorplan);
-const startNode = deltaGraph.roomToNode.get("133");
-const endNode = deltaGraph.roomToNode.get("145");
 
 /*
 console.log("Start Node:", startNode);
@@ -31,12 +32,16 @@ console.log("End Node:", endNode);
 console.log("End Node Edges:", deltaGraph.edges.get(endNode ?? ""));
 */
 //console.log(deltaGraph);
-//console.log(findShortestPath(deltaFloorplan, "133", "145")[0]);
+//const pathLine: LatLng[] = findShortestPath(deltaFloorplan, "133", "145").map(([longitude, latitude]) => ({latitude, longitude}));
+//console.log(pathLine);
 
 type FC = GeoJSON.FeatureCollection;
 
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
 export function IndoorMapScreen() {
+  const [displayInfo, setDisplayInfo] = useState<GeoJSON.Feature | null>(null);
+  const [startNode, setStartNode] = useState<string | null>("135");
+  const [endNode, setEndNode] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
   const { walls, units, hallways } = useMemo(() => {
@@ -68,7 +73,8 @@ export function IndoorMapScreen() {
         wallFeats.push(f);
       }
     }
-    console.log("Hallways: ", hallwayFeats);
+    //console.log("Hallways: ", hallwayFeats);
+
     return {
       walls: { type: "FeatureCollection", features: wallFeats } as FC,
       units: { type: "FeatureCollection", features: unitFeats } as FC,
@@ -76,6 +82,14 @@ export function IndoorMapScreen() {
       hallways: { type: "FeatureCollection", features: hallwayFeats } as FC,
     };
   }, [level]);
+
+  // Check for endNode selection, if non-null -> begin routing using current position and endNode
+    const pathLine = useMemo(() => {
+      console.log("EndNode", endNode);
+      if(endNode) return findShortestPath(deltaFloorplan, startNode, endNode).map(([longitude, latitude]) => ({latitude, longitude}));
+    }, [endNode]);
+
+    if(!pathLine) console.log("PATHLINE NOT CREATED");
 
   return (
     <View style={styles.container}>
@@ -107,13 +121,18 @@ export function IndoorMapScreen() {
         initialRegion={DELTA_REGION}
         mapType="standard"
       >
-        // Points
+        {/* Points*/}
         <Geojson
           geojson={units}
           strokeColor="#1E3A8A"
           strokeWidth={1}
           fillColor="rgba(147, 197, 253, 0.35)"
           color= "#9094a0"
+          onPress={(object) => {
+            setDisplayInfo(object.feature);
+            console.log("Object", object.feature.properties?.NAME);
+            //console.log("\n Object Type: ", typeof object);
+          }}
         />
         {
         <Geojson
@@ -129,7 +148,23 @@ export function IndoorMapScreen() {
           strokeWidth={1.5}
           fillColor="transparent"
         />
+        {pathLine && (<Polyline
+          coordinates={pathLine}
+          strokeColor="#2563EB"
+          strokeWidth={4}
+          lineCap="round"
+          lineJoin="round"
+          zIndex={10}
+      />)}
       </MapView>
+      {displayInfo && (
+        <>
+        <Pressable 
+        style={styles.backdrop}
+        onPress={() => setDisplayInfo(null)}
+        ></Pressable>
+        <DisplayPointInfo object={displayInfo} setEndNode={setEndNode}/>
+        </>)}
     </View>
   );
 }
@@ -157,4 +192,12 @@ const styles = StyleSheet.create({
   levelText: { fontWeight: "600", color: "#111" },
   levelTextOn: { color: "#fff" },
   map: { flex: 1 },
+  backdrop: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'transparent',
+    height: '100%',
+    width: '100%',
+    opacity: 0.1,
+    zIndex: 998
+  }
 });

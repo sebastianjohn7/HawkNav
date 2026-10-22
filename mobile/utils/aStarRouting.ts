@@ -192,7 +192,7 @@ export function buildGraphFromGeoJson(geojson: {
     nearestPointToHallway(hallway, floorStairs, 30);
     nearestPointToHallway(hallway, floorElevators, 30);
   }
-  console.log(`Confirming Edge Generations: \n${graph.edges.size}`);
+  //console.log(`Confirming Edge Generations: \n${graph.edges.size}`);
   //console.log(graph.edges);
   return graph;
 }
@@ -200,9 +200,13 @@ export function buildGraphFromGeoJson(geojson: {
 /** Shortest path as [lng, lat][] between room feature ids (e.g. room_d220 → room_d241). */
 export function findShortestPath(
   geojson: Parameters<typeof buildGraphFromGeoJson>[0],
-  startRoomId: string,
-  endRoomId: string,
+  startRoomId: string | null,
+  endRoomId: string | null,
 ): LngLat[] {
+  if(!startRoomId || !endRoomId) {
+    console.log("Missing Routing Information");
+    return [];
+  }
   const graph = buildGraphFromGeoJson(geojson);
   const start = graph.roomToNode.get(startRoomId);
   const end = graph.roomToNode.get(endRoomId);

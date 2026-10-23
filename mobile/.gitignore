@@ -17,6 +17,12 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+.cursor
+.vscode
+app.json
+package.json
+pacakge-lock.json
+tsconfig.json
 
 # Metro
 .metro-health-check*
@@ -38,6 +44,7 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+supabase
 
 # generated native folders
 /ios
@@ -45,4 +52,6 @@ yarn-error.*
 
 # Full UHCL Indoors dump (~118MB) — keep local; app uses extracted delta_floorplan.json
 assets/maps/UHCL_Campus_Map_Public_WFL1.geojson
+assets/maps/delta_floorplan.json
+assets/maps/delta_floorplan2.json
 assets/maps/*.geojson.zip

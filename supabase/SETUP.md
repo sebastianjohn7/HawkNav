@@ -10,8 +10,7 @@ Do this once per Supabase project (ideally one shared project for the team).
 4. Authentication → Sign In / Providers → Email → password **minimum 8**, require **lowercase, uppercase, digits, symbols**.
 5. Authentication → Email → **Confirm email**: off while testing, **on** for real use. The built-in sender allows only ~2 emails/hour, so real use needs custom SMTP.
 
-   1. [mfa_rls.sql](mfa_rls.sql) — require completed MFA for shuttle data, profile edits, allowlist management, and login history reads
-   All four are safe to re-run. If Supabase warns about destructive operations (the `drop policy` lines), confirm; if it offers to enable RLS on `shuttle_stops`, choose **Run and enable RLS**.
+   schema.sql includes the MFA policies and is safe to re-run.
    
 6. Database → Publications → confirm `shuttle_positions` is in `supabase_realtime` (the SQL tries to add it)
 7. For testing, turn off Authentication → Providers → Email → **Confirm email** (turn it back on for the demo).
@@ -68,7 +67,7 @@ delete from auth.users;
 
 ## MFA verification
 
-For an existing database, run mfa_rls.sql after the other setup scripts.
+For an existing database using the current schema, re-run schema.sql to install the MFA policies.
 The mobile changes alone do not install database policies.
 
 1. Sign in with an account without an authenticator. Start enrollment and add
@@ -81,8 +80,8 @@ The mobile changes alone do not install database policies.
 5. With a signed-in client before MFA (aal1), shuttle reads should return no
    rows and writes should fail. After MFA (aal2), existing role restrictions
    still apply: students can read, drivers/admins can write.
-6. Profile reads and login-log inserts remain available before MFA because
-   startup and password sign-in use them. The login log records password sign-in,
+6. Profile reads remain available before MFA, and the sign-in trigger records logins because
+   startup and password sign-in happen before MFA verification. The login log records password sign-in,
    not proof that MFA was completed.
 
 Run database access checks with ordinary user tokens, not the SQL editor or a

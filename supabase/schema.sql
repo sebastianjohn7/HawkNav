@@ -33,6 +33,11 @@ create table if not exists public.login_log (
   role public.app_role,
   logged_in_at timestamptz not null default now()
 );
+-- Upgrade older installations: CREATE TABLE IF NOT EXISTS does not add columns.
+-- Historical entries remain null because their role at sign-in is unknown.
+alter table public.login_log
+  add column if not exists role public.app_role;
+
 create index if not exists login_log_user_idx on public.login_log (user_id);
 
 -- Every role change (who changed whom). changed_by is null for SQL-editor changes.
@@ -132,6 +137,10 @@ begin
   end if;
 
   if auth.uid() is not null then
+    -- change_role() is SECURITY DEFINER and bypasses RLS, so enforce MFA here too.
+    if (auth.jwt()->>'aal') is distinct from 'aal2' then
+      raise exception 'complete MFA before changing roles';
+    end if;
     if not public.is_admin() then
       raise exception 'only an admin can change a role';
     end if;
@@ -250,3 +259,39 @@ create policy "shuttle_positions_update_driver" on public.shuttle_positions
   for update to authenticated
   using ((select public.current_role_name()) in ('driver', 'admin'))
   with check ((select public.current_role_name()) in ('driver', 'admin'));
+
+
+-- ---------------------------------------------------------------- MFA enforcement
+-- Restrictive policies combine with the role/ownership rules above.
+-- Profile reads remain available before MFA so the app can load the user's role.
+-- Login records are created by the sign-in trigger, even before MFA is complete.
+drop policy if exists "shuttle_requires_mfa" on public.shuttle_positions;
+create policy "shuttle_requires_mfa" on public.shuttle_positions
+  as restrictive for all to public
+  using ((select auth.jwt()->>'aal') = 'aal2')
+  with check ((select auth.jwt()->>'aal') = 'aal2');
+
+drop policy if exists "profile_changes_require_mfa" on public.profiles;
+create policy "profile_changes_require_mfa" on public.profiles
+  as restrictive for update to authenticated
+  using ((select auth.jwt()->>'aal') = 'aal2')
+  with check ((select auth.jwt()->>'aal') = 'aal2');
+
+-- Older installations may still have this table; fresh installations do not.
+do $mfa$
+begin
+  if to_regclass('public.role_allowlist') is not null then
+    execute 'alter table public.role_allowlist enable row level security';
+    execute 'drop policy if exists "allowlist_requires_mfa" on public.role_allowlist';
+    execute 'create policy "allowlist_requires_mfa" on public.role_allowlist
+      as restrictive for all to public
+      using ((select auth.jwt()->>''aal'') = ''aal2'')
+      with check ((select auth.jwt()->>''aal'') = ''aal2'')';
+  end if;
+end;
+$mfa$;
+
+drop policy if exists "login_history_requires_mfa" on public.login_log;
+create policy "login_history_requires_mfa" on public.login_log
+  as restrictive for select to authenticated
+  using ((select auth.jwt()->>'aal') = 'aal2');

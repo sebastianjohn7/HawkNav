@@ -5,8 +5,10 @@ import {
   Text,
   TextInput,
   View,
+  Pressable,
 } from "react-native";
 import { supabase } from "../lib/config";
+import { SvgXml } from "react-native-svg";
 
 type Props = {
   onVerified: () => void;
@@ -16,7 +18,9 @@ export function EnrollMFA({ onVerified }: Props) {
   const busy = useRef(false);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [secret, setSecret] = useState("");
+  const [qrCode, setQrCode] = useState("");
   const [code, setCode] = useState("");
+  const [showSetupKey, setShowSetupKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
@@ -67,6 +71,7 @@ export function EnrollMFA({ onVerified }: Props) {
       }
       setFactorId(data.id);
       setSecret(data.totp.secret);
+      setQrCode(data.totp.qr_code.replace(/^data:image\/svg\+xml;utf-8,/, ""));
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Enrollment failed."
@@ -105,6 +110,7 @@ export function EnrollMFA({ onVerified }: Props) {
     setFactorId(null);
     setSecret("");
     onVerified();
+    setQrCode("");
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Verification failed."
@@ -124,14 +130,40 @@ export function EnrollMFA({ onVerified }: Props) {
 
       {error !== "" && <Text>{error}</Text>}
 
-      {secret !== "" && (
+      {qrCode != "" && (
         <View>
-          <Text>Enter this setup key in your authenticator:</Text>
-          <Text selectable>{secret}</Text>
+          <Text>{'\n'}Scan this QR code with your authenticator:</Text>
+          <SvgXml xml={qrCode} width="200" height="200" />
         </View>
       )}
 
+
+      {secret !== "" && (
+        <View>
+          <Pressable onPress = {() => setShowSetupKey((shown) => !shown)} 
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showSetupKey }}
+            style={{ padding: 10}}
+             >
+
+            <Text style={{ fontSize: 16, color: "red", textDecorationLine: "underline" }}>
+            
+            Manual Setup Key
+            </Text>
+            </Pressable>
+
+          {showSetupKey && (
+          <Text selectable style={{ fontFamily: "monospace", color: "blue", fontSize: 16 }}>
+            {secret}
+          </Text>
+          )}
+        </View>
+      )}
+
+      
+
       <TextInput
+        style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}
         value={code}
         onChangeText={setCode}
         placeholder="6-digit code"
@@ -155,7 +187,8 @@ export function EnrollMFA({ onVerified }: Props) {
           disabled={loading}
        />  
       )}
-
+ 
     </View>
   );
 }
+

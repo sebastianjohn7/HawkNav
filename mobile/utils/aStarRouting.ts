@@ -143,6 +143,7 @@ export function buildGraphFromGeoJson(geojson: {
 
   // Map same elevators between floors
   for(const [, e] of elevators){
+    if(e.length === 1) continue;
     for(let i = 0 ; i < e.length ; i++){
       for(let j = i+1 ; j < e.length ; j++){
         addEdge(graph, e[i].id, e[j].id, 10);

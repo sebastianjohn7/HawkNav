@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         width: '55%',
         backgroundColor: 'white',
         borderRadius: 10,
-        zIndex: 999,
+        zIndex: 998,
         elevation: 50,
         alignItems: 'center',
         top: 100,

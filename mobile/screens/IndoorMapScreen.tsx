@@ -1,10 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
 import { buildGraphFromGeoJson, findShortestPath } from "../utils/aStarRouting.ts";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
-import type { LatLng } from "react-native-maps";
+import StartRoomSelectionTesting from "./hooks/startRoomSelectionTesting.tsx";
 
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";
 
@@ -23,7 +23,7 @@ const DELTA_REGION = {
 };
 
 
-const deltaGraph = buildGraphFromGeoJson(deltaFloorplan);
+//const deltaGraph = buildGraphFromGeoJson(deltaFloorplan);
 
 /*
 console.log("Start Node:", startNode);
@@ -40,7 +40,8 @@ type FC = GeoJSON.FeatureCollection;
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
 export function IndoorMapScreen() {
   const [displayInfo, setDisplayInfo] = useState<GeoJSON.Feature | null>(null);
-  const [startNode, setStartNode] = useState<string | null>("135");
+  const [displayStartOptions, setDisplayStartOptions] = useState<Boolean>(false);
+  const [startNode, setStartNode] = useState<string | null>("205");
   const [endNode, setEndNode] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
@@ -82,6 +83,12 @@ export function IndoorMapScreen() {
       hallways: { type: "FeatureCollection", features: hallwayFeats } as FC,
     };
   }, [level]);
+
+  const rooms: string[] = [];
+  for(const f of deltaFloorplan.features){
+    const name = f.properties?.NAME;
+    if(name) rooms.push(f.properties?.NAME);
+  }
 
   // Check for endNode selection, if non-null -> begin routing using current position and endNode
     const pathLine = useMemo(() => {
@@ -157,6 +164,15 @@ export function IndoorMapScreen() {
           zIndex={10}
       />)}
       </MapView>
+      {displayStartOptions && (
+        <>
+        <StartRoomSelectionTesting rooms={rooms} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
+        <Pressable 
+        style={styles.backdrop}
+        onPress={() => setDisplayStartOptions(false)}
+        ></Pressable>
+        </>
+      )}
       {displayInfo && (
         <>
         <Pressable 
@@ -165,6 +181,11 @@ export function IndoorMapScreen() {
         ></Pressable>
         <DisplayPointInfo object={displayInfo} setEndNode={setEndNode}/>
         </>)}
+      <View style={styles.startSelectionBox}>
+        <Text>Purely For Testing, Removal Imminent</Text>
+        <Pressable style={styles.routeButton}
+          onPress={() => setDisplayStartOptions(true)}><Text>Select Start Node</Text></Pressable>
+      </View>
     </View>
   );
 }
@@ -198,6 +219,26 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     opacity: 0.1,
-    zIndex: 998
-  }
+    zIndex: 997
+  },
+  startSelectionBox: {
+    height: '10%',
+    width: '40%',
+    backgroundColor: 'white',
+    outlineStyle: 'solid',
+    outlineWidth: 5,
+    outlineColor: 'black',
+    bottom: 90,
+    alignSelf: 'flex-end',
+    zIndex: 997
+  },
+  routeButton: {
+        marginTop: 5,
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '30%',
+        width: '80%',
+        backgroundColor: '#784be8',
+        borderRadius: 10
+    }
 });

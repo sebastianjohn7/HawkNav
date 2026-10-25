@@ -38,7 +38,7 @@ console.log("End Node Edges:", deltaGraph.edges.get(endNode ?? ""));
 type FC = GeoJSON.FeatureCollection;
 
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
-export function IndoorMapScreen() {
+export function IndoorMapScreen({tab} : {tab: string}) {
   const [displayInfo, setDisplayInfo] = useState<GeoJSON.Feature | null>(null);
   const [displayStartOptions, setDisplayStartOptions] = useState<Boolean>(false);
   const [startNode, setStartNode] = useState<string | null>("205");
@@ -74,6 +74,7 @@ export function IndoorMapScreen() {
         wallFeats.push(f);
       }
     }
+    console.log("\n\n\nData Loaded\n\n\n");
     //console.log("Hallways: ", hallwayFeats);
 
     return {
@@ -87,7 +88,7 @@ export function IndoorMapScreen() {
   const rooms: string[] = [];
   for(const f of deltaFloorplan.features){
     const name = f.properties?.NAME;
-    if(name) rooms.push(f.properties?.NAME);
+    if(name && !rooms.includes(name)) rooms.push(f.properties?.NAME);
   }
 
   // Check for endNode selection, if non-null -> begin routing using current position and endNode
@@ -98,7 +99,7 @@ export function IndoorMapScreen() {
 
     if(!pathLine) console.log("PATHLINE NOT CREATED");
 
-  return (
+  return (tab === "find" && (
     <View style={styles.container}>
       <View style={styles.banner}>
         <Text style={styles.bannerTitle}>Delta floor plan</Text>
@@ -187,7 +188,7 @@ export function IndoorMapScreen() {
           onPress={() => setDisplayStartOptions(true)}><Text>Select Start Node</Text></Pressable>
       </View>
     </View>
-  );
+  ));
 }
 
 const styles = StyleSheet.create({

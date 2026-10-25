@@ -36,7 +36,7 @@ export function NavModule({ onOpenSettings }: Props) {
 
       <View style={styles.body}>
         {tab === "shuttle" && <ShuttleModule />}
-        {tab === "find" && <IndoorMapScreen />}
+        <IndoorMapScreen tab={tab}/>
         {tab === "alerts" && <AlertsModule />}
       </View>
 

@@ -85,19 +85,19 @@ This clone (`HawkNav-seb`) is **Sebastian John’s** working tree.
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Default focus**      | **Entire Shuttle module (FR-5)** — everything riders and drivers need for live campus shuttles (see breakdown below)                                 |
 | **Product (full app)** | UHCL campus mobility — shuttle tracking, accessible navigation + 360° indoor path view, parking congestion, emergency alerts                         |
-| **Mobile client**      | Expo under `mobile/`; prior Flutter / ArcGIS experiment in `archive/mobile-flutter/`                                                                      |
-| **Do not**             | Commit `.env` / secrets; expand into Map / AR / Parking modules unless asked; invent live-camera AR or hardware beacons for indoor nav                |
+| **Mobile client**      | Expo under `mobile/` (Josh shell + Shuttle/Find/Alerts); prior Flutter / ArcGIS experiment in `archive/mobile-flutter/` |
+| **Do not**             | Commit `.env` / secrets; invent live-camera AR or hardware beacons for indoor nav; bundle the full ~118MB UHCL Indoors GeoJSON into the app |
 
 
 **Shuttle module includes (in scope by default):**
 
-- Driver app: GPS stream every 3–5s (`geolocator`) → `shuttle_positions`
-- Rider / student UI: live position via Supabase Realtime, nearest stop, operational status
-- Routes, stops, and schedules (on-campus + off-campus / Pearland references in `shuttle-pdfs/`)
-- Predictive ETA (Hono): segment traversal history + moving average
-- Shuttle-related alerts / service disruption hooks when they affect routes
+- Driver app: GPS stream every 3–5s (`expo-location`) → `shuttle_positions`
+- Rider / student UI: live position via Supabase Realtime on the Shuttle campus map + stop ETA
+- Routes, stops, and schedules (on-campus + off-campus / Pearland references in `shuttle-pdfs/` / `data/shuttle/`)
+- Predictive ETA (Hono): schedule-based ETA today; segment history / moving average later
+- Josh-shell tabs: Shuttle (map + Rider/Driver), Find (Delta floor plan), News & Alerts (placeholder)
 
-Prefer full Shuttle-scoped changes unless the user explicitly asks for Map, indoor 360°, or Parking work.
+Prefer Shuttle-scoped changes unless the user asks for indoor path routing, 360°, or Parking CV.
 
 ---
 
@@ -108,18 +108,20 @@ Designed to minimize hardware dependencies while supporting cross-platform mobil
 
 | Layer                                   | Choice                                          | Notes                                                                     |
 | --------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
-| Mobile frontend                         | Expo (React Native)                             | Cross-platform UI via Expo Go; Flutter experiment archived under `archive/mobile-flutter/` |
-| Maps & wayfinding                       | react-native-maps + GeoJSON corridors           | Indoor Delta paths as GeoJSON overlays; ArcGIS Indoors remains campus GIS reference |
-| Indoor 360° path view                   | Panorama at path nodes (Street View–style)      | **2D map guides** node-to-node (incl. across floors); **360° is only** “look around where you are” at the current node — not the primary navigator |
-
-### Shared campus map (one MapView)
-
-Shuttle, parking, outdoor walk, and indoor path all share **one map instance** as layer stacks (show/hide / restyle). Indoor is a layer mode + floor filter on that same map — do not remount a second map for indoor nav. The 360° viewer is a UI overlay/panel on top; the 2D map (or minimap) remains the route guide.
-| Database & spatial                      | Supabase (PostgreSQL + PostGIS)                 | Weighted graphs, geofenced lots, roles; WebSocket shuttle coords          |
-| Backend runtime                         | Bun + Hono                                      | A* pathfinding, predictive ETAs, API endpoints                            |
+| Mobile frontend                         | Expo (React Native)                             | Expo Go; Josh shell (Landing → Sign-in → bottom tabs); Flutter archived under `archive/mobile-flutter/` |
+| Maps & wayfinding                       | `react-native-maps` + GeoJSON                   | Shuttle: campus map + live marker; Find: extracted Delta floor plan (`delta_floorplan.json`); custom walk paths later |
+| Indoor floor plan (now)                 | UHCL Indoors GeoJSON extract                    | Source `UHCL_Campus_Map_Public_WFL1.geojson` (~118MB, gitignored); app loads Delta-only extract; L1/L2 toggle |
+| Indoor 360° path view (later)           | Panorama at path nodes (Street View–style)      | **2D map guides** node-to-node; **360°** = look-around at current node only — not live AR |
+| Database & spatial                      | Supabase (PostgreSQL + PostGIS)                 | **Required** for this clone: `shuttle_positions` + Realtime; anon keys in `mobile/.env` |
+| Backend runtime                         | Bun + Hono                                      | Stops / schedules / ETA from CSV; A* pathfinding later                    |
 | Parking CV                              | Python + OpenCV + YOLOv8-nano / TensorFlow Lite | Stationary drone / camera clips of lot entrance/exit (e.g. Delta & Arbor) |
-| Dev tunneling                           | Cloudflare Tunnels (`cloudflared`)              | HTTPS exposure of local backends for mobile device testing                |
-| Push alerts                             | Flutter local/FCM push + Twilio SMS fallback    | Emergency, weather, and service disruption alerts                         |
+| Dev tunneling                           | Cloudflare quick tunnel (`cloudflared`)         | **Required** day-to-day: `cd api && bun run dev` → tunnel + write `EXPO_PUBLIC_API_URL` |
+| Push alerts                             | Expo push / FCM + Twilio SMS fallback (later)   | Emergency, weather, and service disruption alerts                         |
+
+### Maps in this clone (current vs target)
+
+- **Now:** Shuttle tab and Find tab each have their own `MapView` (campus live shuttle vs Delta floor plan).
+- **Target (SRS):** One shared MapView with layer stacks (shuttle / parking / indoor); floor filter; 360° as overlay. Don’t invent a second product map SDK without asking.
 
 
 ### UHCL ArcGIS Indoors (campus GIS reference)
@@ -141,10 +143,10 @@ Official UHCL floor-aware campus map — use as the institutional spatial backbo
 
 **How teams should treat it**
 
-- **Map / indoor 360°:** Source of truth for 2D campus geometry and floors; HawkNav still owns custom path nodes + 360° photos + minimap UX.
+- **Map / indoor:** Source of truth for 2D campus geometry and floors. This clone uses a public Indoors-style GeoJSON export → Delta extract for Find; HawkNav still owns custom path nodes + 360° photos later.
 - **Parking:** Reuse lot polygons where export/API access allows.
-- **Shuttle:** Basemap + stop placement near real entrances; live GPS, routes, schedules, and ETA stay in HawkNav (`shuttle_positions`, `shuttle-pdfs/`, Hono ETA). This Indoors app is not a shuttle tracker.
-- **Access:** Feature-layer export or SDK use may need UHCL ArcGIS credentials — confirm with Facilities/GIS before depending on live services for the senior project.
+- **Shuttle:** Street basemap + live GPS marker; routes/schedules/ETA stay in HawkNav (`shuttle_positions`, `data/shuttle/`, Hono). The Indoors viewer is not a shuttle tracker.
+- **Access:** Prefer extracts over live ArcGIS SDK unless portal credentials exist; never ship the full multi‑100MB GeoJSON in the Expo bundle.
 
 ---
 
@@ -218,11 +220,12 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 | **Output**     | Current position, proximity to nearest stop, operational timings |
 
 
-**Implementation notes:**
+**Implementation notes (this clone):**
 
-- **Driver app:** `geolocator` streams GPS (`lat`, `lng`, `heading`) every 3–5 seconds (background isolate later if needed).
-- **Realtime:** Writes `shuttle_positions` in Supabase; student apps subscribe via WebSockets.
-- **Predictive ETA:** Hono microservice estimates arrival along route segments from historical traversal logs and a moving average.
+- **Driver:** `expo-location` `watchPositionAsync` ~every 4s → upsert `shuttle_positions` (Supabase).
+- **Rider / map:** Supabase Realtime on `shuttle_positions`; green marker on Shuttle campus map; stop list + `GET /eta` from Bun API.
+- **Shell:** Expo port of Josh’s NavModule — Shuttle / Find / News & Alerts (+ settings).
+- **ETA today:** Hono schedule-based next departure; segment history / moving average later.
 
 ### FR-6: Campus Indoor Navigation — Priority: High
 
@@ -236,10 +239,10 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 **Implementation notes:**
 
-- UHCL indoor walkways as a weighted graph of authored **nodes** and **edges** in PostGIS / GeoJSON on top of the existing map.
-- Destinations (rooms, offices, areas) resolve to nearest path node(s).
-- **Mobility mode:** Stairs and steep inclines (`>8.33%` grade) get infinite weight (`w = ∞`) so A\* prefers elevators, ADA ramps, and automatic doors.
-- **2D Map UI:** Overlays for accessible entrances, single-occupancy restrooms, and rest points; draws and follows the computed route (primary indoor UX).
+- **Now (Find tab):** Display-only Delta floor plan from Indoors extract (`mobile/assets/maps/delta_floorplan.json`); Level 1 / Level 2 filter. Re-extract with `mobile/scripts/extract_delta_floorplan.py`.
+- **Later:** Authored walk **nodes/edges** (GeoJSON) + Dijkstra / A\* for FR-6; destinations resolve to nearest path node(s).
+- **Mobility mode (later):** Stairs / steep grades (`>8.33%`) → infinite weight so A\* prefers elevators / ADA.
+- Do **not** `require()` the full campus Indoors dump into Expo — parse/RAM/render will fail; keep extracts.
 
 ### FR-7: Parking Congestion — Priority: High
 
@@ -292,11 +295,13 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 ## 7. System Data Flow
 
 ```text
-[Shuttle Driver Phone] ──(GPS HTTP/WS)──> [Supabase Realtime] ──(WS Sub)──> [Student Flutter App]
-                                                │
-[OpenCV Gate Counter] ──(HTTP POST)─────> [Hono Backend] ───────(SQL)─────> [PostGIS Spatial DB]
-                                                │
-[User Search Query]  ──(API Request)────> [A* on node graph] ─(node path)─> [2D Map + 360° node viewer]
+[Driver Expo Go] ──(expo-location)──> [Supabase shuttle_positions] ──(Realtime)──> [Rider Expo map marker]
+                                              │
+[Expo app] ──(EXPO_PUBLIC_API_URL via cloudflared)──> [Bun + Hono] ──> stops / schedules / ETA (CSV)
+                                              │
+[Find tab] ──(delta_floorplan.json extract)──> [react-native-maps GeoJSON overlay]
+                                              │
+[Later] OpenCV gate / A* indoor paths / 360° node viewer
 ```
 
 ---
@@ -334,11 +339,11 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 When starting a new session on this repo:
 
-1. Prefer the **entire Shuttle module** (driver GPS, realtime rider UI, routes/stops/schedules, ETA service, shuttle status/alerts) unless asked otherwise.
-2. Match the stack: Flutter clients (`supabase_flutter`, `geolocator`; ArcGIS MapView next), Bun + Hono services, Supabase / PostGIS for persistence and realtime. See [`docs/flutter-mobile.md`](docs/flutter-mobile.md).
+1. Prefer the **Shuttle module** (driver GPS, realtime rider map, stops/schedules, ETA) unless asked otherwise.
+2. Match the stack: **Expo** (`expo-location`, `@supabase/supabase-js`, `react-native-maps`), Bun + Hono, Supabase Realtime. Flutter notes only under [`archive/mobile-flutter/`](archive/mobile-flutter/). Boot: root [`README.md`](README.md).
 3. Do not commit secrets (`.env`, keys, credentials). Use `.env.example` patterns only.
-4. Keep changes scoped; do not invent unrelated modules (parking CV, indoor 360°) unless the user requests them.
-5. Prefer HTTPS-reachable local backends via `cloudflared` when mobile devices need to hit APIs.
+4. Keep changes scoped; do not invent parking CV or indoor 360° unless requested.
+5. **Always** use Cloudflare quick tunnel for device testing: `cd api && bun run dev` (writes `EXPO_PUBLIC_API_URL`). Supabase setup is required.
 6. Prefer small, reviewable commits only when the user asks to commit.
-7. Indoors: **2D path guides** node-to-node (multi-floor); **360° is view-at-node only** — do not invent live-camera AR or hardware beacons.
+7. Indoors now = Delta floor-plan extract; custom paths / A* / 360° later. Never bundle the full Indoors GeoJSON. No live-camera AR or beacons.
 

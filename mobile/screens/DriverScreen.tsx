@@ -1,17 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import * as Location from "expo-location";
-import { DEFAULT_SHUTTLE_ID, hasSupabaseConfig, supabase } from "../lib/config";
-import "../lib/backgroundLocationStub";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { apiUrl } from "../lib/config";
+
+type Shuttle = { id: string; name: string; polling: boolean };
 
 type Props = {
-  /** Optimistic map update before Realtime echoes the upsert. */
+  /** Map follows the shuttle the driver has selected. */
+  onShuttleId?: (shuttleId: string) => void;
+  /** Show the first plot before Realtime echoes the database write. */
   onLocalPosition?: (p: {
     lat: number;
     lng: number;
@@ -19,93 +16,122 @@ type Props = {
   }) => void;
 };
 
-export function DriverScreen({ onLocalPosition }: Props) {
-  const [streaming, setStreaming] = useState(false);
+export function DriverScreen({ onShuttleId, onLocalPosition }: Props) {
+  const [shuttles, setShuttles] = useState<Shuttle[]>([]);
+  const [shuttleId, setShuttleId] = useState<string | null>(null);
+  const [polling, setPolling] = useState(false);
   const [status, setStatus] = useState("Idle");
   const [last, setLast] = useState<{
     lat: number;
     lng: number;
     heading: number | null;
   } | null>(null);
-  const subRef = useRef<Location.LocationSubscription | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    fetch(`${apiUrl}/shuttles`)
+      .then((res) => res.json())
+      .then((body: { shuttles?: Shuttle[] }) => {
+        if (cancelled) return;
+        const list = body.shuttles ?? [];
+        setShuttles(list);
+        const active = list.find((shuttle) => shuttle.polling) ?? list[0];
+        if (!active) return;
+        setShuttleId(active.id);
+        setPolling(active.polling);
+        onShuttleId?.(active.id);
+        if (active.polling) setStatus(`Polling ${active.name}`);
+      })
+      .catch(() => {
+        if (!cancelled) setStatus("Cannot reach the API");
+      });
     return () => {
-      subRef.current?.remove();
+      cancelled = true;
     };
-  }, []);
+  }, [onShuttleId]);
 
-  async function start() {
-    if (!supabase) {
-      setStatus("Missing Supabase keys — see README Phase 1B");
-      return;
-    }
-    const client = supabase;
-    const { status: perm } = await Location.requestForegroundPermissionsAsync();
-    if (perm !== "granted") {
-      setStatus("Location permission denied");
-      return;
-    }
-
-    // 3–5s balances battery drain vs rider freshness for campus shuttles.
-    const sub = await Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.High,
-        timeInterval: 4000,
-        distanceInterval: 0,
-      },
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const heading = pos.coords.heading;
-        const point = { lat, lng, heading };
-        setLast(point);
-        onLocalPosition?.(point);
-        const { error } = await client.from("shuttle_positions").upsert(
-          {
-            shuttle_id: DEFAULT_SHUTTLE_ID,
-            lat,
-            lng,
-            heading: heading ?? null,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "shuttle_id" },
-        );
-        if (error) {
-          // 42501 = row-level security refused the write: the account is no longer a driver.
-          if (error.code === "42501") {
-            stop();
-            setStatus("You no longer have driver access. Ask an admin.");
-          } else {
-            setStatus(`Upsert error: ${error.message}`);
-          }
-          return;
-        }
-        setStatus("Streaming");
-      },
-    );
-    subRef.current = sub;
-    setStreaming(true);
-    setStatus("Streaming");
+  function choose(id: string) {
+    if (polling) return;
+    setShuttleId(id);
+    onShuttleId?.(id);
   }
 
-  function stop() {
-    subRef.current?.remove();
-    subRef.current = null;
-    setStreaming(false);
-    setStatus("Stopped");
+  async function start() {
+    if (!shuttleId) {
+      setStatus("Pick a shuttle");
+      return;
+    }
+    setStatus("Starting");
+    try {
+      const res = await fetch(`${apiUrl}/shuttles/checkin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shuttle_id: shuttleId }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setPolling(false);
+        setStatus(body.error ?? "Check-in failed");
+        return;
+      }
+      setPolling(true);
+      const name = shuttles.find((shuttle) => shuttle.id === shuttleId)?.name;
+      setStatus(body.note ?? `Polling ${name ?? shuttleId}`);
+      if (body.position) {
+        const point = {
+          lat: body.position.lat as number,
+          lng: body.position.lng as number,
+          heading: (body.position.heading ?? null) as number | null,
+        };
+        setLast(point);
+        onLocalPosition?.(point);
+      }
+    } catch {
+      setPolling(false);
+      setStatus("Cannot reach the API");
+    }
+  }
+
+  async function stop() {
+    if (!shuttleId) return;
+    try {
+      const res = await fetch(`${apiUrl}/shuttles/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shuttle_id: shuttleId }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setStatus(body.error ?? "Stop failed");
+        return;
+      }
+      setPolling(false);
+      setStatus("Stopped");
+    } catch {
+      setStatus("Cannot reach the API");
+    }
   }
 
   return (
     <View style={styles.wrap}>
       <Text style={styles.title}>Driver check-in</Text>
-      {!hasSupabaseConfig && (
-        <Text style={styles.warn}>
-          Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY after
-          creating a Supabase project (README Phase 1B).
-        </Text>
-      )}
       <Text style={styles.meta}>Status: {status}</Text>
+      {shuttles.map((shuttle) => {
+        const selected = shuttle.id === shuttleId;
+        return (
+          <Pressable
+            key={shuttle.id}
+            style={[styles.choice, selected && styles.choiceOn]}
+            onPress={() => choose(shuttle.id)}
+            disabled={polling}
+          >
+            <Text style={styles.choiceText}>{shuttle.name}</Text>
+            {selected && (
+              <Ionicons name="checkmark" size={18} color="#0B6E4F" />
+            )}
+          </Pressable>
+        );
+      })}
       {last && (
         <Text style={styles.meta}>
           {last.lat.toFixed(5)}, {last.lng.toFixed(5)} heading=
@@ -113,23 +139,30 @@ export function DriverScreen({ onLocalPosition }: Props) {
         </Text>
       )}
       <Pressable
-        style={[styles.btn, streaming && styles.btnOff]}
-        onPress={streaming ? stop : start}
+        style={[styles.btn, polling && styles.btnOff]}
+        onPress={polling ? stop : start}
       >
-        <Text style={styles.btnText}>
-          {streaming ? "Stop" : "Start / Check in"}
-        </Text>
+        <Text style={styles.btnText}>{polling ? "Stop" : "Start"}</Text>
       </Pressable>
-      {!streaming && status === "Streaming" && <ActivityIndicator />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, padding: 16, gap: 12 },
+  wrap: { padding: 16, gap: 12 },
   title: { fontSize: 18, fontWeight: "700" },
   meta: { fontSize: 14, color: "#333" },
-  warn: { color: "#8a4b08", backgroundColor: "#fff4e5", padding: 10 },
+  choice: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#eee",
+  },
+  choiceOn: { backgroundColor: "#cfe8dc" },
+  choiceText: { flex: 1, fontWeight: "600", paddingRight: 8 },
   btn: {
     backgroundColor: "#0b6e4f",
     paddingVertical: 14,

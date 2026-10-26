@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth, type Role } from "../lib/auth";
 import { supabase } from "../lib/config";
 
@@ -90,10 +91,12 @@ export function AdminUsersPage({ onBack }: Props) {
   return (
     <View style={styles.root}>
       <View style={styles.bar}>
-        <Pressable onPress={onBack}>
-          <Text style={styles.back}>← Back</Text>
-        </Pressable>
-        <Text style={styles.title}>Manage users</Text>
+        <View style={styles.titleRow}>
+          <Pressable onPress={onBack} hitSlop={12} accessibilityLabel="Back">
+            <Ionicons name="chevron-back" size={32} color="#1565C0" />
+          </Pressable>
+          <Text style={styles.title}>Manage users</Text>
+        </View>
         <TextInput
           style={styles.search}
           placeholder="Search by email"
@@ -111,7 +114,7 @@ export function AdminUsersPage({ onBack }: Props) {
         data={rows}
         keyExtractor={(r) => r.id}
         ListEmptyComponent={
-          loading ? null : <Text style={styles.empty}>No accounts found.</Text>
+          loading ? undefined : <Text style={styles.empty}>No accounts found.</Text>
         }
         renderItem={({ item }) => {
           const isMe = item.id === myId;
@@ -149,14 +152,15 @@ export function AdminUsersPage({ onBack }: Props) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#fff" },
   bar: {
-    paddingTop: 12,
-    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingRight: 16,
     paddingBottom: 8,
+    paddingLeft: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ccc",
     gap: 8,
   },
-  back: { color: "#1565C0", fontWeight: "600" },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   title: { fontSize: 20, fontWeight: "700" },
   search: {
     height: 44,

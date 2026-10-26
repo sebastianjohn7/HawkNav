@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { AdminUsersPage } from "./AdminUsersPage";
 
 type ToolId = "users";
@@ -24,8 +25,8 @@ export function AdminPage({ onBack }: Props) {
   return (
     <View style={styles.root}>
       <View style={styles.bar}>
-        <Pressable onPress={onBack}>
-          <Text style={styles.back}>← Back</Text>
+        <Pressable onPress={onBack} hitSlop={12} accessibilityLabel="Back">
+          <Ionicons name="chevron-back" size={32} color="#1565C0" />
         </Pressable>
         <Text style={styles.title}>Admin tools</Text>
       </View>
@@ -42,14 +43,15 @@ export function AdminPage({ onBack }: Props) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#fff" },
   bar: {
-    paddingTop: 12,
-    paddingHorizontal: 16,
-    paddingBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingRight: 16,
+    paddingLeft: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ccc",
-    gap: 8,
+    gap: 4,
   },
-  back: { color: "#1565C0", fontWeight: "600" },
   title: { fontSize: 20, fontWeight: "700" },
   row: {
     paddingHorizontal: 16,

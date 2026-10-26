@@ -34,4 +34,5 @@ temp/
 *.local
 .direnv/
 .cursor/rules/authorship-and-style.mdc
+.cursor/plans
 PROJECT_CONTEXT.md

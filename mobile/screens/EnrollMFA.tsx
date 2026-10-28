@@ -130,14 +130,6 @@ export function EnrollMFA({ onVerified }: Props) {
 
       {error !== "" && <Text>{error}</Text>}
 
-      {qrCode != "" && (
-        <View>
-          <Text>{'\n'}Scan this QR code with your authenticator:</Text>
-          <SvgXml xml={qrCode} width="200" height="200" />
-        </View>
-      )}
-
-
       {secret !== "" && (
         <View>
           <Pressable onPress = {() => setShowSetupKey((shown) => !shown)} 
@@ -161,16 +153,19 @@ export function EnrollMFA({ onVerified }: Props) {
       )}
 
       
-
+      {factorId !== null && (
+        
+      
       <TextInput
         style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}
         value={code}
         onChangeText={setCode}
         placeholder="6-digit code"
-        keyboardType="number-pad"
+        keyboardType = "default"
         maxLength={6}
         editable={!loading}
       />
+      )}
 
       {loading && <ActivityIndicator />}
 

@@ -67,7 +67,7 @@ export function AuthMFA({ onVerified }: Props) {
             <TextInput
                 value={code}
                 onChangeText={setCode}
-                keyboardType="numeric"
+                keyboardType="number-pad"
                 maxLength={6}
                 style={{
                     borderWidth: 1,

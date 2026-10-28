@@ -127,6 +127,9 @@ create trigger on_auth_user_created
 -- Signed-in users: only an admin, never on themselves, and only to admin, driver, or the
 -- email's base role (a demotion). auth.uid() is null in the SQL editor / service key, which
 -- is how you make the first admin and recover from a lockout.
+drop trigger if exists profiles_block_role_change
+on public.profiles;
+
 create or replace function public.guard_role_change()
 returns trigger
 language plpgsql security definer set search_path = public

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { checkIn, checkOut, listShuttles } from "./checkins";
 import {
   dayGroupForNow,
   loadShuttleData,
@@ -62,6 +63,37 @@ app.get("/schedules", (c) => {
     })),
     meta: d.meta,
   });
+});
+
+app.get("/shuttles", (c) => {
+  return c.json({ shuttles: listShuttles() });
+});
+
+app.post("/shuttles/checkin", async (c) => {
+  const body = await c.req.json().catch(() => null);
+  const shuttleId =
+    body && typeof body.shuttle_id === "string" ? body.shuttle_id : "";
+  if (!shuttleId) return c.json({ error: "shuttle_id is required" }, 400);
+  try {
+    return c.json(await checkIn(shuttleId));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "check-in failed";
+    const status = message.startsWith("unknown shuttle_id") ? 404 : 502;
+    return c.json({ error: message }, status);
+  }
+});
+
+app.post("/shuttles/checkout", async (c) => {
+  const body = await c.req.json().catch(() => null);
+  const shuttleId =
+    body && typeof body.shuttle_id === "string" ? body.shuttle_id : "";
+  if (!shuttleId) return c.json({ error: "shuttle_id is required" }, 400);
+  try {
+    return c.json(checkOut(shuttleId));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "check-out failed";
+    return c.json({ error: message }, 404);
+  }
 });
 
 app.get("/eta", (c) => {

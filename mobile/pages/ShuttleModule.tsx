@@ -7,7 +7,7 @@ import { DriverScreen } from "../screens/DriverScreen";
 import { RiderScreen } from "../screens/RiderScreen";
 import { ShuttleMapView, type MapStop } from "../widgets/ShuttleMapView";
 
-type Role = "rider" | "driver";
+type Mode = "rider" | "driver";
 
 type Position = {
   lat: number;

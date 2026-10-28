@@ -9,6 +9,9 @@ import { LandingPage } from "./pages/LandingPage";
 import { NavModule } from "./pages/NavModule";
 import { SettingsPage } from "./pages/SettingsPage";
 import { SignInPage } from "./pages/SignInPage";
+import { MFA } from "./pages/MFA";
+
+
 
 /** Expo port of Josh's Landing → Sign-in → NavModule shell, gated by sign-in. */
 function Screens() {
@@ -44,15 +47,27 @@ function Screens() {
         <ActivityIndicator />
       </View>
     );
-  } else if (!session && !guest) {
-    content = started ? (
+  }
+
+  // The session decides which side of the app is shown; no manual route changes.
+  if (!session && !guest) {
+    return started ? (
+      
       <SignInPage />
     ) : (
       <LandingPage onGetStarted={() => setStarted(true)} />
     );
-  } else if (screen === "admin" && role && ACCESS[role].canUseAdminTools) {
-    content = <AdminPage onBack={() => show("settings")} />;
-  } else if (screen === "settings" && !guest) {
+  }
+
+  // Guests only use navigation; account screens require a signed-in session.
+  if (!session) {
+    return <NavModule onOpenSettings={() => {}} />;
+  }
+
+  let content;
+  if (screen === "admin" && role && ACCESS[role].canUseAdminTools) {
+    content = <AdminPage onBack={() => setScreen("settings")} />;
+  } else if (screen === "settings") {
     content = (
       <SettingsPage
         onBack={() => show("nav")}
@@ -60,22 +75,11 @@ function Screens() {
       />
     );
   } else {
-    edgeToEdgeBottom = true;
-    content = <NavModule onOpenSettings={() => show("settings")} />;
+    content = <NavModule onOpenSettings={() => setScreen("settings")} />;
   }
 
-  return (
-    <SafeAreaView
-      style={styles.root}
-      edges={
-        edgeToEdgeBottom
-          ? ["top", "left", "right"]
-          : ["top", "bottom", "left", "right"]
-      }
-    >
-      {content}
-    </SafeAreaView>
-  );
+  // Every signed-in screen stays behind the same MFA gate.
+  return <MFA key={session.user.id}>{content}</MFA>;
 }
 
 export default function App() {
@@ -93,3 +97,4 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
 });
+

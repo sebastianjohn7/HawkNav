@@ -80,8 +80,7 @@ function TabBody({ id, sheetBottom }: { id: Tab; sheetBottom: number }) {
 
 /** Bottom tabs + settings. Visitors have one tab, so they get no bar. */
 export function NavModule({ onOpenSettings }: Props) {
-  const { role, guest, signOut } = useAuth();
-  const insets = useSafeAreaInsets();
+  const { role, roleError, retryRole, guest, signOut } = useAuth();
   const [picked, setPicked] = useState<Tab | null>(null);
   const [floatingBarHeight, setFloatingBarHeight] = useState(64);
   const provenance = useRef(0);
@@ -89,7 +88,21 @@ export function NavModule({ onOpenSettings }: Props) {
   if (!role) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator />
+        {roleError ? (
+          <>
+            <Text style={styles.errorText}>
+              Couldn't load your account. Check your connection and try again.
+            </Text>
+            <Pressable style={styles.signInBtn} onPress={retryRole}>
+              <Text style={styles.signInText}>Retry</Text>
+            </Pressable>
+            <Pressable onPress={signOut}>
+              <Text style={styles.errorLink}>Sign out</Text>
+            </Pressable>
+          </>
+        ) : (
+          <ActivityIndicator />
+        )}
       </View>
     );
   }
@@ -221,7 +234,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   appTitle: { fontSize: 18, fontWeight: "700" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16, padding: 24 },
+  errorText: { textAlign: "center", fontSize: 16 },
+  errorLink: { color: "#1565C0", fontWeight: "600" },
   signInBtn: {
     backgroundColor: "#1565C0",
     paddingHorizontal: 14,

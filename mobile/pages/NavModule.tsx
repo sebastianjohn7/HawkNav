@@ -81,6 +81,7 @@ function TabBody({ id, sheetBottom }: { id: Tab; sheetBottom: number }) {
 /** Bottom tabs + settings. Visitors have one tab, so they get no bar. */
 export function NavModule({ onOpenSettings }: Props) {
   const { role, roleError, retryRole, guest, signOut } = useAuth();
+  const insets = useSafeAreaInsets();
   const [picked, setPicked] = useState<Tab | null>(null);
   const [floatingBarHeight, setFloatingBarHeight] = useState(64);
   const provenance = useRef(0);

@@ -130,12 +130,6 @@ export function EnrollMFA({ onVerified }: Props) {
 
       {error !== "" && <Text>{error}</Text>}
 
-      {qrCode != "" && (
-        <View>
-          <Text>{'\n'}Scan this QR code with your authenticator:</Text>
-          <SvgXml xml={qrCode} width="200" height="200" />
-        </View>
-      )}
 
 
       {secret !== "" && (

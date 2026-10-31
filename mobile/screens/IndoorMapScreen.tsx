@@ -1,10 +1,11 @@
 import { useMemo, useState, useEffect } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import MapView, { Geojson, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
-import { buildGraphFromGeoJson, findShortestPath } from "../utils/aStarRouting.ts";
+import { findShortestPath } from "../utils/aStarRouting.ts";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
 import StartRoomSelectionTesting from "./hooks/startRoomSelectionTesting.tsx";
+import * as Location from 'expo-location';
 
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";
 
@@ -22,19 +23,6 @@ const DELTA_REGION = {
   longitudeDelta: Math.max((bbox[2] - bbox[0]) * 1.6, 0.001),
 };
 
-
-//const deltaGraph = buildGraphFromGeoJson(deltaFloorplan);
-
-/*
-console.log("Start Node:", startNode);
-console.log("Start Node Edges:", deltaGraph.edges.get(startNode ?? ""));
-console.log("End Node:", endNode);
-console.log("End Node Edges:", deltaGraph.edges.get(endNode ?? ""));
-*/
-//console.log(deltaGraph);
-//const pathLine: LatLng[] = findShortestPath(deltaFloorplan, "133", "145").map(([longitude, latitude]) => ({latitude, longitude}));
-//console.log(pathLine);
-
 type FC = GeoJSON.FeatureCollection;
 
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
@@ -45,7 +33,46 @@ export function IndoorMapScreen({tab} : {tab: string}) {
   const [endNode, setEndNode] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
+  const [location, setLocation] = useState<Location.LocationObject>({
+  coords: {
+    latitude: DELTA_REGION.latitude,
+    longitude: DELTA_REGION.longitude,
+    altitude: 0,
+    accuracy: null,
+    altitudeAccuracy: null,
+    heading: null,
+    speed: null,
+  },
+  timestamp: 0, // Initial epoch fallback
+});
+
+useEffect(() => {
+  // Get permission for user location tracking
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
+      }
+    })();
+  }, []);
+
+  const fetchLocation = async () => {
+      try {
+        // Fetch precise current position
+        let currentLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+        if(currentLocation.coords.latitude !== location?.coords.latitude && currentLocation.coords.longitude !== location?.coords.longitude){
+          setLocation(currentLocation);
+        }
+      } catch (error) {
+        console.error('Could not fetch location. Make sure GPS is enabled.');
+      } finally {
+      }
+    };
+
   const { walls, units, hallways } = useMemo(() => {
+    // hallways is used for viewing hallway pathlines
     const features = (deltaFloorplan.features as GeoJSON.Feature[]).filter(
       (f) => (f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID === level,
     );
@@ -57,13 +84,11 @@ export function IndoorMapScreen({tab} : {tab: string}) {
       const t = f.geometry?.type;
       if(f.properties?.USE_TYPE === "movePoint" && (t === "Polygon" || t === "MultiPolygon" || t === "Point")) {
         moveFeats.push(f);
-        //console.log(`\n\n YERRRRRRRRRRRRRRRRRRR ${f.properties?.NAME}`);
       }
       if(f.properties?.USE_TYPE === "HALLWAY"){
         hallwayFeats.push(f);
       }
       else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
-        //console.log(`${f.properties?.NAME} pushed into UNITS`);
         unitFeats.push(f);
       } else if (
         t === "LineString" ||
@@ -74,8 +99,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
         wallFeats.push(f);
       }
     }
-    console.log("\n\n\nData Loaded\n\n\n");
-    //console.log("Hallways: ", hallwayFeats);
 
     return {
       walls: { type: "FeatureCollection", features: wallFeats } as FC,
@@ -92,12 +115,44 @@ export function IndoorMapScreen({tab} : {tab: string}) {
   }
 
   // Check for endNode selection, if non-null -> begin routing using current position and endNode
-    const pathLine = useMemo(() => {
-      console.log("EndNode", endNode);
-      if(endNode) return findShortestPath(deltaFloorplan, startNode, endNode).map(([longitude, latitude]) => ({latitude, longitude}));
+    const [pathLine1, pathLine2] = useMemo(() => {
+      // Add checking portion to differentiate floor filtered nodes
+      //console.log("EndNode", endNode);
+      if(!endNode) {
+        console.log("\nThere is no endNode!\n");
+        return [];
+      }
+      // Current user position will be updated by displayPointInfo --> Push new user location into delta_Floorplan features
+        const fullPath = findShortestPath(deltaFloorplan, startNode, endNode);
+        const pathL1: LatLng[] = [];
+        const pathL2: LatLng[] = [];
+        for (const point of fullPath) {
+          //console.log(`Current point's level:`, point.level);
+          const targetArray = point.level.includes("L1")
+            ? pathL1
+            : point.level.includes("L2")
+              ? pathL2
+              : null;
+          
+          if(targetArray){
+            const [longitude, latitude] = point.coords;
+            targetArray.push({latitude: latitude,
+              longitude: longitude
+            });
+          }
+          else console.log("\n\nTargetArray not selected\n\n");
+        }
+        //pathL1.length === 0 ? console.log("\npathL1 is empty") : pathL2.length === 0 ? console.log("\npathL2 is empty") : null
+        return [pathL1, pathL2];
+        //return findShortestPath(deltaFloorplan, startNode, endNode).map(([longitude, latitude]) => ({latitude, longitude}));
     }, [endNode]);
 
-    if(!pathLine) console.log("PATHLINE NOT CREATED");
+    //if(!pathLine1) console.log("PATHLINE NOT CREATED");
+
+  // constantly refind user_location
+  useEffect(() => {
+    setTimeout(() => fetchLocation(), 5000);
+  })
 
   return (tab === "find" && (
     <View style={styles.container}>
@@ -129,6 +184,12 @@ export function IndoorMapScreen({tab} : {tab: string}) {
         initialRegion={DELTA_REGION}
         mapType="standard"
       >
+        <Marker 
+        coordinate={{
+          longitude: location.coords.longitude ?? 0,
+          latitude: location.coords.latitude ?? 0}}
+        title={"USER_LOCATION"}
+        description={''}/>
         {/* Points*/}
         <Geojson
           geojson={units}
@@ -142,28 +203,36 @@ export function IndoorMapScreen({tab} : {tab: string}) {
             //console.log("\n Object Type: ", typeof object);
           }}
         />
-        {
+        { /* Hallways LineString Display
         <Geojson
           geojson={hallways}
           strokeColor="#f4f9f6"
           strokeWidth={1.5}
           fillColor= "transparent"
         />
-        }
+          */}
         <Geojson
           geojson={walls}
           strokeColor="#33553a"
           strokeWidth={1.5}
           fillColor="transparent"
         />
-        {pathLine && (<Polyline
-          coordinates={pathLine}
+        { /*Route clipping through floor fix*/(pathLine1 && level.includes("L1")) ? (<Polyline
+          coordinates={pathLine1}
           strokeColor="#2563EB"
           strokeWidth={4}
           lineCap="round"
           lineJoin="round"
           zIndex={10}
-      />)}
+      />) : null}
+      { /*Route clipping through floor fix*/(pathLine2 && level.includes("L2")) ? (<Polyline
+          coordinates={pathLine2}
+          strokeColor="#2563EB"
+          strokeWidth={4}
+          lineCap="round"
+          lineJoin="round"
+          zIndex={10}
+      />) : null}
       </MapView>
       {displayStartOptions && (
         <>

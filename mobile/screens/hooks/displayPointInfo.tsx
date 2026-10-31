@@ -23,6 +23,7 @@ const DisplayPointInfo = ({object, setEndNode }
             // Starting point determined by user location
             console.log("Starting Route");
             setEndNode(object.properties?.NAME);
+            // set new startNode to current user position !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }}><Text style={{color: 'white'}}>Route To</Text></Pressable>
     </View>
   )

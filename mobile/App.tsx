@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { DMSans_700Bold, useFonts } from "@expo-google-fonts/dm-sans";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "./lib/auth";
@@ -89,6 +90,19 @@ function Screens() {
 }
 
 export default function App() {
+  // UHCL web headings use DM Sans — load once for the app bar title.
+  const [fontsLoaded] = useFonts({
+    DMSans_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <AuthProvider>

@@ -5,15 +5,32 @@ Do this once per Supabase project (ideally one shared project for the team).
 ## Setup
 
 1. Create a free project at [supabase.com](https://supabase.com).
-2. Project Settings → API Keys → copy the **Project URL** and **publishable key** into `mobile/.env` as `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` 
-3. SQL Editor → paste all of [`schema.sql`](schema.sql) → **Run** (confirm any warning). 
-4. Authentication → Sign In / Providers → Email → password **minimum 8**, require **lowercase, uppercase, digits, symbols**.
-5. Authentication → Email → **Confirm email**: off while testing, **on** for real use. The built-in sender allows only ~2 emails/hour, so real use needs custom SMTP.
+2. Project Settings → API Keys → copy the **Project URL** and **publishable key** into `mobile/.env` as `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
+3. Also copy those two into `api/.env`. Then copy the **service_role** secret (or “secret” key) into `api/.env` only as `SUPABASE_SERVICE_ROLE_KEY`. The API uses that key to write shuttle GPS. Do not put the service role key in `mobile/.env` or commit it.
+4. SQL Editor → paste all of [`schema.sql`](schema.sql) → **Run** (confirm any warning). 
+5. Authentication → Sign In / Providers → Email → password **minimum 8**, require **lowercase, uppercase, digits, symbols**.
+6. Authentication → Email → **Confirm email**: off while testing, **on** for real use. The built-in sender allows only ~2 emails/hour, so real use needs custom SMTP.
 
    schema.sql includes the MFA policies and is safe to re-run.
    
-6. Database → Publications → confirm `shuttle_positions` is in `supabase_realtime` (the SQL tries to add it)
-7. For testing, turn off Authentication → Providers → Email → **Confirm email** (turn it back on for the demo).
+7. Database → Publications → confirm `shuttle_positions` is in `supabase_realtime` (the SQL tries to add it)
+8. For testing, turn off Authentication → Providers → Email → **Confirm email** (turn it back on for the demo).
+
+## If driver check-in says Supabase upsert 401 / permission denied
+
+The Bun API must write with the service role key in `api/.env`:
+
+```env
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-secret
+```
+
+Restart `bun run dev` after saving. Do not grant insert/update on `shuttle_positions` to `anon` just to make the API work.
+
+If the status says **Supabase read 403** after that key is set, grant the service role table access in the SQL editor:
+
+```sql
+grant select, insert, update, delete on table public.shuttle_positions to service_role;
+```
 ## Accounts and roles
 
 Everyone uses a real `@uhcl.edu` email. No preset or test accounts.
@@ -64,6 +81,24 @@ drop function if exists public.set_login_role();
 drop type if exists public.app_role;
 delete from auth.users;
 ```
+
+## If the app says "permission denied for table profiles"
+
+The table exists, but the signed-in role was never granted access. In the SQL editor run:
+
+```sql
+grant usage on schema public to anon, authenticated;
+grant usage on type public.app_role to authenticated;
+grant select on table public.profiles to authenticated;
+grant select on table public.login_log to authenticated;
+grant select on table public.role_changes to authenticated;
+grant select, insert, update on table public.shuttle_positions to authenticated;
+grant execute on function public.current_role_name() to authenticated;
+grant execute on function public.is_admin() to authenticated;
+grant execute on function public.base_role_for(text) to authenticated;
+```
+
+Or re-run all of `schema.sql` (it now includes these grants).
 
 ## MFA verification
 

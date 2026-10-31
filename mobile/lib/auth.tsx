@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AuthError, Session } from "@supabase/supabase-js";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -50,6 +51,8 @@ type AuthState = {
   role: Role | null;
   /** The profile couldn't be loaded (network or server error), as opposed to having no role. */
   roleError: boolean;
+  /** Last profile-load failure, for the retry screen. */
+  roleErrorMessage: string | null;
   retryRole: () => void;
   /** True until the saved session (if any) has been checked on startup. */
   loading: boolean;
@@ -67,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profileRole, setRole] = useState<Role | null>(null);
   const [roleError, setRoleError] = useState(false);
+  const [roleErrorMessage, setRoleErrorMessage] = useState<string | null>(null);
   const [roleTry, setRoleTry] = useState(0);
   const [guest, setGuest] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -100,30 +104,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // The role lives in profiles (set by the signup trigger), not in the app.
+  // Runs again after MFA because the JWT AAL changes and some policies need aal2.
   useEffect(() => {
     if (!supabase || !session) {
       setRole(null);
       setRoleError(false);
+      setRoleErrorMessage(null);
       return;
     }
     let cancelled = false;
     setRoleError(false);
-    supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", session.user.id)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        // A failed request is not "no profile": don't downgrade a real student to visitor
-        // because of a network hiccup. The app shows a retry instead.
-        if (error) {
-          setRoleError(true);
-          return;
-        }
-        // No profile row should not happen; fall back to the least access.
-        setRole((data?.role as Role | undefined) ?? "visitor");
-      });
+    setRoleErrorMessage(null);
+
+    (async () => {
+      const client = supabase;
+      // Prefer the freshest access token (MFA verify updates it).
+      const { data: latest } = await client.auth.getSession();
+      const userId = latest.session?.user.id ?? session.user.id;
+
+      const { data, error } = await client
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      // A failed request is not "no profile": don't downgrade a real student to visitor
+      // because of a network hiccup. The app shows a retry instead.
+      if (error) {
+        setRole(null);
+        setRoleError(true);
+        setRoleErrorMessage(error.message);
+        return;
+      }
+      // No profile row should not happen; fall back to the least access.
+      setRole((data?.role as Role | undefined) ?? "visitor");
+    })();
+
     return () => {
       cancelled = true;
     };
@@ -177,6 +195,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const retryRole = useCallback(() => {
+    setRoleTry((n) => n + 1);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -185,7 +207,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         enterGuest: () => setGuest(true),
         role,
         roleError,
-        retryRole: () => setRoleTry((n) => n + 1),
+        roleErrorMessage,
+        retryRole,
         loading,
         signIn,
         signUp,

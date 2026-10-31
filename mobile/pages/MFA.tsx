@@ -18,7 +18,7 @@ type Props = {
 };
 
 export function MFA({ children }: Props) {
-  const { session, signOut } = useAuth();
+  const { session, signOut, retryRole } = useAuth();
   const userId = session?.user?.id;
   const [status, setStatus] = useState<MFAStatus>("checking");
   const [message, setMessage] = useState("");
@@ -69,10 +69,14 @@ export function MFA({ children }: Props) {
     }
   }, [userId]);
 
-  
   useEffect(() => {
     void checkMFA();
   }, [checkMFA]);
+
+  // Profile role may have failed while the session was still password-only.
+  useEffect(() => {
+    if (status === "allowed") retryRole();
+  }, [status, retryRole]);
 
 
 

@@ -50,6 +50,8 @@ export function AuthMFA({ onVerified }: Props) {
             });
             if (verifyError) throw verifyError;
 
+            // Pull the aal2 session before the app loads the profile role.
+            await supabase.auth.getSession();
             onVerified();
         } catch (error) {
             setError(
@@ -67,7 +69,7 @@ export function AuthMFA({ onVerified }: Props) {
             <TextInput
                 value={code}
                 onChangeText={setCode}
-                keyboardType="numeric"
+                keyboardType="number-pad"
                 maxLength={6}
                 style={{
                     borderWidth: 1,

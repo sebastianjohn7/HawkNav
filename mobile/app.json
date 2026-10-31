@@ -9,8 +9,11 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "HawkNav streams shuttle GPS while you drive so riders see the live position.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Background location is reserved for a later TaskManager pass."
+        "NSLocationWhenInUseUsageDescription": "HawkNav shows your position on the campus map and streams shuttle GPS while you drive so riders see the live bus.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Background location is reserved for a later TaskManager pass.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
       }
     },
     "android": {

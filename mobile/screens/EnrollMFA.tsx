@@ -99,18 +99,21 @@ export function EnrollMFA({ onVerified }: Props) {
     setError("");
 
     try {
-       const { error } = await supabase.auth.mfa.challengeAndVerify({
-      factorId,
-      code: codeTrimmed,
-    });
+      const { error } = await supabase.auth.mfa.challengeAndVerify({
+        factorId,
+        code: codeTrimmed,
+      });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    setCode("");
-    setFactorId(null);
-    setSecret("");
-    onVerified();
-    setQrCode("");
+      // Pull the aal2 session before the app loads the profile role.
+      await supabase.auth.getSession();
+
+      setCode("");
+      setFactorId(null);
+      setSecret("");
+      setQrCode("");
+      onVerified();
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Verification failed."
@@ -129,8 +132,6 @@ export function EnrollMFA({ onVerified }: Props) {
       <Text>If you restarted setup, replace the old HawkNav entry in your authenticator with the new setup key.</Text>
 
       {error !== "" && <Text>{error}</Text>}
-
-
 
       {secret !== "" && (
         <View>
@@ -154,17 +155,20 @@ export function EnrollMFA({ onVerified }: Props) {
         </View>
       )}
 
+        {factorId !== null && (
+        
       
+        <TextInput
+          style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}
+          value={code}
+          onChangeText={setCode}
+          placeholder="6-digit code"
+          keyboardType="default"
+          maxLength={6}
+          editable={!loading}
+        />
+        )}
 
-      <TextInput
-        style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}
-        value={code}
-        onChangeText={setCode}
-        placeholder="6-digit code"
-        keyboardType="number-pad"
-        maxLength={6}
-        editable={!loading}
-      />
 
       {loading && <ActivityIndicator />}
 

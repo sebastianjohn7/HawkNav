@@ -127,6 +127,9 @@ create trigger on_auth_user_created
 -- Signed-in users: only an admin, never on themselves, and only to admin, driver, or the
 -- email's base role (a demotion). auth.uid() is null in the SQL editor / service key, which
 -- is how you make the first admin and recover from a lockout.
+drop trigger if exists profiles_block_role_change
+on public.profiles;
+
 create or replace function public.guard_role_change()
 returns trigger
 language plpgsql security definer set search_path = public
@@ -214,6 +217,26 @@ $$;
 
 revoke execute on function public.change_role(uuid, text) from public, anon;
 grant execute on function public.change_role(uuid, text) to authenticated;
+
+-- ---------------------------------------------------------------- Grants
+-- RLS decides which rows; these grants let the signed-in client touch the tables at all.
+-- Without them Postgres returns "permission denied for table …" before RLS runs.
+grant usage on schema public to anon, authenticated;
+grant usage on type public.app_role to authenticated;
+
+grant select on table public.profiles to authenticated;
+grant select on table public.login_log to authenticated;
+grant select on table public.role_changes to authenticated;
+grant select, insert, update on table public.shuttle_positions to authenticated;
+-- Publishable/anon key probes and any future guest reads need SELECT too.
+grant select on table public.shuttle_positions to anon;
+-- The Bun API writes GPS with SUPABASE_SERVICE_ROLE_KEY (sb_secret_… / service_role).
+-- New Supabase projects do not always grant that role table access by default.
+grant select, insert, update, delete on table public.shuttle_positions to service_role;
+
+grant execute on function public.current_role_name() to authenticated;
+grant execute on function public.is_admin() to authenticated;
+grant execute on function public.base_role_for(text) to authenticated;
 
 -- ---------------------------------------------------------------- Row Level Security
 -- (select ...) around the helpers lets Postgres evaluate them once per query, not per row.

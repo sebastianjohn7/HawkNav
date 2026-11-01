@@ -4,9 +4,10 @@ import React from 'react'
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
-const DisplayPointInfo = ({object, setEndNode } 
+const DisplayPointInfo = ({object, setEndNode, setDisplayInfo } 
     : {object: GeoJSON.Feature,
-         setEndNode: React.Dispatch<React.SetStateAction<string | null>>
+         setEndNode: React.Dispatch<React.SetStateAction<string | null>>,
+         setDisplayInfo: React.Dispatch<React.SetStateAction<GeoJSON.Feature | null>>
         }) => {
   const name = object.properties?.NAME;
   if(name === '1' || name === '2' || !object) return null;
@@ -23,6 +24,7 @@ const DisplayPointInfo = ({object, setEndNode }
             // Starting point determined by user location
             console.log("Starting Route");
             setEndNode(object.properties?.NAME);
+            setDisplayInfo(null);
             // set new startNode to current user position !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }}><Text style={{color: 'white'}}>Route To</Text></Pressable>
     </View>

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View, Image } from "react-native";
 import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
 import { findShortestPath } from "../utils/aStarRouting.ts";
@@ -22,6 +22,8 @@ const DELTA_REGION = {
   latitudeDelta: Math.max((bbox[3] - bbox[1]) * 1.6, 0.001),
   longitudeDelta: Math.max((bbox[2] - bbox[0]) * 1.6, 0.001),
 };
+
+const roomImage = require('../assets/img/navicon.jpg');
 
 type FC = GeoJSON.FeatureCollection;
 
@@ -152,7 +154,14 @@ useEffect(() => {
   // constantly refind user_location
   useEffect(() => {
     setTimeout(() => fetchLocation(), 5000);
-  })
+  });
+
+  // Custom Room Marker 
+  const RoomMarker = () => (
+    <View style={styles.markerContainer}>
+      <Text style={styles.roomMarkerText}>R</Text>
+    </View>
+  );
 
   return (tab === "find" && (
     <View style={styles.container}>
@@ -197,12 +206,14 @@ useEffect(() => {
           strokeWidth={1}
           fillColor="rgba(147, 197, 253, 0.35)"
           color= "#9094a0"
+          markerComponent={<RoomMarker />}
           onPress={(object) => {
             setDisplayInfo(object.feature);
-            console.log("Object", object.feature.properties?.NAME);
+            //console.log("Object", object.feature.properties?.NAME);
             //console.log("\n Object Type: ", typeof object);
           }}
         />
+
         { /* Hallways LineString Display
         <Geojson
           geojson={hallways}
@@ -211,6 +222,7 @@ useEffect(() => {
           fillColor= "transparent"
         />
           */}
+
         <Geojson
           geojson={walls}
           strokeColor="#33553a"
@@ -243,13 +255,13 @@ useEffect(() => {
         ></Pressable>
         </>
       )}
-      {displayInfo && (
+      { /* Displays Current Selected room info to users */displayInfo && (
         <>
         <Pressable 
         style={styles.backdrop}
         onPress={() => setDisplayInfo(null)}
         ></Pressable>
-        <DisplayPointInfo object={displayInfo} setEndNode={setEndNode}/>
+        <DisplayPointInfo object={displayInfo} setEndNode={setEndNode} setDisplayInfo={setDisplayInfo}/>
         </>)}
       <View style={styles.startSelectionBox}>
         <Text>Purely For Testing, Removal Imminent</Text>
@@ -310,5 +322,16 @@ const styles = StyleSheet.create({
         width: '80%',
         backgroundColor: '#784be8',
         borderRadius: 10
-    }
+    },
+  markerContainer: {
+    backgroundColor: '#573dec',
+    padding: 10,
+    borderRadius: 20,
+    borderColor: '#fff',
+    borderWidth: 1
+  },
+  roomMarkerText: {
+    fontSize: 15,
+    color: '#fff'
+  }
 });

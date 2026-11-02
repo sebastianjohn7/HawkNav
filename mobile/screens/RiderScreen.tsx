@@ -1,36 +1,59 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  FlatList,
+  Linking,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { apiUrl } from "../lib/config";
 import {
-  apiUrl,
-  DEFAULT_SHUTTLE_ID,
-  hasSupabaseConfig,
-  supabase,
-} from "../lib/config";
+  fallbackRouteEta,
+  fetchDrivingRouteEta,
+  formatRouteEtaLine,
+} from "../lib/routeEta";
 
 type Stop = {
   stop_id: string;
   name: string;
+  lat?: number | null;
+  lng?: number | null;
+  /** True when this stop is on today's schedule (Chicago day group). */
+  runs_today?: boolean;
 };
 
-type Position = {
-  lat: number;
-  lng: number;
-  heading: number | null;
-  updated_at: string;
-};
+/** Open directions in Apple Maps (iOS) or Google Maps (Android). */
+async function openDirections(lat: number, lng: number, label: string) {
+  const name = encodeURIComponent(label);
+  if (Platform.OS === "ios") {
+    await Linking.openURL(
+      `http://maps.apple.com/?daddr=${lat},${lng}&q=${name}`,
+    );
+    return;
+  }
+  // Prefer the Google Maps app; fall back to the web directions URL.
+  const appUrl = `google.navigation:q=${lat},${lng}`;
+  const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=&travelmode=walking`;
+  const canOpenApp = await Linking.canOpenURL(appUrl);
+  await Linking.openURL(canOpenApp ? appUrl : webUrl);
+}
+
+/** Min movement before we re-query the road router. */
+const ROUTE_MOVE_METERS = 40;
+const ROUTE_MIN_INTERVAL_MS = 5_000;
 
 type EtaResponse = {
   stop_id: string;
   stop_name: string;
+  drop_off_only?: boolean;
   eta: {
     next_time: string;
+    next_time_12h?: string;
+    weekday?: string;
+    is_today?: boolean;
     day_group: string;
     route: string;
   } | null;
@@ -39,6 +62,9 @@ type EtaResponse = {
 type Props = {
   /** Keeps the ETA card above the tab bar. */
   sheetBottom: number;
+  /** Live shuttle plot from Realtime — used for distance ETA only. */
+  shuttleLat?: number | null;
+  shuttleLng?: number | null;
   /** Highlights the chosen stop pin on the map. */
   onSelectedStop?: (stopId: string | null) => void;
   /** Move the map to this stop. Called only when the rider taps a row. */
@@ -49,18 +75,23 @@ type Props = {
 
 export function RiderScreen({
   sheetBottom,
+  shuttleLat,
+  shuttleLng,
   onSelectedStop,
   onFocusStop,
   onCoverFraction,
 }: Props) {
-  const [position, setPosition] = useState<Position | null>(null);
-  const [rtStatus, setRtStatus] = useState("Not connected");
   const [stops, setStops] = useState<Stop[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [stopsOpen, setStopsOpen] = useState(false);
-  const [etaText, setEtaText] = useState<string>("");
+  const [scheduleText, setScheduleText] = useState<string>("");
+  const [liveText, setLiveText] = useState<string | null>(null);
+  const [routeTick, setRouteTick] = useState(0);
   const frameWidth = useRef(0);
   const panelWidth = useRef(0);
+  const lastRouteAt = useRef(0);
+  const lastRouteFrom = useRef<{ lat: number; lng: number } | null>(null);
+  const routeAbort = useRef<AbortController | null>(null);
 
   function reportCover() {
     if (frameWidth.current <= 0 || panelWidth.current <= 0) return;
@@ -73,49 +104,10 @@ export function RiderScreen({
       .then((body) => {
         const list = (body.stops as Stop[]) ?? [];
         setStops(list);
-        if (list[0]) setSelected(list[0].stop_id);
+        const firstToday = list.find((stop) => stop.runs_today) ?? list[0];
+        if (firstToday) setSelected(firstToday.stop_id);
       })
-      .catch((e) => setEtaText(`API error: ${String(e)}`));
-  }, []);
-
-  useEffect(() => {
-    if (!supabase) {
-      setRtStatus("Waiting for Supabase keys (Phase 1B)");
-      return;
-    }
-    const client = supabase;
-
-    client
-      .from("shuttle_positions")
-      .select("lat,lng,heading,updated_at")
-      .eq("shuttle_id", DEFAULT_SHUTTLE_ID)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (error) setRtStatus(error.message);
-        else if (data) setPosition(data as Position);
-      });
-
-    const channel = client
-      .channel("shuttle_positions_rider")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "shuttle_positions",
-          filter: `shuttle_id=eq.${DEFAULT_SHUTTLE_ID}`,
-        },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as Position | undefined;
-          if (row && "lat" in row) setPosition(row);
-          setRtStatus("Live");
-        },
-      )
-      .subscribe((status) => setRtStatus(String(status)));
-
-    return () => {
-      void client.removeChannel(channel);
-    };
+      .catch((e) => setScheduleText(`API error: ${String(e)}`));
   }, []);
 
   const loadEta = useCallback(async (stopId: string) => {
@@ -124,15 +116,19 @@ export function RiderScreen({
         `${apiUrl}/eta?stop_id=${encodeURIComponent(stopId)}`,
       );
       const body = (await res.json()) as EtaResponse;
-      if (!body.eta) {
-        setEtaText(`${body.stop_name}: no more departures today`);
+      if (body.drop_off_only) {
+        setScheduleText(`${body.stop_name}: DROP OFF ONLY`);
+      } else if (!body.eta) {
+        setScheduleText(`${body.stop_name}: no scheduled departures`);
       } else {
-        setEtaText(
-          `${body.stop_name}: next ${body.eta.next_time} (${body.eta.route}, ${body.eta.day_group})`,
-        );
+        const time = body.eta.next_time_12h ?? body.eta.next_time;
+        const day = body.eta.is_today
+          ? "today"
+          : (body.eta.weekday ?? body.eta.day_group);
+        setScheduleText(`${body.stop_name}: next ${time} (${day})`);
       }
     } catch (e) {
-      setEtaText(`ETA error: ${String(e)}`);
+      setScheduleText(`ETA error: ${String(e)}`);
     }
   }, []);
 
@@ -145,6 +141,91 @@ export function RiderScreen({
   }, [selected, onSelectedStop]);
 
   const selectedStop = stops.find((stop) => stop.stop_id === selected);
+  const canRoute =
+    selectedStop != null &&
+    Number.isFinite(selectedStop.lat) &&
+    Number.isFinite(selectedStop.lng);
+
+  const hasShuttle =
+    typeof shuttleLat === "number" &&
+    typeof shuttleLng === "number" &&
+    Number.isFinite(shuttleLat) &&
+    Number.isFinite(shuttleLng);
+
+  // Reset routed ETA when the chosen stop changes.
+  useEffect(() => {
+    lastRouteFrom.current = null;
+    lastRouteAt.current = 0;
+    setLiveText(null);
+  }, [selected]);
+
+  // Re-check the road router on a fixed cadence.
+  useEffect(() => {
+    const id = setInterval(
+      () => setRouteTick((n) => n + 1),
+      ROUTE_MIN_INTERVAL_MS,
+    );
+    return () => clearInterval(id);
+  }, []);
+
+  // Road-routed duration/distance for the live shuttle → stop ETA (no turn UI).
+  useEffect(() => {
+    if (!canRoute || !hasShuttle || !selectedStop) {
+      setLiveText(null);
+      lastRouteFrom.current = null;
+      return;
+    }
+
+    const stopLat = selectedStop.lat as number;
+    const stopLng = selectedStop.lng as number;
+    const from = lastRouteFrom.current;
+    const moved = from
+      ? fallbackRouteEta(from.lat, from.lng, shuttleLat, shuttleLng)
+          .distanceMeters
+      : Infinity;
+    const due =
+      Date.now() - lastRouteAt.current >= ROUTE_MIN_INTERVAL_MS ||
+      moved >= ROUTE_MOVE_METERS ||
+      !from;
+
+    if (!due) return;
+
+    routeAbort.current?.abort();
+    const ac = new AbortController();
+    routeAbort.current = ac;
+
+    void (async () => {
+      try {
+        const eta = await fetchDrivingRouteEta(
+          shuttleLat,
+          shuttleLng,
+          stopLat,
+          stopLng,
+          ac.signal,
+        );
+        if (ac.signal.aborted) return;
+        lastRouteAt.current = Date.now();
+        lastRouteFrom.current = { lat: shuttleLat, lng: shuttleLng };
+        setLiveText(formatRouteEtaLine(eta));
+      } catch {
+        if (ac.signal.aborted) return;
+        // Offline / router down — keep a straight-line estimate.
+        lastRouteAt.current = Date.now();
+        lastRouteFrom.current = { lat: shuttleLat, lng: shuttleLng };
+        setLiveText(
+          formatRouteEtaLine(
+            fallbackRouteEta(shuttleLat, shuttleLng, stopLat, stopLng),
+          ),
+        );
+      }
+    })();
+
+    return () => {
+      ac.abort();
+    };
+  }, [canRoute, hasShuttle, selectedStop, shuttleLat, shuttleLng, routeTick]);
+
+  const etaText = [liveText, scheduleText].filter(Boolean).join("\n");
 
   return (
     <View
@@ -163,66 +244,85 @@ export function RiderScreen({
       )}
 
       <View style={[styles.card, { bottom: sheetBottom }]}>
-        {!hasSupabaseConfig && (
-          <Text style={styles.warn}>
-            Live GPS needs Supabase. Schedule ETA still works via the local API.
-          </Text>
-        )}
-        <Text style={styles.meta}>Realtime: {rtStatus}</Text>
-        {position ? (
-          <Text style={styles.meta}>Updated: {position.updated_at}</Text>
-        ) : (
-          <Text style={styles.meta}>Waiting for driver check-in on map…</Text>
-        )}
-        <Text style={styles.eta}>
+        <Text style={styles.eta} numberOfLines={3}>
           {etaText || selectedStop?.name || "Open Stops to pick a stop"}
         </Text>
+        {canRoute && (
+          <Pressable
+            style={styles.routeBtn}
+            onPress={() =>
+              openDirections(
+                selectedStop.lat as number,
+                selectedStop.lng as number,
+                selectedStop.name,
+              )
+            }
+            accessibilityLabel={`Directions to ${selectedStop.name}`}
+            hitSlop={6}
+          >
+            <Ionicons name="navigate" size={18} color="#1565C0" />
+          </Pressable>
+        )}
       </View>
 
       {stopsOpen && (
-        <View style={StyleSheet.absoluteFill}>
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
           <Pressable
             style={styles.backdrop}
             onPress={() => setStopsOpen(false)}
           />
           <View
-            style={[styles.sidebar, { bottom: sheetBottom }]}
-            onLayout={(event) => {
-              panelWidth.current = event.nativeEvent.layout.width;
-              reportCover();
-            }}
+            style={[styles.sidebarSlot, { paddingBottom: sheetBottom }]}
+            pointerEvents="box-none"
           >
-            <View style={styles.sidebarHeader}>
-              <Text style={styles.sidebarTitle}>Stops</Text>
-              <Pressable
-                onPress={() => setStopsOpen(false)}
-                hitSlop={8}
-              >
-                <Ionicons name="chevron-back" size={22} color="#1565C0" />
-              </Pressable>
-            </View>
-            <FlatList
-              data={stops}
-              keyExtractor={(item) => item.stop_id}
-              style={styles.list}
-              renderItem={({ item }) => {
-                const on = selected === item.stop_id;
-                return (
-                  <Pressable
-                    style={[styles.row, on && styles.rowSelected]}
-                    onPress={() => {
-                      setSelected(item.stop_id);
-                      onFocusStop?.(item.stop_id);
-                    }}
-                  >
-                    <Text style={styles.rowText}>{item.name}</Text>
-                    {on && (
-                      <Ionicons name="checkmark" size={18} color="#0B6E4F" />
-                    )}
-                  </Pressable>
-                );
+            <View
+              style={styles.sidebar}
+              onLayout={(event) => {
+                panelWidth.current = event.nativeEvent.layout.width;
+                reportCover();
               }}
-            />
+            >
+              <View style={styles.sidebarHeader}>
+                <Text style={styles.sidebarTitle}>Stops</Text>
+                <Pressable onPress={() => setStopsOpen(false)} hitSlop={8}>
+                  <Ionicons name="chevron-back" size={22} color="#1565C0" />
+                </Pressable>
+              </View>
+              <ScrollView
+                style={styles.list}
+                contentContainerStyle={styles.listContent}
+                keyboardShouldPersistTaps="handled"
+              >
+                {stops.map((item) => {
+                  const on = selected === item.stop_id;
+                  return (
+                    <Pressable
+                      key={item.stop_id}
+                      style={[styles.row, on && styles.rowSelected]}
+                      onPress={() => {
+                        setSelected(item.stop_id);
+                        onFocusStop?.(item.stop_id);
+                      }}
+                    >
+                      <View style={styles.rowMain}>
+                        {item.runs_today ? (
+                          <View
+                            style={styles.todayDot}
+                            accessibilityLabel="Runs today"
+                          />
+                        ) : (
+                          <View style={styles.todayDotSpacer} />
+                        )}
+                        <Text style={styles.rowText}>{item.name}</Text>
+                      </View>
+                      {on && (
+                        <Ionicons name="checkmark" size={18} color="#0B6E4F" />
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
           </View>
         </View>
       )}
@@ -255,25 +355,34 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 12,
     right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 14,
-    gap: 6,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#ddd",
   },
-  meta: { fontSize: 14, color: "#333" },
-  warn: { color: "#8a4b08", backgroundColor: "#fff4e5", padding: 10 },
-  eta: { fontSize: 15, fontWeight: "600" },
+  eta: { flex: 1, fontSize: 15, fontWeight: "600" },
+  routeBtn: {
+    padding: 8,
+    borderRadius: 999,
+    backgroundColor: "#e8f0fa",
+  },
   backdrop: {
     ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(0,0,0,0.25)",
   },
+  sidebarSlot: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
   sidebar: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    width: "62%",
+    width: "46%",
+    // Fraction of the map — keeps the panel short; list scrolls inside.
+    height: "55%",
     backgroundColor: "#fff",
     borderTopRightRadius: 16,
     borderBottomRightRadius: 16,
@@ -283,22 +392,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ddd",
   },
-  sidebarTitle: { fontSize: 18, fontWeight: "700" },
+  sidebarTitle: { fontSize: 16, fontWeight: "700" },
   list: { flex: 1 },
+  listContent: { flexGrow: 0 },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: "#eee",
   },
-  rowText: { flex: 1, paddingRight: 8 },
+  rowMain: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingRight: 8,
+  },
+  todayDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: "#0B6E4F",
+  },
+  todayDotSpacer: { width: 8, height: 8 },
+  rowText: { flex: 1 },
   rowSelected: { backgroundColor: "#e8f5ef" },
 });

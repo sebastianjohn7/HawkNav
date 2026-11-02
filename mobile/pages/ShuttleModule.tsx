@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../lib/auth";
 import { apiUrl, DEFAULT_SHUTTLE_ID, supabase } from "../lib/config";
 import { ACCESS } from "../lib/roles";
@@ -7,7 +8,7 @@ import { DriverScreen } from "../screens/DriverScreen";
 import { RiderScreen } from "../screens/RiderScreen";
 import { ShuttleMapView, type MapStop } from "../widgets/ShuttleMapView";
 
-type Role = "rider" | "driver";
+type ShuttleMode = "rider" | "driver";
 
 type Position = {
   lat: number;
@@ -21,13 +22,13 @@ type Props = {
   sheetBottom: number;
 };
 
-/** Campus map full screen; rider and driver content sit in a sheet over it. */
+/** Campus map full screen; rider and driver content sit over it. */
 export function ShuttleModule({ sheetBottom }: Props) {
   const { role: userRole } = useAuth();
   const canDrive = userRole ? ACCESS[userRole].canDrive : false;
-  const [pickedView, setRole] = useState<Role>("rider");
+  const [pickedMode, setMode] = useState<ShuttleMode>("rider");
   // Students and faculty stay on the rider sheet.
-  const role: Role = canDrive ? pickedView : "rider";
+  const mode: ShuttleMode = canDrive ? pickedMode : "rider";
   const [position, setPosition] = useState<Position | null>(null);
   const [stops, setStops] = useState<MapStop[]>([]);
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null);
@@ -36,27 +37,36 @@ export function ShuttleModule({ sheetBottom }: Props) {
   );
   const [coverFraction, setCoverFraction] = useState(0);
   const [driverShuttleId, setDriverShuttleId] = useState(DEFAULT_SHUTTLE_ID);
-  const mapShuttleId = role === "driver" ? driverShuttleId : DEFAULT_SHUTTLE_ID;
+  const mapShuttleId = mode === "driver" ? driverShuttleId : DEFAULT_SHUTTLE_ID;
 
   useEffect(() => {
     let cancelled = false;
     fetch(`${apiUrl}/stops`)
       .then((res) => res.json())
-      .then((body: { stops?: Array<MapStop & { lat?: number; lng?: number }> }) => {
-        if (cancelled) return;
-        const pins = (body.stops ?? []).flatMap((stop) => {
-          if (!Number.isFinite(stop.lat) || !Number.isFinite(stop.lng)) return [];
-          return [
-            {
-              stop_id: stop.stop_id,
-              name: stop.name,
-              lat: stop.lat as number,
-              lng: stop.lng as number,
-            },
-          ];
-        });
-        setStops(pins);
-      })
+      .then(
+        (body: {
+          stops?: Array<
+            MapStop & { lat?: number; lng?: number; runs_today?: boolean }
+          >;
+        }) => {
+          if (cancelled) return;
+          // All geocoded stops get pins; sidebar green dots mark runs_today.
+          const pins = (body.stops ?? []).flatMap((stop) => {
+            if (!Number.isFinite(stop.lat) || !Number.isFinite(stop.lng)) {
+              return [];
+            }
+            return [
+              {
+                stop_id: stop.stop_id,
+                name: stop.name,
+                lat: stop.lat as number,
+                lng: stop.lng as number,
+              },
+            ];
+          });
+          setStops(pins);
+        },
+      )
       .catch(() => {});
     return () => {
       cancelled = true;
@@ -113,27 +123,45 @@ export function ShuttleModule({ sheetBottom }: Props) {
           obscuredFraction={coverFraction}
         />
       </View>
+
       {canDrive && (
-        <View style={styles.topRow} pointerEvents="box-none">
-          <View style={styles.switch}>
+        <View style={styles.toggleWrap} pointerEvents="box-none">
+          <View style={styles.toggle}>
             <Pressable
-              style={[styles.switchItem, role === "rider" && styles.switchOn]}
-              onPress={() => setRole("rider")}
+              style={[styles.toggleSide, mode === "rider" && styles.toggleOn]}
+              onPress={() => setMode("rider")}
+              accessibilityRole="button"
+              accessibilityState={{ selected: mode === "rider" }}
+              accessibilityLabel="Rider"
             >
-              <Text style={styles.switchText}>Rider</Text>
+              <Ionicons
+                name="walk"
+                size={18}
+                color={mode === "rider" ? "#0B6E4F" : "#666"}
+              />
             </Pressable>
             <Pressable
-              style={[styles.switchItem, role === "driver" && styles.switchOn]}
-              onPress={() => setRole("driver")}
+              style={[styles.toggleSide, mode === "driver" && styles.toggleOn]}
+              onPress={() => setMode("driver")}
+              accessibilityRole="button"
+              accessibilityState={{ selected: mode === "driver" }}
+              accessibilityLabel="Driver"
             >
-              <Text style={styles.switchText}>Driver</Text>
+              <Ionicons
+                name="bus"
+                size={18}
+                color={mode === "driver" ? "#0B6E4F" : "#666"}
+              />
             </Pressable>
           </View>
         </View>
       )}
-      {role === "rider" ? (
+
+      {mode === "rider" ? (
         <RiderScreen
           sheetBottom={sheetBottom}
+          shuttleLat={position?.lat}
+          shuttleLng={position?.lng}
           onSelectedStop={setSelectedStopId}
           onFocusStop={(stopId) =>
             setStopFocus((current) => ({ id: stopId, n: (current?.n ?? 0) + 1 }))
@@ -141,20 +169,18 @@ export function ShuttleModule({ sheetBottom }: Props) {
           onCoverFraction={setCoverFraction}
         />
       ) : (
-        <View style={[styles.sheet, { bottom: sheetBottom }]}>
-          <ScrollView contentContainerStyle={styles.driverScroll}>
-            <DriverScreen
-              onShuttleId={setDriverShuttleId}
-              onLocalPosition={(p) =>
-                setPosition({
-                  lat: p.lat,
-                  lng: p.lng,
-                  heading: p.heading,
-                })
-              }
-            />
-          </ScrollView>
-        </View>
+        <DriverScreen
+          sheetBottom={sheetBottom}
+          onShuttleId={setDriverShuttleId}
+          onLocalPosition={(p) =>
+            setPosition({
+              lat: p.lat,
+              lng: p.lng,
+              heading: p.heading,
+            })
+          }
+          onCoverFraction={setCoverFraction}
+        />
       )}
     </View>
   );
@@ -162,40 +188,31 @@ export function ShuttleModule({ sheetBottom }: Props) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#fff" },
-  sheet: {
+  toggleWrap: {
     position: "absolute",
-    left: 12,
-    right: 12,
-    maxHeight: "50%",
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    overflow: "hidden",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#ddd",
-  },
-  topRow: {
-    position: "absolute",
-    top: 12,
-    left: 12,
-    right: 12,
-  },
-  switch: {
-    flexDirection: "row",
-    gap: 8,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 4,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#ddd",
-  },
-  switchItem: {
-    flex: 1,
-    paddingVertical: 10,
+    top: 10,
+    left: 0,
+    right: 0,
     alignItems: "center",
-    borderRadius: 8,
-    backgroundColor: "#eee",
+    zIndex: 2,
   },
-  switchOn: { backgroundColor: "#cfe8dc" },
-  switchText: { fontWeight: "600" },
-  driverScroll: { paddingBottom: 8 },
+  toggle: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 999,
+    padding: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#ddd",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 3,
+  },
+  toggleSide: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+  },
+  toggleOn: { backgroundColor: "#cfe8dc" },
 });

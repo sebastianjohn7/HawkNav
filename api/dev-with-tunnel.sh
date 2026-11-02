@@ -50,7 +50,7 @@ cleanup() {
     kill "$TUNNEL_PID" 2>/dev/null || true
   fi
   set_api_url "$LOCAL_API_URL"
-  echo "Restored mobile/.env EXPO_PUBLIC_API_URL to $LOCAL_API_URL"
+  echo "Restored mobile/.env EXPO_PUBLIC_API_URL to $LOCAL_API_URL (API is stopped)"
   rm -f "$LOG_FILE"
 }
 trap cleanup INT TERM EXIT
@@ -75,12 +75,26 @@ if [ -z "$TUNNEL_URL" ]; then
   exit 1
 fi
 
-set_api_url "$TUNNEL_URL"
+# Expo Go on the same Wi-Fi should use the Mac's LAN IP. Quick tunnels are
+# often blocked or flaky from phones even when curl from the Mac works.
+LAN_IP="$(ipconfig getifaddr en0 2>/dev/null || true)"
+if [ -z "$LAN_IP" ]; then
+  LAN_IP="$(ipconfig getifaddr en1 2>/dev/null || true)"
+fi
+
+if [ -n "$LAN_IP" ]; then
+  MOBILE_API_URL="http://${LAN_IP}:${BUN_PORT}"
+else
+  MOBILE_API_URL="$TUNNEL_URL"
+fi
+
+set_api_url "$MOBILE_API_URL"
 
 echo "=================================================="
 echo "Tunnel Active: $TUNNEL_URL"
+echo "Mobile API URL: $MOBILE_API_URL"
 echo "Wrote EXPO_PUBLIC_API_URL into mobile/.env"
-echo "Next (other terminal): cd mobile && npx expo start"
+echo "Next (other terminal): cd mobile && npx expo start --clear"
 echo "=================================================="
 
 cd "$API_DIR"

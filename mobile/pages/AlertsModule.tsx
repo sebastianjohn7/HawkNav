@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -42,9 +43,10 @@ function formatWhen(iso: string): string {
 /** Campus alerts. Messages stay on this device until a database exists. */
 export function AlertsModule({ bottomInset }: Props) {
   const { role } = useAuth();
-  const canSend = role ? ACCESS[role].canUseAdminTools : false;
+  const canManage = role ? ACCESS[role].canUseAdminTools : false;
   const [ready, setReady] = useState(false);
   const [alerts, setAlerts] = useState<AlertMessage[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [writing, setWriting] = useState(false);
   const [fabHeight, setFabHeight] = useState(0);
   const [title, setTitle] = useState("");
@@ -72,20 +74,62 @@ export function AlertsModule({ bottomInset }: Props) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(alerts)).catch(() => {});
   }, [alerts, ready]);
 
-  function send() {
+  function openNew() {
+    setEditingId(null);
+    setTitle("");
+    setBody("");
+    setWriting(true);
+  }
+
+  function openEdit(item: AlertMessage) {
+    setEditingId(item.id);
+    setTitle(item.title);
+    setBody(item.body);
+    setWriting(true);
+  }
+
+  function closeWriter() {
+    setWriting(false);
+    setEditingId(null);
+    setTitle("");
+    setBody("");
+  }
+
+  function save() {
     const nextTitle = title.trim();
     const nextBody = body.trim();
     if (!nextTitle || !nextBody) return;
-    const message: AlertMessage = {
-      id: `${Date.now()}`,
-      title: nextTitle,
-      body: nextBody,
-      createdAt: new Date().toISOString(),
-    };
-    setAlerts((current) => [message, ...current]);
-    setTitle("");
-    setBody("");
-    setWriting(false);
+
+    if (editingId) {
+      setAlerts((current) =>
+        current.map((item) =>
+          item.id === editingId
+            ? { ...item, title: nextTitle, body: nextBody }
+            : item,
+        ),
+      );
+    } else {
+      const message: AlertMessage = {
+        id: `${Date.now()}`,
+        title: nextTitle,
+        body: nextBody,
+        createdAt: new Date().toISOString(),
+      };
+      setAlerts((current) => [message, ...current]);
+    }
+    closeWriter();
+  }
+
+  function confirmDelete(item: AlertMessage) {
+    Alert.alert("Delete alert", `Remove “${item.title}”?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () =>
+          setAlerts((current) => current.filter((row) => row.id !== item.id)),
+      },
+    ]);
   }
 
   if (writing) {
@@ -96,12 +140,16 @@ export function AlertsModule({ bottomInset }: Props) {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View style={styles.header}>
-          <Pressable onPress={() => setWriting(false)} hitSlop={8}>
+          <Pressable onPress={closeWriter} hitSlop={8}>
             <Text style={styles.link}>Cancel</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>New alert</Text>
-          <Pressable onPress={send} disabled={!canSubmit} hitSlop={8}>
-            <Text style={[styles.link, !canSubmit && styles.linkOff]}>Send</Text>
+          <Text style={styles.headerTitle}>
+            {editingId ? "Edit alert" : "New alert"}
+          </Text>
+          <Pressable onPress={save} disabled={!canSubmit} hitSlop={8}>
+            <Text style={[styles.link, !canSubmit && styles.linkOff]}>
+              {editingId ? "Save" : "Send"}
+            </Text>
           </Pressable>
         </View>
         <View style={[styles.form, { paddingBottom: bottomInset }]}>
@@ -149,24 +197,64 @@ export function AlertsModule({ bottomInset }: Props) {
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
+            <View style={styles.cardTop}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              {canManage && (
+                <Pressable
+                  hitSlop={8}
+                  accessibilityLabel="Alert options"
+                  onPress={() =>
+                    Alert.alert(item.title, undefined, [
+                      {
+                        text: "Edit",
+                        onPress: () => openEdit(item),
+                      },
+                      {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: () => confirmDelete(item),
+                      },
+                      { text: "Cancel", style: "cancel" },
+                    ])
+                  }
+                >
+                  <Ionicons
+                    name="ellipsis-vertical"
+                    size={18}
+                    color="#666"
+                  />
+                </Pressable>
+              )}
+            </View>
             <Text style={styles.cardWhen}>{formatWhen(item.createdAt)}</Text>
             <Text style={styles.cardBody}>{item.body}</Text>
           </View>
         )}
       />
-      {canSend && (
-        <Pressable
-          style={[styles.fab, { bottom: bottomInset + fabHeight }]}
-          onPress={() => setWriting(true)}
-          onLayout={(event) => {
-            const next = event.nativeEvent.layout.height;
-            setFabHeight((current) => (current === next ? current : next));
-          }}
-          accessibilityLabel="New alert"
+      {canManage && (
+        <View
+          style={[
+            styles.fabDock,
+            {
+              paddingBottom: bottomInset,
+              // Inset scales with the measured FAB so it isn't a fixed px value.
+              paddingHorizontal: fabHeight > 0 ? fabHeight * 0.3 : undefined,
+            },
+          ]}
+          pointerEvents="box-none"
         >
-          <Ionicons name="add" size={28} color="#fff" />
-        </Pressable>
+          <Pressable
+            style={styles.fab}
+            onPress={openNew}
+            onLayout={(event) => {
+              const next = Math.round(event.nativeEvent.layout.height);
+              setFabHeight((current) => (current === next ? current : next));
+            }}
+            accessibilityLabel="New alert"
+          >
+            <Ionicons name="add" size={28} color="#fff" />
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -188,9 +276,12 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: "700", flex: 1 },
   link: { color: "#1565C0", fontWeight: "700", fontSize: 16 },
   linkOff: { color: "#9bb" },
+  fabDock: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+  },
   fab: {
-    position: "absolute",
-    right: "4%",
     backgroundColor: "#1565C0",
     borderRadius: 999,
     padding: 14,
@@ -210,7 +301,13 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#ddd",
   },
-  cardTitle: { fontSize: 17, fontWeight: "700" },
+  cardTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  cardTitle: { flex: 1, fontSize: 17, fontWeight: "700" },
   cardWhen: { fontSize: 13, color: "#666" },
   cardBody: { fontSize: 15, color: "#222" },
   form: { flex: 1, padding: 16, gap: 12 },

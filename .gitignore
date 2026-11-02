@@ -30,6 +30,7 @@ secrets/
 build/
 out/
 tmp/
+.idea/
 temp/
 *.local
 .direnv/

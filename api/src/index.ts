@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { checkIn, checkOut, listShuttles } from "./checkins";
 import {
   dayGroupForNow,
+  isDropOffOnly,
   loadShuttleData,
   nextDeparture,
   type RouteId,
@@ -29,11 +30,27 @@ app.get("/health", (c) => {
 app.get("/stops", (c) => {
   const d = data();
   const route = c.req.query("route");
+  const day_group = dayGroupForNow();
+  // Stops the shuttle actually visits on today's Chicago day group.
+  const todayStopIds = new Set(
+    day_group
+      ? d.schedules
+          .filter((row) => row.day_group === day_group)
+          .map((row) => row.stop_id)
+      : [],
+  );
   let stops = d.stops.filter((s) => s.status === "active");
   if (route) {
     stops = stops.filter((s) => s.routes.includes(route));
   }
-  return c.json({ stops, meta: d.meta });
+  return c.json({
+    stops: stops.map((stop) => ({
+      ...stop,
+      runs_today: todayStopIds.has(stop.stop_id),
+    })),
+    day_group_today: day_group,
+    meta: d.meta,
+  });
 });
 
 app.get("/schedules", (c) => {
@@ -106,10 +123,12 @@ app.get("/eta", (c) => {
   if (!stop) {
     return c.json({ error: `unknown stop_id: ${stop_id}` }, 404);
   }
-  const eta = nextDeparture(d, stop_id);
+  const drop_off_only = isDropOffOnly(d, stop_id);
+  const eta = drop_off_only ? null : nextDeparture(d, stop_id);
   return c.json({
     stop_id,
     stop_name: stop.name,
+    drop_off_only,
     eta,
     note: "Schedule next-departure from CSVs (America/Chicago); not GPS-based ETA",
   });

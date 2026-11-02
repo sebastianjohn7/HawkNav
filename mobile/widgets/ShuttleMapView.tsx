@@ -1,5 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 
 /** UHCL Bayou area — campus overview (same default as the Flutter ArcGIS map). */
@@ -40,6 +42,7 @@ export function ShuttleMapView({
   obscuredFraction = 0,
 }: Props) {
   const mapRef = useRef<MapView>(null);
+  const [showUser, setShowUser] = useState(false);
   const hasShuttle =
     typeof shuttleLat === "number" &&
     typeof shuttleLng === "number" &&
@@ -47,6 +50,18 @@ export function ShuttleMapView({
     Number.isFinite(shuttleLng);
 
   const lookingAtStop = focusNonce > 0;
+
+  // Local blue-dot only — never written to Supabase.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (!cancelled) setShowUser(status === "granted");
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!hasShuttle || lookingAtStop || !mapRef.current) return;
@@ -103,6 +118,12 @@ export function ShuttleMapView({
         provider={PROVIDER_DEFAULT}
         initialRegion={UHCL_REGION}
         mapType="standard"
+        showsUserLocation={showUser}
+        showsMyLocationButton={false}
+        // Native ignores bottom/left of 0 (falsy). Stack in bottom-left:
+        // Apple logo above, Legal underneath.
+        appleLogoInsets={{ left: 8, bottom: 8 }}
+        legalLabelInsets={{ top: 0, right: 0, bottom: 8, left: 8 }}
       >
         {stops.map((stop) => (
           <Marker
@@ -116,8 +137,13 @@ export function ShuttleMapView({
           <Marker
             coordinate={{ latitude: shuttleLat!, longitude: shuttleLng! }}
             title="Shuttle"
-            pinColor="#0B6E4F"
-          />
+            anchor={{ x: 0.5, y: 0.5 }}
+            tracksViewChanges={false}
+          >
+            <View style={styles.shuttleMark}>
+              <Ionicons name="bus" size={18} color="#fff" />
+            </View>
+          </Marker>
         )}
       </MapView>
     </View>
@@ -127,4 +153,11 @@ export function ShuttleMapView({
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   map: { flex: 1 },
+  shuttleMark: {
+    backgroundColor: "#0B6E4F",
+    borderRadius: 999,
+    padding: 8,
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
 });

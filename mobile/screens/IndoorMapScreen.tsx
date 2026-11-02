@@ -7,6 +7,7 @@ import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
 import StartRoomSelectionTesting from "./hooks/startRoomSelectionTesting.tsx";
 import * as Location from 'expo-location';
 
+
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";
 
 const LEVELS: Array<{ id: LevelId; label: string }> = [
@@ -22,8 +23,6 @@ const DELTA_REGION = {
   latitudeDelta: Math.max((bbox[3] - bbox[1]) * 1.6, 0.001),
   longitudeDelta: Math.max((bbox[2] - bbox[0]) * 1.6, 0.001),
 };
-
-const roomImage = require('../assets/img/navicon.jpg');
 
 type FC = GeoJSON.FeatureCollection;
 
@@ -172,6 +171,7 @@ useEffect(() => {
         <Text style={styles.bannerSub}>
           UHCL Indoors extract — paths/routing later
         </Text>
+        <Text style={styles.bannerTitle}>Delta</Text>
         <View style={styles.levelRow}>
           {LEVELS.map((l) => {
             const on = level === l.id;
@@ -195,6 +195,10 @@ useEffect(() => {
         provider={PROVIDER_DEFAULT}
         initialRegion={DELTA_REGION}
         mapType="standard"
+        // Native ignores bottom/left of 0 (falsy). Stack in bottom-left:
+        // Apple logo above, Legal underneath.
+        appleLogoInsets={{ left: 8, bottom: 8 }}
+        legalLabelInsets={{ top: 0, right: 0, bottom: 8, left: 8 }}
       >
         <Marker 
         coordinate={{
@@ -212,7 +216,9 @@ useEffect(() => {
           markerComponent={<RoomMarker />}
           onPress={(object) => {
             setDisplayInfo(object.feature);
-            //console.log("Object", object.feature.properties?.NAME);
+          onPress={(object) => {
+            setDisplayInfo(object.feature);
+            console.log("Object", object.feature.properties?.NAME);
             //console.log("\n Object Type: ", typeof object);
           }}
         />
@@ -233,6 +239,8 @@ useEffect(() => {
           fillColor="transparent"
         />
         { /*Route clipping through floor fix*/(pathLine1 && level.includes("L1")) ? (<Polyline
+          coordinates={pathLine1}
+        {pathLine1 && (<Polyline
           coordinates={pathLine1}
           strokeColor="#2563EB"
           strokeWidth={4}
@@ -259,6 +267,9 @@ useEffect(() => {
         </>
       )}
       { /* Displays Current Selected room info to users */displayInfo && (
+      />)}
+      </MapView>
+      {displayInfo && (
         <>
         <Pressable 
         style={styles.backdrop}
@@ -271,6 +282,8 @@ useEffect(() => {
         <Pressable style={styles.routeButton}
           onPress={() => setDisplayStartOptions(true)}><Text>Select Start Node</Text></Pressable>
       </View>
+        <DisplayPointInfo object={displayInfo} setEndNode={setEndNode}/>
+        </>)}
     </View>
   ));
 }
@@ -278,16 +291,17 @@ useEffect(() => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   banner: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: "#f5f5f5",
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ccc",
-    gap: 4,
+    gap: 12,
   },
   bannerTitle: { fontWeight: "700" },
-  bannerSub: { fontSize: 12, color: "#555" },
-  levelRow: { flexDirection: "row", gap: 8, marginTop: 4 },
+  levelRow: { flexDirection: "row", gap: 8 },
   levelBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,

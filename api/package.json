@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "./dev-with-tunnel.sh",
+    "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ./dev-with-tunnel.ps1",
     "dev:local": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
     "check": "bun run src/check.ts"
   },
   "dependencies": {
     "bun": "^1.4.2",
-    "hono": "^4.7.2"
+    "hono": "^4.13.13"
   },
   "devDependencies": {
     "@types/bun": "latest",

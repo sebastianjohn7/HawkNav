@@ -1,17 +1,17 @@
 stop_id,name,lat,lng,routes,status
-bay_area_park_ride,Bay Area Park & Ride,29.55340,-95.12406,off_campus,active
-united_way_houston,United Way of Houston,29.55988,-95.11643,off_campus,active
-coastal_flow,Coastal Flow Measurement Co,29.57011,-95.11092,off_campus,active
-anytime_fitness,Anytime Fitness,29.57651,-95.10702,off_campus,active
-university_forest_apts,University Forest Apartments,29.58240,-95.10080,off_campus,active
-heb,HEB,29.54483,-95.13369,off_campus,active
-delta_front,Delta,29.58060,-95.09870,on_campus,active
-arbor,Arbor,29.57990,-95.09960,on_campus,active
-police_building,Police Building,29.58020,-95.09640,on_campus,active
-recreation_center,Recreation Center,29.58120,-95.09710,on_campus,active
-hunter_hall,Hunter Hall,29.57870,-95.09590,on_campus,active
-sscb_entrance,SSCB Entrance,29.57820,-95.09650,"on_campus,pearland",active
-bayou_student_entrance,Bayou Student Entrance,29.57770,-95.09780,on_campus,active
-pearland_arrival,Pearland Arrival,29.54850,-95.28600,pearland,active
-pearland_departure,Pearland Departure,29.54850,-95.28600,pearland,active
-tmc,UHCL at Texas Medical Center ,29.71450,-95.40150,medical_center,inactive
+delta_front,Delta,29.578137, -95.103850,on_campus,active
+arbor,Arbor,29.577969, -95.102865,on_campus,active
+police_building,Police Building,29.586858, -95.094525,on_campus,active
+rec_center,Rec Center,29.586089, -95.098299,on_campus,active
+hunter_hall,Hunter Hall,29.585197, -95.097884,on_campus,active
+sscb_entrance,SSCB Entrance,29.584489, -95.097761,"on_campus,pearland",active
+bayou_student_entrance,Bayou Entrance,29.582716, -95.097297,on_campus,active
+pearland_arrival,Pearland Arrival,29.587031, -95.267637,pearland,active
+pearland_departure,Pearland Departure,29.587031, -95.267637,pearland,active
+tmc,Medical Center,29.708792, -95.401819,medical_center,inactive
+university_forest_apts,University Forest Apt,29.576970, -95.106258,off_campus,active
+bay_area_park,Bay Area Park,29.569848, -95.111155,off_campus,active
+united_way_houston,United Way,29.560029, -95.115616,off_campus,active
+coastal_flow,Coastal Flow,29.570195, -95.109943,off_campus,active
+anytime_fitness,Anytime Fitness,29.574122, -95.107483,off_campus,active
+heb,HEB,29.606248, -95.126115,off_campus,active

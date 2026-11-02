@@ -30,12 +30,10 @@ secrets/
 build/
 out/
 tmp/
+.idea/
 temp/
 *.local
 .direnv/
 .cursor/rules/authorship-and-style.mdc
+.cursor/plans
 PROJECT_CONTEXT.md
-.DS_Store
-.DS_Store
-
-arcgis_maps_core/

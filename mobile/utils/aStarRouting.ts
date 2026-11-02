@@ -2,6 +2,8 @@
 
 //import { forkEvent } from "react-native/types_generated/Libraries/Animated/AnimatedExports";
 
+//import { forkEvent } from "react-native/types_generated/Libraries/Animated/AnimatedExports";
+
 export type LngLat = [number, number];
 
 type Graph = {
@@ -193,6 +195,8 @@ export function buildGraphFromGeoJson(geojson: {
     nearestPointToHallway(hallway, floorStairs, 30);
     nearestPointToHallway(hallway, floorElevators, 30);
   }
+  //console.log(`Confirming Edge Generations: \n${graph.edges.size}`);
+  //console.log(graph.edges);
   //console.log(`Confirming Edge Generations: \n${graph.edges.size}`);
   //console.log(graph.edges);
   return graph;

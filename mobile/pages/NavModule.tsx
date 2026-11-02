@@ -1,11 +1,26 @@
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type NativeSyntheticEvent,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  Tabs,
+  type TabSelectedEvent,
+  type TabSelectionRejectedEvent,
+} from "react-native-screens";
+import { useAuth } from "../lib/auth";
+import { ACCESS, type Tab } from "../lib/roles";
 import { IndoorMapScreen } from "../screens/IndoorMapScreen";
 import { AlertsModule } from "./AlertsModule";
 import { ShuttleModule } from "./ShuttleModule";
-
-type Tab = "shuttle" | "find" | "alerts";
 
 type Props = {
   onOpenSettings: () => void;
@@ -15,52 +30,208 @@ const TABS: Array<{
   id: Tab;
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
+  sf: string;
+  sfOn: string;
 }> = [
-  { id: "shuttle", label: "Shuttle", icon: "bus" },
-  { id: "find", label: "Find", icon: "location" },
-  { id: "alerts", label: "News & Alerts", icon: "notifications" },
+  { id: "shuttle", label: "Shuttle", icon: "bus", sf: "bus", sfOn: "bus.fill" },
+  { id: "find", label: "Map", icon: "map", sf: "map", sfOn: "map.fill" },
+  {
+    id: "alerts",
+    label: "Alerts",
+    icon: "notifications",
+    sf: "bell",
+    sfOn: "bell.fill",
+  },
 ];
 
-/** Josh's NavModule shell — bottom tabs + settings (Parking removed). */
+// Room for the floating pill, plus a gap so the shuttle sheet clears it.
+const FLOATING_BAR_GAP = 8;
+// iOS 26 draws the system bar over the screen. This clears that glass pill.
+const SYSTEM_TAB_CLEARANCE = 68;
+
+type BarKind = "system" | "floating" | "none";
+
+/**
+ * iOS 26+ uses UITabBar only when this binary actually has the native host.
+ * Expo Go builds that predate that view fall back to the floating bar.
+ */
+function systemTabBarAvailable(): boolean {
+  if (Platform.OS !== "ios") return false;
+  const major = parseInt(String(Platform.Version), 10);
+  if (!Number.isFinite(major) || major < 26) return false;
+
+  const probe = (
+    globalThis as {
+      __nativeComponentRegistry__hasComponent?: (name: string) => boolean;
+    }
+  ).__nativeComponentRegistry__hasComponent;
+  if (typeof probe !== "function") return false;
+  try {
+    return probe("RNSTabsHostIOS");
+  } catch {
+    return false;
+  }
+}
+
+function TabBody({ id, sheetBottom }: { id: Tab; sheetBottom: number }) {
+  if (id === "shuttle") return <ShuttleModule sheetBottom={sheetBottom} />;
+  if (id === "find") return <IndoorMapScreen />;
+  return <AlertsModule bottomInset={sheetBottom} />;
+}
+
+/** Bottom tabs + settings. Visitors have one tab, so they get no bar. */
 export function NavModule({ onOpenSettings }: Props) {
-  const [tab, setTab] = useState<Tab>("shuttle");
+  const { role, roleError, roleErrorMessage, retryRole, guest, signOut } =
+    useAuth();
+  const insets = useSafeAreaInsets();
+  const [picked, setPicked] = useState<Tab | null>(null);
+  const [floatingBarHeight, setFloatingBarHeight] = useState(64);
+  const provenance = useRef(0);
+
+  if (!role) {
+    return (
+      <View style={styles.center}>
+        {roleError ? (
+          <>
+            <Text style={styles.errorText}>
+              Couldn't load your account. Check your connection and try again.
+            </Text>
+            {roleErrorMessage ? (
+              <Text style={styles.errorLink}>{roleErrorMessage}</Text>
+            ) : null}
+            <Pressable style={styles.signInBtn} onPress={retryRole}>
+              <Text style={styles.signInText}>Retry</Text>
+            </Pressable>
+            <Pressable onPress={signOut}>
+              <Text style={styles.errorLink}>Sign out</Text>
+            </Pressable>
+          </>
+        ) : (
+          <ActivityIndicator />
+        )}
+      </View>
+    );
+  }
+
+  const allowed = TABS.filter((t) => ACCESS[role].tabs.includes(t.id));
+  const tab = allowed.some((t) => t.id === picked) ? picked! : allowed[0].id;
+  const bar: BarKind =
+    allowed.length <= 1
+      ? "none"
+      : systemTabBarAvailable()
+        ? "system"
+        : "floating";
+
+  const sheetBottom =
+    bar === "floating"
+      ? Math.max(insets.bottom, 10) + floatingBarHeight + FLOATING_BAR_GAP
+      : bar === "system"
+        ? insets.bottom + SYSTEM_TAB_CLEARANCE
+        : Math.max(insets.bottom, 12);
+
+  const trailing = guest ? (
+    <Pressable style={styles.signInBtn} onPress={signOut}>
+      <Text style={styles.signInText}>Sign In</Text>
+    </Pressable>
+  ) : (
+    <Pressable style={styles.settingsBtn} onPress={onOpenSettings}>
+      <Ionicons name="settings" size={22} color="#fff" />
+    </Pressable>
+  );
 
   return (
     <View style={styles.root}>
       <View style={styles.appBar}>
-        <Text style={styles.appTitle}>HawkNav</Text>
-        <Pressable style={styles.settingsBtn} onPress={onOpenSettings}>
-          <Ionicons name="settings" size={22} color="#fff" />
-        </Pressable>
+        <View style={styles.brand}>
+          <Image
+            source={require("../assets/img/uhcl_wordmark.png")}
+            style={styles.brandMark}
+            accessibilityLabel="UHCL"
+          />
+          <Text style={styles.appTitle}>
+            {tab === "alerts" ? "Alerts" : "HawkNav"}
+          </Text>
+        </View>
+        {trailing}
       </View>
 
-      <View style={styles.body}>
-        {tab === "shuttle" && <ShuttleModule />}
-        <IndoorMapScreen tab={tab}/>
-        {tab === "alerts" && <AlertsModule />}
-      </View>
-
-      <View style={styles.bottom}>
-        {TABS.map((t) => {
-          const on = tab === t.id;
-          return (
-            <Pressable
+      {bar === "system" ? (
+        <Tabs.Host
+          key={allowed.map((t) => t.id).join("-")}
+          navStateRequest={{
+            selectedScreenKey: tab,
+            baseProvenance: provenance.current,
+          }}
+          onTabSelected={(event: NativeSyntheticEvent<TabSelectedEvent>) => {
+            provenance.current = event.nativeEvent.provenance;
+            setPicked(event.nativeEvent.selectedScreenKey as Tab);
+          }}
+          onTabSelectionRejected={(
+            event: NativeSyntheticEvent<TabSelectionRejectedEvent>,
+          ) => {
+            provenance.current = event.nativeEvent.provenance;
+            const key = event.nativeEvent.selectedScreenKey as Tab;
+            setPicked((current) => (current === key ? current : key));
+          }}
+          ios={{
+            tabBarTintColor: "#1565C0",
+            tabBarControllerMode: "tabBar",
+            tabBarMinimizeBehavior: "never",
+          }}
+        >
+          {allowed.map((t) => (
+            <Tabs.Screen
               key={t.id}
-              style={styles.bottomItem}
-              onPress={() => setTab(t.id)}
+              screenKey={t.id}
+              title={t.label}
+              ios={{
+                icon: { type: "sfSymbol", name: t.sf },
+                selectedIcon: { type: "sfSymbol", name: t.sfOn },
+              }}
             >
-              <Ionicons
-                name={t.icon}
-                size={22}
-                color={on ? "#1565C0" : "#666"}
-              />
-              <Text style={[styles.bottomLabel, on && styles.bottomLabelOn]}>
-                {t.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+              <View style={styles.body}>
+                <TabBody id={t.id} sheetBottom={sheetBottom} />
+              </View>
+            </Tabs.Screen>
+          ))}
+        </Tabs.Host>
+      ) : (
+        <View style={styles.body}>
+          <TabBody id={tab} sheetBottom={sheetBottom} />
+        </View>
+      )}
+
+      {bar === "floating" && (
+        <View
+          style={[styles.floatBar, { bottom: Math.max(insets.bottom, 10) }]}
+          onLayout={(event) => {
+            const next = Math.round(event.nativeEvent.layout.height);
+            setFloatingBarHeight((current) =>
+              current === next ? current : next,
+            );
+          }}
+        >
+          {allowed.map((t) => {
+            const on = tab === t.id;
+            return (
+              <Pressable
+                key={t.id}
+                style={styles.floatItem}
+                onPress={() => setPicked(t.id)}
+              >
+                <Ionicons
+                  name={t.icon}
+                  size={22}
+                  color={on ? "#1565C0" : "#666"}
+                />
+                <Text style={[styles.floatLabel, on && styles.floatLabelOn]}>
+                  {t.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
@@ -75,27 +246,61 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ddd",
+    backgroundColor: "#fff",
   },
-  appTitle: { fontSize: 18, fontWeight: "700" },
+  brand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 0.75,
+  },
+  brandMark: { width: 40, height: 30, resizeMode: "contain" },
+  // Matches UHCL web H4/H5: DM Sans, tight tracking, navy.
+  appTitle: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 22,
+    letterSpacing: -0.1,
+    color: "#003A60",
+    // Optical align with the UHCL wordmark beside it.
+    transform: [{ translateY: 1.5 }],
+  },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16, padding: 24 },
+  errorText: { textAlign: "center", fontSize: 16 },
+  errorLink: { color: "#1565C0", fontWeight: "600" },
+  signInBtn: {
+    backgroundColor: "#1565C0",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  signInText: { color: "#fff", fontWeight: "700" },
   settingsBtn: {
     backgroundColor: "#1565C0",
     padding: 8,
     borderRadius: 20,
   },
   body: { flex: 1 },
-  bottom: {
+  floatBar: {
+    position: "absolute",
+    left: 16,
+    right: 16,
     flexDirection: "row",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#ccc",
-    paddingTop: 6,
-    paddingBottom: 4,
-    backgroundColor: "#fafafa",
+    backgroundColor: "#fff",
+    borderRadius: 28,
+    paddingVertical: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#ddd",
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 6,
   },
-  bottomItem: {
+  floatItem: {
     flex: 1,
     alignItems: "center",
     gap: 2,
   },
-  bottomLabel: { fontSize: 10, color: "#666" },
-  bottomLabelOn: { color: "#1565C0", fontWeight: "700" },
+  floatLabel: { fontSize: 11, color: "#666" },
+  floatLabelOn: { color: "#1565C0", fontWeight: "700" },
 });

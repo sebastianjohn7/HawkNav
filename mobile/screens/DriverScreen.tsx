@@ -1,131 +1,291 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import * as Location from "expo-location";
-import { DEFAULT_SHUTTLE_ID, hasSupabaseConfig, supabase } from "../lib/config";
-import "../lib/backgroundLocationStub";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { apiUrl } from "../lib/config";
+
+type Shuttle = { id: string; name: string; polling: boolean };
 
 type Props = {
-  /** Optimistic map update before Realtime echoes the upsert. */
+  /** Keeps the sidebar above the tab bar. */
+  sheetBottom: number;
+  /** Map follows the shuttle the driver has selected. */
+  onShuttleId?: (shuttleId: string) => void;
+  /** Show the first plot before Realtime echoes the database write. */
   onLocalPosition?: (p: {
     lat: number;
     lng: number;
     heading: number | null;
   }) => void;
+  /** Share of the screen the open sidebar covers, so the pin stays visible. */
+  onCoverFraction?: (fraction: number) => void;
 };
 
-export function DriverScreen({ onLocalPosition }: Props) {
-  const [streaming, setStreaming] = useState(false);
+export function DriverScreen({
+  sheetBottom,
+  onShuttleId,
+  onLocalPosition,
+  onCoverFraction,
+}: Props) {
+  const [open, setOpen] = useState(false);
+  const [shuttles, setShuttles] = useState<Shuttle[]>([]);
+  const [shuttleId, setShuttleId] = useState<string | null>(null);
+  const [polling, setPolling] = useState(false);
   const [status, setStatus] = useState("Idle");
   const [last, setLast] = useState<{
     lat: number;
     lng: number;
     heading: number | null;
   } | null>(null);
-  const subRef = useRef<Location.LocationSubscription | null>(null);
+  const frameWidth = useRef(0);
+  const panelWidth = useRef(0);
 
-  useEffect(() => {
-    return () => {
-      subRef.current?.remove();
-    };
-  }, []);
-
-  async function start() {
-    if (!supabase) {
-      setStatus("Missing Supabase keys — see README Phase 1B");
-      return;
-    }
-    const client = supabase;
-    const { status: perm } = await Location.requestForegroundPermissionsAsync();
-    if (perm !== "granted") {
-      setStatus("Location permission denied");
-      return;
-    }
-
-    // 3–5s balances battery drain vs rider freshness for campus shuttles.
-    const sub = await Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.High,
-        timeInterval: 4000,
-        distanceInterval: 0,
-      },
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const heading = pos.coords.heading;
-        const point = { lat, lng, heading };
-        setLast(point);
-        onLocalPosition?.(point);
-        const { error } = await client.from("shuttle_positions").upsert(
-          {
-            shuttle_id: DEFAULT_SHUTTLE_ID,
-            lat,
-            lng,
-            heading: heading ?? null,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "shuttle_id" },
-        );
-        setStatus(error ? `Upsert error: ${error.message}` : "Streaming");
-      },
-    );
-    subRef.current = sub;
-    setStreaming(true);
-    setStatus("Streaming");
+  function reportCover() {
+    if (frameWidth.current <= 0 || panelWidth.current <= 0) return;
+    onCoverFraction?.(panelWidth.current / frameWidth.current);
   }
 
-  function stop() {
-    subRef.current?.remove();
-    subRef.current = null;
-    setStreaming(false);
-    setStatus("Stopped");
+  useEffect(() => {
+    if (!open) onCoverFraction?.(0);
+  }, [open, onCoverFraction]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${apiUrl}/shuttles`)
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return res.json() as Promise<{ shuttles?: Shuttle[] }>;
+      })
+      .then((body) => {
+        if (cancelled) return;
+        const list = body.shuttles ?? [];
+        setShuttles(list);
+        const active = list.find((shuttle) => shuttle.polling) ?? list[0];
+        if (!active) {
+          setStatus("No shuttles configured");
+          return;
+        }
+        setShuttleId(active.id);
+        setPolling(active.polling);
+        onShuttleId?.(active.id);
+        if (active.polling) setStatus(`Polling ${active.name}`);
+        else setStatus("Idle");
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        const detail =
+          error instanceof Error ? error.message : "request failed";
+        setStatus(`Cannot reach API (${apiUrl}): ${detail}`);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [onShuttleId]);
+
+  function choose(id: string) {
+    if (polling) return;
+    setShuttleId(id);
+    onShuttleId?.(id);
+  }
+
+  async function start() {
+    if (!shuttleId) {
+      setStatus("Pick a shuttle");
+      return;
+    }
+    setStatus("Starting");
+    try {
+      const res = await fetch(`${apiUrl}/shuttles/checkin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shuttle_id: shuttleId }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setPolling(false);
+        setStatus(body.error ?? "Check-in failed");
+        return;
+      }
+      setPolling(true);
+      const name = shuttles.find((shuttle) => shuttle.id === shuttleId)?.name;
+      setStatus(body.note ?? `Polling ${name ?? shuttleId}`);
+      if (body.position) {
+        const point = {
+          lat: body.position.lat as number,
+          lng: body.position.lng as number,
+          heading: (body.position.heading ?? null) as number | null,
+        };
+        setLast(point);
+        onLocalPosition?.(point);
+      }
+    } catch {
+      setPolling(false);
+      setStatus("Cannot reach the API");
+    }
+  }
+
+  async function stop() {
+    if (!shuttleId) return;
+    try {
+      const res = await fetch(`${apiUrl}/shuttles/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shuttle_id: shuttleId }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setStatus(body.error ?? "Stop failed");
+        return;
+      }
+      setPolling(false);
+      setStatus("Stopped");
+    } catch {
+      setStatus("Cannot reach the API");
+    }
   }
 
   return (
-    <View style={styles.wrap}>
-      <Text style={styles.title}>Driver check-in</Text>
-      {!hasSupabaseConfig && (
-        <Text style={styles.warn}>
-          Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY after
-          creating a Supabase project (README Phase 1B).
-        </Text>
+    <View
+      style={styles.overlay}
+      pointerEvents="box-none"
+      onLayout={(event) => {
+        frameWidth.current = event.nativeEvent.layout.width;
+        reportCover();
+      }}
+    >
+      {!open && (
+        <Pressable style={styles.handle} onPress={() => setOpen(true)}>
+          <Ionicons name="bus" size={18} color="#1565C0" />
+          <Text style={styles.handleText}>Drive</Text>
+        </Pressable>
       )}
-      <Text style={styles.meta}>Status: {status}</Text>
-      {last && (
-        <Text style={styles.meta}>
-          {last.lat.toFixed(5)}, {last.lng.toFixed(5)} heading=
-          {last.heading?.toFixed(0) ?? "—"}
-        </Text>
+
+      {open && (
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+          <Pressable style={styles.backdrop} onPress={() => setOpen(false)} />
+          <View
+            style={[styles.sidebarSlot, { paddingBottom: sheetBottom }]}
+            pointerEvents="box-none"
+          >
+            <View
+              style={styles.sidebar}
+              onLayout={(event) => {
+                panelWidth.current = event.nativeEvent.layout.width;
+                reportCover();
+              }}
+            >
+            <View style={styles.sidebarHeader}>
+              <Pressable onPress={() => setOpen(false)} hitSlop={8}>
+                <Ionicons name="chevron-forward" size={22} color="#1565C0" />
+              </Pressable>
+              <Text style={styles.sidebarTitle}>Check-in</Text>
+            </View>
+            <View style={styles.body}>
+              <Text style={styles.meta}>Status: {status}</Text>
+              {shuttles.map((shuttle) => {
+                const selected = shuttle.id === shuttleId;
+                return (
+                  <Pressable
+                    key={shuttle.id}
+                    style={[styles.choice, selected && styles.choiceOn]}
+                    onPress={() => choose(shuttle.id)}
+                    disabled={polling}
+                  >
+                    <Text style={styles.choiceText}>{shuttle.name}</Text>
+                    {selected && (
+                      <Ionicons name="checkmark" size={18} color="#0B6E4F" />
+                    )}
+                  </Pressable>
+                );
+              })}
+              {last && (
+                <Text style={styles.meta}>
+                  {last.lat.toFixed(5)}, {last.lng.toFixed(5)} heading=
+                  {last.heading?.toFixed(0) ?? "—"}
+                </Text>
+              )}
+              <Pressable
+                style={[styles.btn, polling && styles.btnOff]}
+                onPress={polling ? stop : start}
+              >
+                <Text style={styles.btnText}>{polling ? "Stop" : "Start"}</Text>
+              </Pressable>
+            </View>
+            </View>
+          </View>
+        </View>
       )}
-      <Pressable
-        style={[styles.btn, streaming && styles.btnOff]}
-        onPress={streaming ? stop : start}
-      >
-        <Text style={styles.btnText}>
-          {streaming ? "Stop" : "Start / Check in"}
-        </Text>
-      </Pressable>
-      {!streaming && status === "Streaming" && <ActivityIndicator />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, padding: 16, gap: 12 },
-  title: { fontSize: 18, fontWeight: "700" },
-  meta: { fontSize: 14, color: "#333" },
-  warn: { color: "#8a4b08", backgroundColor: "#fff4e5", padding: 10 },
+  overlay: { ...StyleSheet.absoluteFill },
+  handle: {
+    position: "absolute",
+    right: 0,
+    top: "38%",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    gap: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#ddd",
+  },
+  handleText: {
+    color: "#1565C0",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+  sidebarSlot: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: "center",
+    alignItems: "flex-end",
+  },
+  sidebar: {
+    width: "46%",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+    overflow: "hidden",
+  },
+  sidebarHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ddd",
+  },
+  sidebarTitle: { fontSize: 16, fontWeight: "700" },
+  body: { padding: 10, gap: 6 },
+  meta: { fontSize: 13, color: "#333" },
+  choice: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: "#eee",
+  },
+  choiceOn: { backgroundColor: "#cfe8dc" },
+  choiceText: { flex: 1, fontWeight: "600", fontSize: 14, paddingRight: 8 },
   btn: {
     backgroundColor: "#0b6e4f",
-    paddingVertical: 14,
+    paddingVertical: 10,
     alignItems: "center",
     borderRadius: 8,
   },
   btnOff: { backgroundColor: "#8b1e1e" },
-  btnText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+  btnText: { color: "#fff", fontWeight: "600", fontSize: 15 },
 });

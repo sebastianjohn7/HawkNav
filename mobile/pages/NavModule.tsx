@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -80,7 +81,8 @@ function TabBody({ id, sheetBottom }: { id: Tab; sheetBottom: number }) {
 
 /** Bottom tabs + settings. Visitors have one tab, so they get no bar. */
 export function NavModule({ onOpenSettings }: Props) {
-  const { role, roleError, retryRole, guest, signOut } = useAuth();
+  const { role, roleError, roleErrorMessage, retryRole, guest, signOut } =
+    useAuth();
   const insets = useSafeAreaInsets();
   const [picked, setPicked] = useState<Tab | null>(null);
   const [floatingBarHeight, setFloatingBarHeight] = useState(64);
@@ -94,6 +96,9 @@ export function NavModule({ onOpenSettings }: Props) {
             <Text style={styles.errorText}>
               Couldn't load your account. Check your connection and try again.
             </Text>
+            {roleErrorMessage ? (
+              <Text style={styles.errorLink}>{roleErrorMessage}</Text>
+            ) : null}
             <Pressable style={styles.signInBtn} onPress={retryRole}>
               <Text style={styles.signInText}>Retry</Text>
             </Pressable>
@@ -124,21 +129,30 @@ export function NavModule({ onOpenSettings }: Props) {
         ? insets.bottom + SYSTEM_TAB_CLEARANCE
         : Math.max(insets.bottom, 12);
 
+  const trailing = guest ? (
+    <Pressable style={styles.signInBtn} onPress={signOut}>
+      <Text style={styles.signInText}>Sign In</Text>
+    </Pressable>
+  ) : (
+    <Pressable style={styles.settingsBtn} onPress={onOpenSettings}>
+      <Ionicons name="settings" size={22} color="#fff" />
+    </Pressable>
+  );
+
   return (
     <View style={styles.root}>
       <View style={styles.appBar}>
-        <Text style={styles.appTitle}>
-          {tab === "alerts" ? "Alerts" : "HawkNav"}
-        </Text>
-        {guest ? (
-          <Pressable style={styles.signInBtn} onPress={signOut}>
-            <Text style={styles.signInText}>Sign In</Text>
-          </Pressable>
-        ) : (
-          <Pressable style={styles.settingsBtn} onPress={onOpenSettings}>
-            <Ionicons name="settings" size={22} color="#fff" />
-          </Pressable>
-        )}
+        <View style={styles.brand}>
+          <Image
+            source={require("../assets/img/uhcl_wordmark.png")}
+            style={styles.brandMark}
+            accessibilityLabel="UHCL"
+          />
+          <Text style={styles.appTitle}>
+            {tab === "alerts" ? "Alerts" : "HawkNav"}
+          </Text>
+        </View>
+        {trailing}
       </View>
 
       {bar === "system" ? (
@@ -234,7 +248,22 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ddd",
     backgroundColor: "#fff",
   },
-  appTitle: { fontSize: 18, fontWeight: "700" },
+  brand: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 0.75,
+  },
+  brandMark: { width: 40, height: 30, resizeMode: "contain" },
+  // Matches UHCL web H4/H5: DM Sans, tight tracking, navy.
+  appTitle: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 22,
+    letterSpacing: -0.1,
+    color: "#003A60",
+    // Optical align with the UHCL wordmark beside it.
+    transform: [{ translateY: 1.5 }],
+  },
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16, padding: 24 },
   errorText: { textAlign: "center", fontSize: 16 },
   errorLink: { color: "#1565C0", fontWeight: "600" },

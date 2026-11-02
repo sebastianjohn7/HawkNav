@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { DMSans_700Bold, useFonts } from "@expo-google-fonts/dm-sans";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "./lib/auth";
@@ -51,9 +52,13 @@ function Screens() {
     ) : (
       <LandingPage onGetStarted={() => setStarted(true)} />
     );
+  } else if (!session) {
+    // Guests only use navigation; account screens require a signed-in session.
+    edgeToEdgeBottom = true;
+    content = <NavModule onOpenSettings={() => {}} />;
   } else if (screen === "admin" && role && ACCESS[role].canUseAdminTools) {
     content = <AdminPage onBack={() => show("settings")} />;
-  } else if (screen === "settings" && !guest) {
+  } else if (screen === "settings") {
     content = (
       <SettingsPage
         onBack={() => show("nav")}
@@ -63,6 +68,11 @@ function Screens() {
   } else {
     edgeToEdgeBottom = true;
     content = <NavModule onOpenSettings={() => show("settings")} />;
+  }
+
+  // Signed-in screens stay behind the MFA gate.
+  if (session) {
+    content = <MFA key={session.user.id}>{content}</MFA>;
   }
 
   return (
@@ -80,6 +90,19 @@ function Screens() {
 }
 
 export default function App() {
+  // UHCL web headings use DM Sans — load once for the app bar title.
+  const [fontsLoaded] = useFonts({
+    DMSans_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <AuthProvider>

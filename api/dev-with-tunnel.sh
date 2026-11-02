@@ -50,7 +50,7 @@ cleanup() {
     kill "$TUNNEL_PID" 2>/dev/null || true
   fi
   set_api_url "$LOCAL_API_URL"
-  echo "Restored mobile/.env EXPO_PUBLIC_API_URL to $LOCAL_API_URL"
+  echo "Restored mobile/.env EXPO_PUBLIC_API_URL to $LOCAL_API_URL (API is stopped)"
   rm -f "$LOG_FILE"
 }
 trap cleanup INT TERM EXIT
@@ -80,7 +80,7 @@ set_api_url "$TUNNEL_URL"
 echo "=================================================="
 echo "Tunnel Active: $TUNNEL_URL"
 echo "Wrote EXPO_PUBLIC_API_URL into mobile/.env"
-echo "Next (other terminal): cd mobile && npx expo start"
+echo "Next (other terminal): cd mobile && npx expo start --clear"
 echo "=================================================="
 
 cd "$API_DIR"

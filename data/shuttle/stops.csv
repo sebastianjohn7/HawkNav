@@ -2,15 +2,15 @@ stop_id,name,lat,lng,routes,status
 delta_front,Delta,29.578137, -95.103850,on_campus,active
 arbor,Arbor,29.577969, -95.102865,on_campus,active
 police_building,Police Building,29.586858, -95.094525,on_campus,active
-recreation_center,Recreation Center,29.586089, -95.098299,on_campus,active
+rec_center,Rec Center,29.586089, -95.098299,on_campus,active
 hunter_hall,Hunter Hall,29.585197, -95.097884,on_campus,active
 sscb_entrance,SSCB Entrance,29.584489, -95.097761,"on_campus,pearland",active
 bayou_student_entrance,Bayou Entrance,29.582716, -95.097297,on_campus,active
 pearland_arrival,Pearland Arrival,29.587031, -95.267637,pearland,active
 pearland_departure,Pearland Departure,29.587031, -95.267637,pearland,active
-tmc,Texas Medical Center,29.708792, -95.401819,medical_center,inactive
+tmc,Medical Center,29.708792, -95.401819,medical_center,inactive
 university_forest_apts,University Forest Apt,29.576970, -95.106258,off_campus,active
-bay_area_park,Bay Area Park,29.569832, -95.111171,off_campus,active
+bay_area_park,Bay Area Park,29.569848, -95.111155,off_campus,active
 united_way_houston,United Way,29.560029, -95.115616,off_campus,active
 coastal_flow,Coastal Flow,29.570195, -95.109943,off_campus,active
 anytime_fitness,Anytime Fitness,29.574122, -95.107483,off_campus,active

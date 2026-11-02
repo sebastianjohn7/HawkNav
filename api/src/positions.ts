@@ -6,11 +6,18 @@ function supabaseEnv(): { url: string; key: string } {
     process.env.EXPO_PUBLIC_SUPABASE_URL ??
     ""
   ).replace(/\/$/, "");
+  // Service role bypasses RLS (needed for server-side GPS upserts under MFA policies).
+  // Never put SUPABASE_SERVICE_ROLE_KEY in the mobile app.
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY ??
     process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
     "";
   if (!url || !key) throw new Error("missing Supabase URL or key");
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      "set SUPABASE_SERVICE_ROLE_KEY in api/.env (anon cannot write shuttle_positions)",
+    );
+  }
   return { url, key };
 }
 

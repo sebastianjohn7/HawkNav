@@ -50,6 +50,8 @@ export function AuthMFA({ onVerified }: Props) {
             });
             if (verifyError) throw verifyError;
 
+            // Pull the aal2 session before the app loads the profile role.
+            await supabase.auth.getSession();
             onVerified();
         } catch (error) {
             setError(

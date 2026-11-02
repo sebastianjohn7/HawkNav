@@ -165,7 +165,9 @@ useEffect(() => {
 
   return (tab === "find" && (
     <View style={styles.container}>
+      {/*Parent Container */}
       <View style={styles.banner}>
+        {/*Screen Header*/}
         <Text style={styles.bannerTitle}>Delta floor plan</Text>
         <Text style={styles.bannerSub}>
           UHCL Indoors extract — paths/routing later
@@ -187,6 +189,7 @@ useEffect(() => {
           })}
         </View>
       </View>
+      
       <MapView
         style={styles.map}
         provider={PROVIDER_DEFAULT}

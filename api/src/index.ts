@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { checkIn, checkOut, listShuttles } from "./checkins";
+import { loadParkingMetrics } from "./parking";
 import {
   dayGroupForNow,
   loadShuttleData,
@@ -67,6 +68,16 @@ app.get("/schedules", (c) => {
 
 app.get("/shuttles", (c) => {
   return c.json({ shuttles: listShuttles() });
+});
+
+app.get("/parking/metrics", async (c) => {
+  try {
+    return c.json({ metrics: await loadParkingMetrics() });
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "could not load parking metrics";
+    return c.json({ error: message }, 502);
+  }
 });
 
 app.post("/shuttles/checkin", async (c) => {

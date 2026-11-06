@@ -4,7 +4,7 @@
 // Matches the app_role enum in supabase/profiles.sql.
 export type Role = "visitor" | "student" | "faculty" | "driver" | "admin";
 
-export type Tab = "shuttle" | "find" | "alerts";
+export type Tab = "shuttle" | "find" | "parking" | "alerts";
 
 type Access = {
   tabs: Tab[];
@@ -15,7 +15,7 @@ type Access = {
 };
 
 const STUDENT: Access = {
-  tabs: ["shuttle", "find", "alerts"],
+  tabs: ["shuttle", "find", "parking", "alerts"],
   canDrive: false,
   canUseAdminTools: false,
 };
@@ -26,9 +26,17 @@ export const ACCESS: Record<Role, Access> = {
   student: STUDENT,
   // Faculty match students for now.
   faculty: STUDENT,
-  driver: { tabs: ["shuttle", "find", "alerts"], canDrive: true, canUseAdminTools: false },
+  driver: {
+    tabs: ["shuttle", "find", "parking", "alerts"],
+    canDrive: true,
+    canUseAdminTools: false,
+  },
   // Admin sees everything.
-  admin: { tabs: ["shuttle", "find", "alerts"], canDrive: true, canUseAdminTools: true },
+  admin: {
+    tabs: ["shuttle", "find", "parking", "alerts"],
+    canDrive: true,
+    canUseAdminTools: true,
+  },
 };
 
 /** Set to true to require a UHCL email to create an account (also change the

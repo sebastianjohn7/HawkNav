@@ -1,10 +1,11 @@
 import { useMemo, useState, useEffect } from "react";
-import { Pressable, StyleSheet, Text, View, Image } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
 import { findShortestPath } from "../utils/aStarRouting.ts";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
 import StartRoomSelectionTesting from "./hooks/startRoomSelectionTesting.tsx";
+import FloorSelectionPrompt from "./hooks/floorSelectionPrompt.tsx";
 import * as Location from 'expo-location';
 
 
@@ -33,6 +34,7 @@ export function IndoorMapScreen({tab} : {tab: string}) {
   const [startNode, setStartNode] = useState<string | null>("205");
   const [endNode, setEndNode] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
+  const [userLevel, setUserLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
   const [location, setLocation] = useState<Location.LocationObject>({
   coords: {
@@ -124,6 +126,9 @@ useEffect(() => {
         return [];
       }
       // Current user position will be updated by displayPointInfo --> Push new user location into delta_Floorplan features
+        if(location){
+          //deltaFloorplan = deltaFloorplan.features.map((f) => f.properties?.NAME.includes("USER") ? ({}))
+        }
         const fullPath = findShortestPath(deltaFloorplan, startNode, endNode);
         const pathL1: LatLng[] = [];
         const pathL2: LatLng[] = [];
@@ -143,12 +148,8 @@ useEffect(() => {
           }
           else console.log("\n\nTargetArray not selected\n\n");
         }
-        //pathL1.length === 0 ? console.log("\npathL1 is empty") : pathL2.length === 0 ? console.log("\npathL2 is empty") : null
         return [pathL1, pathL2];
-        //return findShortestPath(deltaFloorplan, startNode, endNode).map(([longitude, latitude]) => ({latitude, longitude}));
     }, [endNode]);
-
-    //if(!pathLine1) console.log("PATHLINE NOT CREATED");
 
   // constantly refind user_location
   useEffect(() => {
@@ -168,9 +169,6 @@ useEffect(() => {
       <View style={styles.banner}>
         {/*Screen Header*/}
         <Text style={styles.bannerTitle}>Delta floor plan</Text>
-        <Text style={styles.bannerSub}>
-          UHCL Indoors extract — paths/routing later
-        </Text>
         <Text style={styles.bannerTitle}>Delta</Text>
         <View style={styles.levelRow}>
           {LEVELS.map((l) => {
@@ -197,15 +195,16 @@ useEffect(() => {
         mapType="standard"
         // Native ignores bottom/left of 0 (falsy). Stack in bottom-left:
         // Apple logo above, Legal underneath.
-        appleLogoInsets={{ left: 8, bottom: 8 }}
+        appleLogoInsets={{ left: 8, bottom: 8, right: 0, top: 0 }}
         legalLabelInsets={{ top: 0, right: 0, bottom: 8, left: 8 }}
       >
         <Marker 
-        coordinate={{
+          coordinate={{
           longitude: location.coords.longitude ?? 0,
           latitude: location.coords.latitude ?? 0}}
-        title={"USER_LOCATION"}
-        description={''}/>
+          title={"USER_LOCATION"}
+          description={''}
+        />
         {/* Points*/}
         <Geojson
           geojson={units}
@@ -214,8 +213,6 @@ useEffect(() => {
           fillColor="rgba(147, 197, 253, 0.35)"
           color= "#9094a0"
           markerComponent={<RoomMarker />}
-          onPress={(object) => {
-            setDisplayInfo(object.feature);
           onPress={(object) => {
             setDisplayInfo(object.feature);
             console.log("Object", object.feature.properties?.NAME);
@@ -230,7 +227,7 @@ useEffect(() => {
           strokeWidth={1.5}
           fillColor= "transparent"
         />
-          */}
+        */}
 
         <Geojson
           geojson={walls}
@@ -238,37 +235,40 @@ useEffect(() => {
           strokeWidth={1.5}
           fillColor="transparent"
         />
-        { /*Route clipping through floor fix*/(pathLine1 && level.includes("L1")) ? (<Polyline
-          coordinates={pathLine1}
-        {pathLine1 && (<Polyline
-          coordinates={pathLine1}
-          strokeColor="#2563EB"
-          strokeWidth={4}
-          lineCap="round"
-          lineJoin="round"
-          zIndex={10}
-      />) : null}
-      { /*Route clipping through floor fix*/(pathLine2 && level.includes("L2")) ? (<Polyline
-          coordinates={pathLine2}
-          strokeColor="#2563EB"
-          strokeWidth={4}
-          lineCap="round"
-          lineJoin="round"
-          zIndex={10}
-      />) : null}
+
+        { /*Route clipping through floor fix*/(pathLine1 && level.includes("L1")) ? (
+          <Polyline
+            coordinates={pathLine1}
+            strokeColor="#2563EB"
+            strokeWidth={4}
+            lineCap="round"
+            lineJoin="round"
+            zIndex={10}
+          />
+        ) : null}
+
+        { /*Route clipping through floor fix*/(pathLine2 && level.includes("L2")) ? (
+          <Polyline
+            coordinates={pathLine2}
+            strokeColor="#2563EB"
+            strokeWidth={4}
+            lineCap="round"
+            lineJoin="round"
+            zIndex={10}
+          />
+        ) : null}
       </MapView>
+
       {displayStartOptions && (
         <>
-        <StartRoomSelectionTesting rooms={rooms} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
-        <Pressable 
-        style={styles.backdrop}
-        onPress={() => setDisplayStartOptions(false)}
-        ></Pressable>
+          <StartRoomSelectionTesting rooms={rooms} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
+          <Pressable 
+            style={styles.backdrop}
+            onPress={() => setDisplayStartOptions(false)}
+          ></Pressable>
         </>
       )}
-      { /* Displays Current Selected room info to users */displayInfo && (
-      />)}
-      </MapView>
+      { /* Displays Current Selected room info to users */}
       {displayInfo && (
         <>
         <Pressable 
@@ -276,14 +276,15 @@ useEffect(() => {
         onPress={() => setDisplayInfo(null)}
         ></Pressable>
         <DisplayPointInfo object={displayInfo} setEndNode={setEndNode} setDisplayInfo={setDisplayInfo}/>
-        </>)}
+        </>
+      )}
       <View style={styles.startSelectionBox}>
         <Text>Purely For Testing, Removal Imminent</Text>
         <Pressable style={styles.routeButton}
-          onPress={() => setDisplayStartOptions(true)}><Text>Select Start Node</Text></Pressable>
+          onPress={() => setDisplayStartOptions(true)}>
+            <Text>Select Start Node</Text>
+        </Pressable>
       </View>
-        <DisplayPointInfo object={displayInfo} setEndNode={setEndNode}/>
-        </>)}
     </View>
   ));
 }

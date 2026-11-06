@@ -75,7 +75,7 @@ function systemTabBarAvailable(): boolean {
 
 function TabBody({ id, sheetBottom }: { id: Tab; sheetBottom: number }) {
   if (id === "shuttle") return <ShuttleModule sheetBottom={sheetBottom} />;
-  if (id === "find") return <IndoorMapScreen />;
+  if (id === "find") return <IndoorMapScreen tab={id}/>;
   return <AlertsModule bottomInset={sheetBottom} />;
 }
 

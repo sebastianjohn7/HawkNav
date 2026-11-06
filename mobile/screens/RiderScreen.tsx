@@ -99,15 +99,27 @@ export function RiderScreen({
   }
 
   useEffect(() => {
-    fetch(`${apiUrl}/stops`)
-      .then((r) => r.json())
+    fetch(`${apiUrl}/stops`, {
+      headers: {
+        "ngrok-skip-browser-warning": "true",
+        "Accept": "application/json",
+      },
+    })
+      .then((r) => {
+        console.log(`HTTP Status: ${r.status} ${r.statusText}`);
+        return r.json()
+      })
       .then((body) => {
         const list = (body.stops as Stop[]) ?? [];
+        console.log(`\n\nCurrent Stops: `, body.stops);
         setStops(list);
         const firstToday = list.find((stop) => stop.runs_today) ?? list[0];
         if (firstToday) setSelected(firstToday.stop_id);
       })
-      .catch((e) => setScheduleText(`API error: ${String(e)}`));
+      .catch((e) => {
+        setScheduleText(`API error: ${String(e)}`);
+        console.log("\nAPI Request Processing error occured.");
+  }); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }, []);
 
   const loadEta = useCallback(async (stopId: string) => {

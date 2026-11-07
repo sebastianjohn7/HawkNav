@@ -6,6 +6,7 @@ import {
   TextInput,
   View,
   Pressable,
+  Platform,
 } from "react-native";
 import { supabase } from "../lib/config";
 import { SvgXml } from "react-native-svg";
@@ -133,6 +134,12 @@ export function EnrollMFA({ onVerified }: Props) {
 
       {error !== "" && <Text>{error}</Text>}
 
+      {qrCode !== "" && (
+        <View style={{ alignItems: "center", padding: 10, backgroundColor: "#fff" }}>
+          <SvgXml xml={qrCode} width={200} height={200} />
+        </View>
+      )}
+
       {secret !== "" && (
         <View>
           <Pressable onPress = {() => setShowSetupKey((shown) => !shown)} 
@@ -148,7 +155,7 @@ export function EnrollMFA({ onVerified }: Props) {
             </Pressable>
 
           {showSetupKey && (
-          <Text selectable style={{ fontFamily: "monospace", color: "blue", fontSize: 16 }}>
+          <Text selectable style={{ fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }), color: "blue", fontSize: 16 }}>
             {secret}
           </Text>
           )}
@@ -163,7 +170,7 @@ export function EnrollMFA({ onVerified }: Props) {
           value={code}
           onChangeText={setCode}
           placeholder="6-digit code"
-          keyboardType="default"
+          keyboardType="number-pad"
           maxLength={6}
           editable={!loading}
         />

@@ -249,6 +249,12 @@ alter table public.shuttle_positions enable row level security;
 -- Users read their own profile (this is how the app learns the role); admins read all.
 -- No one can write profiles or login_log from the app: roles change only through
 -- change_role() or the SQL editor, and login_log is written by the trigger above.
+drop policy if exists login_log_insert_own
+on public.login_log;
+
+drop policy if exists profiles_update_own
+on public.profiles;
+
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own" on public.profiles
   for select to authenticated

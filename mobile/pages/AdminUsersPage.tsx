@@ -114,7 +114,7 @@ export function AdminUsersPage({ onBack }: Props) {
         data={rows}
         keyExtractor={(r) => r.id}
         ListEmptyComponent={
-          loading ? null : <Text style={styles.empty}>No accounts found.</Text>
+          loading ? undefined : <Text style={styles.empty}>No accounts found.</Text>
         }
         renderItem={({ item }) => {
           const isMe = item.id === myId;

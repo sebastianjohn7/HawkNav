@@ -7,14 +7,10 @@ Do this once per Supabase project (ideally one shared project for the team).
 1. Create a free project at [supabase.com](https://supabase.com).
 2. Project Settings → API Keys → copy the **Project URL** and **publishable key** into `mobile/.env` as `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
 3. Also copy those two into `api/.env`. Then copy the **service_role** secret (or “secret” key) into `api/.env` only as `SUPABASE_SERVICE_ROLE_KEY`. The API uses that key to write shuttle GPS. Do not put the service role key in `mobile/.env` or commit it.
-4. SQL Editor → paste all of [`schema.sql`](schema.sql) → **Run** (confirm any warning). 
+4. SQL Editor → paste all of [`schema.sql`](schema.sql) → **Run** (confirm any warning). It includes the MFA policies and is safe to re-run.
 5. Authentication → Sign In / Providers → Email → password **minimum 8**, require **lowercase, uppercase, digits, symbols**.
-6. Authentication → Email → **Confirm email**: off while testing, **on** for real use. The built-in sender allows only ~2 emails/hour, so real use needs custom SMTP.
-
-   schema.sql includes the MFA policies and is safe to re-run.
-   
+6. Authentication → Providers → Email → **Confirm email**: off while testing, **on** for the demo and real use. The built-in sender allows only ~2 emails/hour, so real use needs custom SMTP.
 7. Database → Publications → confirm `shuttle_positions` is in `supabase_realtime` (the SQL tries to add it)
-8. For testing, turn off Authentication → Providers → Email → **Confirm email** (turn it back on for the demo).
 
 ## If driver check-in says Supabase upsert 401 / permission denied
 
@@ -36,12 +32,12 @@ grant select, insert, update, delete on table public.shuttle_positions to servic
 Everyone uses a real `@uhcl.edu` email. No preset or test accounts.
 
 | Who | How they get in |
-| --- | --- | --- |
-| Visitor | **Continue as Visitor** (no account) | Delta map only |
-| Student | Create account; name has digits (ex. `amerr0500@uhcl.edu`) | 
+| --- | --- |
+| Visitor | **Continue as Visitor** (no account); Delta map only |
+| Student | Create account; name has digits (ex. `amerr0500@uhcl.edu`) |
 | Faculty | Create account; name has no digits |
 | Driver | An admin promotes a UHCL account |
-| Admin | First one via SQL below, then admins promote others | 
+| Admin | First one via SQL below, then admins promote others |
 
 The database sets the role from the email, and only admins can change it.
 **First admin:** sign up in the app, then run:

@@ -27,10 +27,17 @@ function metres([lng1, lat1], [lng2, lat2]) {
 let filled = 0;
 for (const node of data.nodes) {
   if (!force && node.lat != null && node.lng != null) continue;
+  if (!node.floorPlanRef?.length) {
+    console.warn(`${node.id}: no floorPlanRef, so set floorPlanRef (or lat/lng) in panorama_nodes.json by hand`);
+    continue;
+  }
   const levelId = `UHCL.MAIN.${node.building.toUpperCase()}.L${node.floor}`;
-  const units = floorPlan.features.filter(
-    (f) => f.properties?.LEVEL_ID === levelId && f.geometry.type === 'Point' && node.floorPlanRef?.includes(f.properties.NAME)
-  );
+  const onLevel = floorPlan.features.filter((f) => f.properties?.LEVEL_ID === levelId && f.geometry.type === 'Point');
+  // A ref with no unit of that exact name (door 119) falls back to its lettered units (119A, 119B, ...).
+  const units = node.floorPlanRef.flatMap((ref) => {
+    const exact = onLevel.filter((f) => f.properties.NAME === ref);
+    return exact.length > 0 ? exact : onLevel.filter((f) => new RegExp(`^${ref}[A-Z]$`).test(f.properties.NAME ?? ''));
+  });
   if (units.length === 0) {
     console.warn(`${node.id}: no unit named ${JSON.stringify(node.floorPlanRef)} on ${levelId}`);
     continue;
@@ -39,6 +46,15 @@ for (const node of data.nodes) {
     units.reduce((s, f) => s + f.geometry.coordinates[0], 0) / units.length,
     units.reduce((s, f) => s + f.geometry.coordinates[1], 0) / units.length,
   ];
+  // Photos taken inside a room (id contains -room-) sit at the room itself, not in the hallway.
+  if (node.id.includes('-room-')) {
+    node.lng = centre[0];
+    node.lat = centre[1];
+    node.positionSource = `centre of ${node.floorPlanRef.join('+')} in ${path.basename(floorPlanPath)}`;
+    filled++;
+    console.log(`${node.id.padEnd(24)} ${node.lat.toFixed(6)}, ${node.lng.toFixed(6)}  (inside room)`);
+    continue;
+  }
   let best = null;
   let bestDist = Infinity;
   for (const f of floorPlan.features) {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -52,7 +53,7 @@ export function ParkingCongestionScreen({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [realtimeStatus, setRealtimeStatus] = useState("Connecting");
-  const [availabilityVisible, setAvailabilityVisible] = useState(true);
+  const [expanded, setExpanded] = useState(true);
   const groupedLots = useMemo(() => {
     const groups = new Map<number, ParkingLotMetrics>();
     for (const metric of lots) {
@@ -145,8 +146,8 @@ export function ParkingCongestionScreen({
   return (
     <View style={styles.container}>
       <View style={styles.banner}>
-        <Text style={styles.title}>Parking congestion</Text>
-        <Text style={styles.subtitle}>UHCL campus parking</Text>
+        <Text style={styles.title}>Parking Congestion</Text>
+        <Text style={styles.subtitle}>UHCL Campus Parking</Text>
       </View>
       <MapView
         style={styles.map}
@@ -154,90 +155,115 @@ export function ParkingCongestionScreen({
         initialRegion={UHCL_REGION}
         mapType="standard"
       />
-      <Pressable
-        style={styles.availabilityToggle}
-        onPress={() => setAvailabilityVisible((visible) => !visible)}
-        accessibilityRole="switch"
-        accessibilityState={{ checked: availabilityVisible }}
-        accessibilityLabel="Parking availability panel"
+      <View
+        style={[
+          styles.panel,
+          expanded && styles.expandedPanel,
+          { bottom: sheetBottom + 12 },
+        ]}
       >
-        <Ionicons
-          name={availabilityVisible ? "eye" : "eye-off"}
-          size={18}
-          color="#1565C0"
-        />
-        <Text style={styles.toggleText}>
-          {availabilityVisible ? "Hide availability" : "Show availability"}
-        </Text>
-      </Pressable>
-      {availabilityVisible && (
-        <View style={[styles.panel, { bottom: sheetBottom + 12 }]}>
-          <Text style={styles.panelTitle}>Parking availability</Text>
-          <View style={styles.statusRow}>
-            <Text style={styles.status}>Realtime: {realtimeStatus}</Text>
-            <Pressable
-              onPress={() => void loadMetrics()}
-              accessibilityRole="button"
-              disabled={loading}
-            >
-              <Text style={styles.retry}>Refresh</Text>
-            </Pressable>
+        <Pressable
+          style={styles.panelTop}
+          onPress={() => setExpanded((current) => !current)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded }}
+          accessibilityLabel={
+            expanded
+              ? "Minimize parking availability"
+              : "Maximize parking availability"
+          }
+        >
+          <View style={styles.panelHandle} />
+          <View style={styles.panelHeading}>
+            <Text style={styles.panelTitle}>Parking Availability</Text>
+            <Ionicons
+              name={expanded ? "chevron-down" : "chevron-up"}
+              size={20}
+              color="#555"
+            />
           </View>
-          {loading ? (
-            <ActivityIndicator accessibilityLabel="Loading parking metrics" />
-          ) : error ? (
-            <View style={styles.messageRow}>
-              <Text style={styles.error}>{error}</Text>
+        </Pressable>
+        {expanded && (
+          <ScrollView
+            style={styles.panelContent}
+            contentContainerStyle={styles.panelContentInner}
+            showsVerticalScrollIndicator
+          >
+            <View style={styles.statusRow}>
+              <Text style={styles.status}>Status: {realtimeStatus}</Text>
               <Pressable
                 onPress={() => void loadMetrics()}
                 accessibilityRole="button"
+                disabled={loading}
               >
-                <Text style={styles.retry}>Retry</Text>
+                <Text style={styles.retry}>Refresh</Text>
               </Pressable>
             </View>
-          ) : groupedLots.length === 0 ? (
-            <Text style={styles.note}>No parking lots are available.</Text>
-          ) : (
-            groupedLots.map((lot) => {
-              const name = lot.unofficial_name || lot.uhcl_name;
-              const updated = lot.latest_updated_at
-                ? `Updated ${new Date(lot.latest_updated_at).toLocaleTimeString()}`
-                : "Waiting for spot updates";
+            {loading ? (
+              <ActivityIndicator accessibilityLabel="Loading Parking Metrics" />
+            ) : error ? (
+              <View style={styles.messageRow}>
+                <Text style={styles.error}>{error}</Text>
+                <Pressable
+                  onPress={() => void loadMetrics()}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.retry}>Retry</Text>
+                </Pressable>
+              </View>
+            ) : groupedLots.length === 0 ? (
+              <Text style={styles.note}>No parking lots are available.</Text>
+            ) : (
+              groupedLots.map((lot) => {
+                const updated = lot.latest_updated_at
+                  ? `Updated ${new Date(lot.latest_updated_at).toLocaleTimeString()}`
+                  : "Waiting for spot updates";
 
-              return (
-                <View key={lot.parking_lot_id} style={styles.lotCard}>
-                  <View style={styles.lotHeader}>
-                    <Text style={styles.lotName}>
-                      {name} · {lot.uhcl_name}
-                    </Text>
-                    <Text style={styles.lotDetail}>{lot.building}</Text>
+                return (
+                  <View key={lot.parking_lot_id} style={styles.lotCard}>
+                    <View style={styles.lotHeader}>
+                      <Text style={styles.lotName}>
+                        {lot.building} • {lot.uhcl_name}
+                      </Text>
+                    </View>
+                    <View style={styles.metricsRow}>
+                      {SPOT_TYPES.map((spotType) => {
+                        const metric = lot.spot_types[spotType];
+                        return (
+                          <View key={spotType} style={styles.metricColumn}>
+                            <Text style={styles.spotType}>
+                              {spotType === "EV"
+                                ? "EV"
+                                : spotType.charAt(0).toUpperCase() +
+                                  spotType.slice(1)}
+                            </Text>
+                            <Text
+                              style={[
+                                styles.metricValue,
+                                metric && { color: availabilityColor(metric) },
+                              ]}
+                            >
+                              {metric
+                                ? `${(metric.percentage * 100).toFixed(1)}%`
+                                : "—"}
+                            </Text>
+                            <Text style={styles.lotDetail}>
+                              {metric
+                                ? `${metric.number_available} out of ${metric.total_number}`
+                                : "No data"}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                    <Text style={styles.updated}>{updated}</Text>
                   </View>
-                  {SPOT_TYPES.map((spotType) => {
-                    const metric = lot.spot_types[spotType];
-                    return (
-                      <View key={spotType} style={styles.metricRow}>
-                        <Text style={styles.spotType}>{spotType}</Text>
-                        <Text
-                          style={[
-                            styles.lotDetail,
-                            styles.metricValue,
-                            metric && { color: availabilityColor(metric) },
-                          ]}
-                        >
-                          {metric
-                            ? `${metric.number_available} available of ${metric.total_number} · ${(metric.percentage * 100).toFixed(1)}%`
-                            : "No data"}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                  <Text style={styles.updated}>{updated}</Text>
-                </View>
-              );
-            })
-          )}
-        </View>
-      )}
+                );
+              })
+            )}
+          </ScrollView>
+        )}
+      </View>
     </View>
   );
 }
@@ -255,38 +281,34 @@ const styles = StyleSheet.create({
   title: { fontWeight: "700" },
   subtitle: { fontSize: 12, color: "#555" },
   map: { flex: 1 },
-  availabilityToggle: {
-    position: "absolute",
-    top: 60,
-    left: 12,
-    zIndex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#ccc",
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-  },
-  toggleText: { color: "#1565C0", fontSize: 13, fontWeight: "600" },
   panel: {
     position: "absolute",
     left: 12,
     right: 12,
-    padding: 14,
     backgroundColor: "#fff",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#ccc",
-    gap: 8,
+    overflow: "hidden",
+    maxHeight: "75%",
   },
+  expandedPanel: { height: "75%" },
+  panelTop: { paddingHorizontal: 14, paddingTop: 8, paddingBottom: 10 },
+  panelHandle: {
+    alignSelf: "center",
+    width: 34,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#bbb",
+    marginBottom: 8,
+  },
+  panelHeading: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  panelContent: { flex: 1 },
+  panelContentInner: { paddingHorizontal: 14, paddingBottom: 12, gap: 8 },
   panelTitle: { fontSize: 16, fontWeight: "700", color: "#111" },
   statusRow: {
     flexDirection: "row",
@@ -300,18 +322,26 @@ const styles = StyleSheet.create({
     borderTopColor: "#ddd",
     gap: 4,
   },
-  lotHeader: { gap: 2, paddingBottom: 2 },
-  metricRow: {
+  lotHeader: { gap: 2, paddingBottom: 2, alignItems: "center" },
+  metricsRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "stretch",
     justifyContent: "space-between",
-    gap: 8,
+    gap: 6,
   },
   lotName: { fontSize: 14, fontWeight: "600", color: "#111" },
-  spotType: { fontSize: 12, fontWeight: "600", color: "#333" },
-  lotDetail: { fontSize: 12, color: "#555" },
-  metricValue: { fontWeight: "700" },
-  updated: { fontSize: 11, color: "#666" },
+  spotType: { fontSize: 11, fontWeight: "600", color: "#333" },
+  metricColumn: {
+    flex: 1,
+    alignItems: "center",
+    gap: 3,
+    paddingVertical: 5,
+    borderRadius: 6,
+    backgroundColor: "#f7f7f7",
+  },
+  lotDetail: { fontSize: 12, color: "#555", textAlign: "center" },
+  metricValue: { fontSize: 15, fontWeight: "700", color: "#666" },
+  updated: { fontSize: 11, color: "#666", textAlign: "center", alignSelf: "stretch"},
   note: { fontSize: 12, color: "#666" },
   messageRow: { gap: 6 },
   error: { fontSize: 12, color: "#9B1C1C" },

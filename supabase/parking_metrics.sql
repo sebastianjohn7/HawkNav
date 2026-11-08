@@ -27,12 +27,7 @@ RETURNS TRIGGER AS $$
 DECLARE
     max_spots INT;
 BEGIN
-    SELECT CASE NEW.parking_spot_type
-        WHEN 'standard' THEN num_standard_spots
-        WHEN 'handicap' THEN num_handicap_spots
-        WHEN 'EV' THEN num_ev_spots
-        ELSE NULL
-    END
+    SELECT total_priority_spots
     INTO max_spots
     FROM public.parking_lots
     WHERE id = NEW.parking_lot_id;

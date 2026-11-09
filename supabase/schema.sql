@@ -1,5 +1,5 @@
 -- HawkNav database setup. Run once in the Supabase SQL editor (after creating the project).
--- Safe to re-run. Schedules stay in data/shuttle CSVs; this file is accounts, roles, and live GPS.
+-- Safe to re-run. Schedules stay in data/shuttle CSVs; this file is accounts, roles, live GPS, and alerts.
 --
 -- Who gets an account: only @uhcl.edu emails. Visitors use "Continue as Visitor" (no account).
 -- Roles:
@@ -71,6 +71,112 @@ exception
   when duplicate_object then null;
 end $$;
 
+-- Campus alerts (MVP): staff (faculty/driver) submit pending; admin approves or posts live.
+-- “Sent” = approved + active + not past expires_at → visible in the Alerts feed (no push yet).
+do $$
+begin
+  create type public.alert_audience as enum ('staff', 'all');
+exception
+  when duplicate_object then null;
+end $$;
+
+-- Older projects had audience=students; MVP is staff | all only.
+-- Must drop policies that reference audience before altering its type.
+do $$
+begin
+  if exists (
+    select 1
+    from pg_type t
+    join pg_enum e on e.enumtypid = t.oid
+    where t.typname = 'alert_audience'
+      and e.enumlabel = 'students'
+  ) then
+    drop policy if exists "alerts_select" on public.alerts;
+
+    update public.alerts
+      set audience = 'all'
+      where audience::text = 'students';
+
+    create type public.alert_audience_v2 as enum ('staff', 'all');
+
+    alter table public.alerts
+      alter column audience type public.alert_audience_v2
+      using (audience::text)::public.alert_audience_v2;
+
+    drop type public.alert_audience;
+    alter type public.alert_audience_v2 rename to alert_audience;
+  end if;
+end $$;
+
+do $$
+begin
+  create type public.alert_status as enum ('pending', 'approved', 'rejected');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  create type public.alert_urgency as enum ('normal', 'high', 'critical');
+exception
+  when duplicate_object then null;
+end $$;
+
+create table if not exists public.alerts (
+  id bigint generated always as identity primary key,
+  title text not null,
+  body text not null,
+  audience public.alert_audience not null,
+  status public.alert_status not null,
+  urgency public.alert_urgency not null default 'normal',
+  effective_at timestamptz not null,
+  expires_at timestamptz not null,
+  active boolean not null default true,
+  created_by uuid not null references auth.users (id) on delete cascade,
+  reviewed_by uuid references auth.users (id) on delete set null,
+  reviewed_at timestamptz,
+  created_at timestamptz not null default now(),
+  constraint alerts_expires_after_effective check (expires_at > effective_at)
+);
+
+-- Existing projects created alerts before urgency existed.
+alter table public.alerts
+  add column if not exists urgency public.alert_urgency not null default 'normal';
+
+create index if not exists alerts_status_effective_idx
+  on public.alerts (status, effective_at);
+create index if not exists alerts_status_urgency_idx
+  on public.alerts (status, urgency);
+create index if not exists alerts_created_by_idx
+  on public.alerts (created_by);
+
+-- Admin-only writes; readers follow the parent alert's audience (see RLS below).
+create table if not exists public.alert_comments (
+  id bigint generated always as identity primary key,
+  alert_id bigint not null references public.alerts (id) on delete cascade,
+  body text not null,
+  created_by uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  constraint alert_comments_body_not_blank check (char_length(trim(body)) > 0)
+);
+
+create index if not exists alert_comments_alert_id_idx
+  on public.alert_comments (alert_id, created_at);
+
+do $$
+begin
+  alter publication supabase_realtime add table public.alerts;
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.alert_comments;
+exception
+  when duplicate_object then null;
+end $$;
+
 -- ---------------------------------------------------------------- helpers
 
 -- security definer so RLS policies can call these without recursing into profiles.
@@ -86,6 +192,42 @@ returns boolean
 language sql stable security definer set search_path = public
 as $$
   select coalesce(public.current_role_name() = 'admin', false);
+$$;
+
+-- Faculty and drivers compose alerts that need admin approval (admin is not “staff” here).
+create or replace function public.is_alert_staff()
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select coalesce(public.current_role_name() in ('faculty', 'driver'), false);
+$$;
+
+-- Same visibility rules as alerts_select — used so comment RLS stays in sync with the feed.
+create or replace function public.can_read_alert(p_alert_id bigint)
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.alerts a
+    where a.id = p_alert_id
+      and (
+        public.is_admin()
+        or a.created_by = auth.uid()
+        or (
+          a.status = 'approved'
+          and a.active = true
+          and a.expires_at > now()
+          and (
+            a.audience = 'all'
+            or (
+              a.audience = 'staff'
+              and public.current_role_name() in ('faculty', 'driver', 'admin')
+            )
+          )
+        )
+      )
+  );
 $$;
 
 -- The role an email gets by default (and returns to when demoted): digits in the name = student.
@@ -223,11 +365,16 @@ grant execute on function public.change_role(uuid, text) to authenticated;
 -- Without them Postgres returns "permission denied for table …" before RLS runs.
 grant usage on schema public to anon, authenticated;
 grant usage on type public.app_role to authenticated;
+grant usage on type public.alert_audience to authenticated;
+grant usage on type public.alert_status to authenticated;
+grant usage on type public.alert_urgency to authenticated;
 
 grant select on table public.profiles to authenticated;
 grant select on table public.login_log to authenticated;
 grant select on table public.role_changes to authenticated;
 grant select, insert, update on table public.shuttle_positions to authenticated;
+grant select, insert, update on table public.alerts to authenticated;
+grant select, insert on table public.alert_comments to authenticated;
 -- Publishable/anon key probes and any future guest reads need SELECT too.
 grant select on table public.shuttle_positions to anon;
 -- The Bun API writes GPS with SUPABASE_SERVICE_ROLE_KEY (sb_secret_… / service_role).
@@ -236,6 +383,8 @@ grant select, insert, update, delete on table public.shuttle_positions to servic
 
 grant execute on function public.current_role_name() to authenticated;
 grant execute on function public.is_admin() to authenticated;
+grant execute on function public.is_alert_staff() to authenticated;
+grant execute on function public.can_read_alert(bigint) to authenticated;
 grant execute on function public.base_role_for(text) to authenticated;
 
 -- ---------------------------------------------------------------- Row Level Security
@@ -245,6 +394,8 @@ alter table public.profiles enable row level security;
 alter table public.login_log enable row level security;
 alter table public.role_changes enable row level security;
 alter table public.shuttle_positions enable row level security;
+alter table public.alerts enable row level security;
+alter table public.alert_comments enable row level security;
 
 -- Users read their own profile (this is how the app learns the role); admins read all.
 -- No one can write profiles or login_log from the app: roles change only through
@@ -289,6 +440,71 @@ create policy "shuttle_positions_update_driver" on public.shuttle_positions
   using ((select public.current_role_name()) in ('driver', 'admin'))
   with check ((select public.current_role_name()) in ('driver', 'admin'));
 
+-- Alerts: live feed = approved + active + not expired, filtered by audience.
+-- Authors always see their own rows (pending/rejected). Admin sees everything.
+-- audience: all = every signed-in role; staff = faculty/driver/admin only.
+-- Staff insert pending only; admin insert approved. Only admin updates (approve/reject/edit).
+drop policy if exists "alerts_select" on public.alerts;
+create policy "alerts_select" on public.alerts
+  for select to authenticated
+  using (
+    (select public.is_admin())
+    or created_by = (select auth.uid())
+    or (
+      status = 'approved'
+      and active = true
+      and expires_at > now()
+      and (
+        audience = 'all'
+        or (
+          audience = 'staff'
+          and (select public.current_role_name()) in ('faculty', 'driver', 'admin')
+        )
+      )
+    )
+  );
+
+drop policy if exists "alerts_insert_staff" on public.alerts;
+create policy "alerts_insert_staff" on public.alerts
+  for insert to authenticated
+  with check (
+    (select public.is_alert_staff())
+    and status = 'pending'
+    and created_by = (select auth.uid())
+    and reviewed_by is null
+    and reviewed_at is null
+  );
+
+drop policy if exists "alerts_insert_admin" on public.alerts;
+create policy "alerts_insert_admin" on public.alerts
+  for insert to authenticated
+  with check (
+    (select public.is_admin())
+    and status = 'approved'
+    and created_by = (select auth.uid())
+    and (reviewed_by is null or reviewed_by = (select auth.uid()))
+  );
+
+drop policy if exists "alerts_update_admin" on public.alerts;
+create policy "alerts_update_admin" on public.alerts
+  for update to authenticated
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
+
+-- Comments: read if you can see the parent alert (audience-aware); only admins write.
+drop policy if exists "alert_comments_select" on public.alert_comments;
+create policy "alert_comments_select" on public.alert_comments
+  for select to authenticated
+  using ((select public.can_read_alert(alert_id)));
+
+drop policy if exists "alert_comments_insert_admin" on public.alert_comments;
+create policy "alert_comments_insert_admin" on public.alert_comments
+  for insert to authenticated
+  with check (
+    (select public.is_admin())
+    and created_by = (select auth.uid())
+    and (select public.can_read_alert(alert_id))
+  );
 
 -- ---------------------------------------------------------------- MFA enforcement
 -- Restrictive policies combine with the role/ownership rules above.
@@ -296,6 +512,18 @@ create policy "shuttle_positions_update_driver" on public.shuttle_positions
 -- Login records are created by the sign-in trigger, even before MFA is complete.
 drop policy if exists "shuttle_requires_mfa" on public.shuttle_positions;
 create policy "shuttle_requires_mfa" on public.shuttle_positions
+  as restrictive for all to public
+  using ((select auth.jwt()->>'aal') = 'aal2')
+  with check ((select auth.jwt()->>'aal') = 'aal2');
+
+drop policy if exists "alerts_requires_mfa" on public.alerts;
+create policy "alerts_requires_mfa" on public.alerts
+  as restrictive for all to public
+  using ((select auth.jwt()->>'aal') = 'aal2')
+  with check ((select auth.jwt()->>'aal') = 'aal2');
+
+drop policy if exists "alert_comments_requires_mfa" on public.alert_comments;
+create policy "alert_comments_requires_mfa" on public.alert_comments
   as restrictive for all to public
   using ((select auth.jwt()->>'aal') = 'aal2')
   with check ((select auth.jwt()->>'aal') = 'aal2');

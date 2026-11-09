@@ -15,6 +15,8 @@ import { PanoramaScreen } from "./screens/PanoramaScreen";
 
 type ScreenName = "nav" | "settings" | "admin" | "panorama";
 
+type ScreenName = "nav" | "settings" | "admin";
+
 /** Expo port of Josh's Landing → Sign-in → NavModule shell, gated by sign-in. */
 function Screens() {
   const { session, guest, role, loading } = useAuth();
@@ -65,13 +67,7 @@ function Screens() {
     // Temporary entry from Settings until the map screen gets its own "Look around" button.
     content = <PanoramaScreen onBack={() => show("settings")} />;
   } else if (screen === "settings") {
-    content = (
-      <SettingsPage
-        onBack={() => show("nav")}
-        onOpenAdmin={() => show("admin")}
-        onOpenPanorama={() => show("panorama")}
-      />
-    );
+    content = <SettingsPage onBack={() => show("nav")} onOpenAdmin={() => show("admin")} />;
   } else {
     edgeToEdgeBottom = true;
     content = <NavModule onOpenSettings={() => show("settings")} />;

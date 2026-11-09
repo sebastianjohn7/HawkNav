@@ -1,0 +1,1969 @@
+{
+  "type": "FeatureCollection",
+  "name": "UHCL Delta floor plan (cleaned & ordered)",
+  "source": "UHCL_Campus_Map_Public_WFL1.geojson",
+  "bbox": [-95.1046523259853, 29.5774712892038, -95.103753651375, 29.5781040350149],
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "HALLWAY"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-95.104473, 29.577979, 0],
+          [-95.104434, 29.578004, 0],
+          [-95.104415, 29.577995, 0],
+          [-95.104368, 29.577978, 0],
+          [-95.104311, 29.577954, 0],
+          [-95.104239, 29.577922, 0],
+          [-95.104175, 29.577899, 0],
+          [-95.104121, 29.577877, 0],
+          [-95.104084, 29.577861, 0],
+          [-95.104046, 29.577845, 0],
+          [-95.104026, 29.577837, 0],
+          [-95.10401, 29.57786, 0],
+          [-95.10397, 29.577846, 0],
+          [-95.103924, 29.577828, 0],
+          [-95.103892, 29.577815, 0],
+          [-95.103845, 29.577796, 0],
+          [-95.103832, 29.577792, 0],
+          [-95.103841, 29.577777, 0],
+          [-95.10385, 29.577762, 0],
+          [-95.103869, 29.57773, 0],
+          [-95.103888, 29.577693, 0],
+          [-95.1039, 29.577673, 0],
+          [-95.103921, 29.577636, 0],
+          [-95.103935, 29.577605, 0],
+          [-95.103953, 29.577569, 0],
+          [-95.103964, 29.577545, 0],
+          [-95.103996, 29.577556, 0],
+          [-95.104026, 29.57757, 0],
+          [-95.104055, 29.577581, 0],
+          [-95.104083, 29.577596, 0],
+          [-95.104112, 29.577605, 0],
+          [-95.104125, 29.577611, 0],
+          [-95.104155, 29.577622, 0],
+          [-95.104168, 29.57763, 0],
+          [-95.104151, 29.577666, 0],
+          [-95.104123, 29.577709, 0],
+          [-95.104082, 29.577701, 0],
+          [-95.104052, 29.577693, 0],
+          [-95.104003, 29.577673, 0],
+          [-95.103959, 29.577655, 0],
+          [-95.103932, 29.577644, 0]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "HALLWAY"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-95.104473, 29.577979, 0],
+          [-95.104477, 29.577971, 0],
+          [-95.104496, 29.577931, 0],
+          [-95.104514, 29.577903, 0],
+          [-95.104519, 29.577892, 0],
+          [-95.104541, 29.577854, 0],
+          [-95.104545, 29.577843, 0],
+          [-95.104558, 29.577819, 0],
+          [-95.104569, 29.577796, 0],
+          [-95.104541, 29.57778, 0],
+          [-95.10451, 29.577767, 0],
+          [-95.10448, 29.577754, 0],
+          [-95.104451, 29.577742, 0],
+          [-95.104421, 29.577731, 0],
+          [-95.104391, 29.577715, 0],
+          [-95.104361, 29.577705, 0],
+          [-95.104348, 29.577701, 0],
+          [-95.10432, 29.577687, 0],
+          [-95.1043, 29.577721, 0],
+          [-95.104294, 29.577736, 0],
+          [-95.104281, 29.577756, 0],
+          [-95.104269, 29.577781, 0],
+          [-95.104288, 29.577786, 0],
+          [-95.104318, 29.5778, 0],
+          [-95.104349, 29.577813, 0],
+          [-95.104364, 29.577821, 0],
+          [-95.104404, 29.57784, 0],
+          [-95.104442, 29.577853, 0],
+          [-95.104486, 29.577869, 0],
+          [-95.104508, 29.577878, 0]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "HALLWAY"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-95.104121, 29.577877, 0],
+          [-95.104144, 29.577831, 0],
+          [-95.104173, 29.577773, 0],
+          [-95.104185, 29.577747, 0],
+          [-95.104213, 29.577703, 0],
+          [-95.104238, 29.577657, 0]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "101",
+        "NAME_LONG": "101, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.101"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104257, 29.577732, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "102",
+        "NAME_LONG": "102, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.102"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104335, 29.577728, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "103",
+        "NAME_LONG": "103, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.103"
+      },E
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104278, 29.577693, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "104",
+        "NAME_LONG": "104, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.104"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104296, 29.577652, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "104A",
+        "NAME_LONG": "104A, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.104A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104326, 29.577655, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "105",
+        "NAME_LONG": "105, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.105"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1043561334698, 29.5776680558947, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "106",
+        "NAME_LONG": "106, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.106"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1043859162147, 29.577680172354, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "107",
+        "NAME_LONG": "107, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.107"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1044156962647, 29.5776922927182, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "108",
+        "NAME_LONG": "108, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.108"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1044454367888, 29.5777043974558, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "109",
+        "NAME_LONG": "109, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.109"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1044752114489, 29.5777165201608, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "110",
+        "NAME_LONG": "110, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.110"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1045049555663, 29.5777286178643, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "111",
+        "NAME_LONG": "111, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.111"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1045347365146, 29.5777407429101, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "112",
+        "NAME_LONG": "112, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.112"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104564475242, 29.577752847642, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "113",
+        "NAME_LONG": "113, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.113"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1045942561903, 29.5777649679974, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "114",
+        "NAME_LONG": "114, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.114"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1046166844281, 29.5777843297817, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "115",
+        "NAME_LONG": "115, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.115"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104594, 29.577821, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "116",
+        "NAME_LONG": "116, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.116"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104581, 29.577841, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "117",
+        "NAME_LONG": "117, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.117"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1045662754659, 29.5778681339289, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "118",
+        "NAME_LONG": "118, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.118"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104325, 29.57777, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "TELECOMMUNICATION SERVICE",
+        "NAME": "118A",
+        "NAME_LONG": "118A, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.118A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1043, 29.577758, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY",
+        "NAME": "119A",
+        "NAME_LONG": "119A, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.119A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104503, 29.577814, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY",
+        "NAME": "119B",
+        "NAME_LONG": "119B, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.119B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104411, 29.577776, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY SERVICE",
+        "NAME": "119C",
+        "NAME_LONG": "119C, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.119C"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104337, 29.577788, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY SERVICE",
+        "NAME": "119D",
+        "NAME_LONG": "119D, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.119D"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104516, 29.57786, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "120",
+        "NAME_LONG": "120, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.120"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10455, 29.577893, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "121",
+        "NAME_LONG": "121, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.121"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104539, 29.577919, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "123",
+        "NAME_LONG": "123, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.123"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104521, 29.577953, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "124",
+        "NAME_LONG": "124, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.124"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104499, 29.577995, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "INDIVIDUAL STUDY LABORATORY",
+        "NAME": "125",
+        "NAME_LONG": "125, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.125"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10445, 29.57791, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "INDIVIDUAL STUDY LABORATORY SERVICE",
+        "NAME": "125A",
+        "NAME_LONG": "125A, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.125A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104411, 29.57796, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY",
+        "NAME": "126",
+        "NAME_LONG": "126, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.126"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104369, 29.577896, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY SERVICE",
+        "NAME": "126A",
+        "NAME_LONG": "126A, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.126A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104307, 29.577854, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY SERVICE",
+        "NAME": "127",
+        "NAME_LONG": "127, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.127"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104321, 29.577828, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY",
+        "NAME": "128",
+        "NAME_LONG": "128, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.128"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104225, 29.577836, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "129",
+        "NAME_LONG": "129, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.129"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104448, 29.577973, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "INDIVIDUAL STUDY LABORATORY",
+        "NAME": "130",
+        "NAME_LONG": "130, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.130"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104285, 29.577892, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "UTILITY/MECHANICAL SPACE",
+        "NAME": "131",
+        "NAME_LONG": "131, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.131"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104455, 29.578058, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "INDIVIDUAL STUDY LABORATORY",
+        "NAME": "132",
+        "NAME_LONG": "132, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.132"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104398, 29.578037, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "INDIVIDUAL STUDY LABORATORY",
+        "NAME": "133",
+        "NAME_LONG": "133, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.133"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104337, 29.57801, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "WOMENS PUBLIC RESTROOM",
+        "NAME": "134",
+        "NAME_LONG": "134, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.134"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1042839466502, 29.5779904177495, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "MENS PUBLIC RESTROOM",
+        "NAME": "135",
+        "NAME_LONG": "135, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.135"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1042428002169, 29.5779731536639, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "CLASSROOM",
+        "NAME": "136",
+        "NAME_LONG": "136, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.136"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104181, 29.577945, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "MERCHANDISING",
+        "NAME": "137",
+        "NAME_LONG": "137, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.137"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1041, 29.577809, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "UTILITY_MECHANICAL_SPACE",
+        "NAME": "138",
+        "NAME_LONG": "138, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.138"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104125, 29.577765, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "139",
+        "NAME_LONG": "139, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.139"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104042, 29.577888, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "CLASS LABORATORY",
+        "NAME": "140",
+        "NAME_LONG": "140, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.140"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10397, 29.577773, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "MENS PUBLIC RESTROOM",
+        "NAME": "141",
+        "NAME_LONG": "141, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.141"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104069496334, 29.5778033517175, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "WOMENS PUBLIC RESTROOM",
+        "NAME": "142",
+        "NAME_LONG": "142, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.142"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1040396812497, 29.5777907555839, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "UTILITY/MECHANICAL SPACE",
+        "NAME": "143",
+        "NAME_LONG": "143, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.143"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104071, 29.577745, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "CUSTODIAL",
+        "NAME": "144",
+        "NAME_LONG": "144, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.144"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104001, 29.57783, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "145",
+        "NAME_LONG": "145, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.145"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1039902047388, 29.5778830206832, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "146",
+        "NAME_LONG": "146, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.146"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1039605756058, 29.5778709612796, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "147",
+        "NAME_LONG": "147, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.147"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1039309922868, 29.5778589214058, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "148",
+        "NAME_LONG": "148, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.148"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1039012481695, 29.5778468151242, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "149",
+        "NAME_LONG": "149, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.149"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1038714726111, 29.5778346955599, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL CLASS LABORATORY",
+        "NAME": "150",
+        "NAME_LONG": "150, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.150"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103901, 29.577748, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "151 :)",
+        "NAME_LONG": "151, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.151"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103844, 29.57782, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "CONFERENCE_ROOM",
+        "NAME": "152",
+        "NAME_LONG": "152, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.152"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1038123149563, 29.5778090900164, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "153 :)",
+        "NAME_LONG": "153, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.153"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103812, 29.577769, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "INDIVIDUAL_STUDY_LABORATORY",
+        "NAME": "154 :)",
+        "NAME_LONG": "154, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.154"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103838, 29.577718, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "INDIVIDUAL_STUDY_LABORATORY",
+        "NAME": "155",
+        "NAME_LONG": "155, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.155"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10386, 29.577677, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "INDIVIDUAL_STUDY_LABORATORY",
+        "NAME": "156 :)",
+        "NAME_LONG": "156, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.156"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103884, 29.577631, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "TELECOMMUNICATION SERVICE",
+        "NAME": "157",
+        "NAME_LONG": "157, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.157"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103934, 29.57767, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "UTILITY/MECHANICAL SPACE",
+        "NAME": "157A",
+        "NAME_LONG": "157A, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.157A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103926, 29.577689, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL_CLASS_LABORATORY",
+        "NAME": "158A",
+        "NAME_LONG": "158A, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.158A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104092, 29.577645, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL_CLASS_LABORATORY",
+        "NAME": "158B",
+        "NAME_LONG": "158B, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.158B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103999, 29.577607, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL_CLASS_LABORATORY_SERVICE",
+        "NAME": "158C",
+        "NAME_LONG": "158C, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.158C"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104113, 29.577697, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "SPECIAL_CLASS_LABORATORY_SERVICE",
+        "NAME": "158D",
+        "NAME_LONG": "158D, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.158D"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103942, 29.577625, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "RESEARCH/NON-CLASS LABORATORY",
+        "NAME": "159",
+        "NAME_LONG": "159, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.159"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103975, 29.577696, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "RESEARCH/NON-CLASS LABORATORY",
+        "NAME": "160",
+        "NAME_LONG": "160, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.160"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104018, 29.577713, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "161",
+        "NAME_LONG": "161, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.161"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104161, 29.577697, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "163",
+        "NAME_LONG": "163, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.163"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1042048472945, 29.5776146540808, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "165",
+        "NAME_LONG": "165, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.165"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1041497410417, 29.5775840461115, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "167",
+        "NAME_LONG": "167, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.167"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1040902950277, 29.5775598506685, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "168",
+        "NAME_LONG": "168, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.168"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1040604934182, 29.5775477263822, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "169",
+        "NAME_LONG": "169, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.169"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1040306567744, 29.5775355770942, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "170",
+        "NAME_LONG": "170, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.170"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1040008542665, 29.577523452805, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "171",
+        "NAME_LONG": "171, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.171"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103970899045, 29.5775112542951, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "173",
+        "NAME_LONG": "173, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.173"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1039271915149, 29.5775473076298, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "174",
+        "NAME_LONG": "174, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.174"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1039140213145, 29.5775720788602, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "OFFICE",
+        "NAME": "175",
+        "NAME_LONG": "175, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.175"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1039005618566, 29.5775973094619, 0.000100000004749745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "UTILITY_MECHANICAL_SPACE",
+        "NAME": "176 :)",
+        "NAME_LONG": "176, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.176"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103808, 29.577676, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASS_LABORATORY",
+        "NAME": "201",
+        "NAME_LONG": "201, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.201"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10431, 29.577687, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "SPECIAL_CLASS_LABORATORY",
+        "NAME": "202",
+        "NAME_LONG": "202, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.202"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1044, 29.57772, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASS_LABORATORY",
+        "NAME": "203",
+        "NAME_LONG": "203, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.203"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104489, 29.577756, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASS_LABORATORY",
+        "NAME": "204",
+        "NAME_LONG": "204, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.204"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104578, 29.577794, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "INDIVIDUAL_STUDY_LABORATORY",
+        "NAME": "205",
+        "NAME_LONG": "205, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.205"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104419, 29.577892, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "STUDY_SPACE",
+        "NAME": "205A",
+        "NAME_LONG": "205A, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.205A"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104512, 29.577968, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "STUDY_SPACE",
+        "NAME": "205B",
+        "NAME_LONG": "205B, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.205B"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104491, 29.578007, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "TELECOMMUNICATION_SERVICE",
+        "NAME": "206",
+        "NAME_LONG": "206, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.206"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10425, 29.577916, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "UTILITY_MECHANICAL_SPACE",
+        "NAME": "207",
+        "NAME_LONG": "207, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.207"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104188, 29.577884, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "208",
+        "NAME_LONG": "208, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.208"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104262, 29.577887, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "209",
+        "NAME_LONG": "209, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.209"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104292, 29.577866, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "210",
+        "NAME_LONG": "210, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.210"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10426, 29.577852, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "211",
+        "NAME_LONG": "211, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.211"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104305, 29.577842, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "212",
+        "NAME_LONG": "212, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.212"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104274, 29.57783, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "213",
+        "NAME_LONG": "213, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.213"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104304, 29.577803, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM",
+        "NAME": "214",
+        "NAME_LONG": "214, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.214"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104224, 29.577816, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "UTILITY_MECHANICAL_SPACE",
+        "NAME": "216",
+        "NAME_LONG": "216, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.216"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104108, 29.577731, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "MENS PUBLIC RESTROOM",
+        "NAME": "217",
+        "NAME_LONG": "217, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.217"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1041100831168, 29.5777640859631, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "WOMENS PUBLIC RESTROOM",
+        "NAME": "218",
+        "NAME_LONG": "218, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.218"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1040926315458, 29.577797442324, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "UTILITY_MECHANICAL_SPACE",
+        "NAME": "219",
+        "NAME_LONG": "219, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.219"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104073, 29.577834, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "220",
+        "NAME_LONG": "220, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.220"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104024, 29.577822, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "TELECOMMUNICATION_SERVICE",
+        "NAME": "221",
+        "NAME_LONG": "221, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.221"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104029, 29.57776, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "222",
+        "NAME_LONG": "222, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.222"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103994, 29.577809, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "223",
+        "NAME_LONG": "223, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.223"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103989, 29.57775, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "224",
+        "NAME_LONG": "224, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.224"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1039635625041, 29.5777976141995, 4.25010000000475]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "226",
+        "NAME_LONG": "226, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.226"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103958, 29.577737, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "227",
+        "NAME_LONG": "227, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.227"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10390404193, 29.5777733891201, 4.25010000000475]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "229",
+        "NAME_LONG": "229, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.229"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103829, 29.577742, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "230",
+        "NAME_LONG": "230, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.230"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10384, 29.577713, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "231",
+        "NAME_LONG": "231, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.231"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103923, 29.577707, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "232",
+        "NAME_LONG": "232, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.232"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.10385, 29.577687, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "233",
+        "NAME_LONG": "233, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.233"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103901, 29.577724, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM",
+        "NAME": "234",
+        "NAME_LONG": "234, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.234"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103944, 29.577665, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "235",
+        "NAME_LONG": "235, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.235"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103867, 29.577662, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CONFERENCE_ROOM",
+        "NAME": "236",
+        "NAME_LONG": "236, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.236"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103897, 29.577611, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM",
+        "NAME": "237",
+        "NAME_LONG": "237, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.237"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104002, 29.577692, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE",
+        "NAME": "238",
+        "NAME_LONG": "238, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.238"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104062, 29.577696, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "OFFICE_SERVICE",
+        "NAME": "239",
+        "NAME_LONG": "239, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.239"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104046, 29.577726, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM",
+        "NAME": "240",
+        "NAME_LONG": "240, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.240"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104175, 29.577608, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM",
+        "NAME": "241",
+        "NAME_LONG": "241, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.241"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104066, 29.577581, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM",
+        "NAME": "242",
+        "NAME_LONG": "242, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.242"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103949, 29.577548, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM_SERVICE",
+        "NAME": "243",
+        "NAME_LONG": "243, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.243"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.103941, 29.577488, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM_SERVICE",
+        "NAME": "244",
+        "NAME_LONG": "244, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.244"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104012, 29.577532, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CUSTODIAL",
+        "NAME": "245",
+        "NAME_LONG": "245, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.245"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104008, 29.577619, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CUSTODIAL",
+        "NAME": "246",
+        "NAME_LONG": "246, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.246"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104026, 29.577627, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CUSTODIAL",
+        "NAME": "247",
+        "NAME_LONG": "247, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.247"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104076, 29.57764, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "CLASSROOM_SERVICE",
+        "NAME": "248",
+        "NAME_LONG": "248, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.248"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104186, 29.577652, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "UTILITY_MECHANICAL_SPACE",
+        "NAME": "249",
+        "NAME_LONG": "249, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.249"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.104157, 29.577667, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L1",
+        "USE_TYPE": "ELEVATOR",
+        "NAME": "DELTA_ELEVATOR",
+        "NAME_LONG": "DELATA_ELEVATOR, L1",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L1.DELTA_ELEVATOR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1041337537246, 29.5777477546547, 0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "LEVEL_ID": "UHCL.MAIN.DELTA.L2",
+        "USE_TYPE": "ELEVATOR",
+        "NAME": "DELTA_ELEVATOR",
+        "NAME_LONG": "DELTA_ELEVATOR, L2",
+        "UNIT_ID": "UHCL.MAIN.DELTA.L2.DELTA_ELEVATOR"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.1041337537246, 29.5777477546547, 0]
+      }
+    }
+  ]
+}

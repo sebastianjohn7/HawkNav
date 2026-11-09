@@ -2,6 +2,8 @@
 
 //import { forkEvent } from "react-native/types_generated/Libraries/Animated/AnimatedExports";
 
+//import { forkEvent } from "react-native/types_generated/Libraries/Animated/AnimatedExports";
+
 export type LngLat = [number, number];
 
 type Graph = {
@@ -143,6 +145,7 @@ export function buildGraphFromGeoJson(geojson: {
 
   // Map same elevators between floors
   for(const [, e] of elevators){
+    if(e.length === 1) continue;
     for(let i = 0 ; i < e.length ; i++){
       for(let j = i+1 ; j < e.length ; j++){
         addEdge(graph, e[i].id, e[j].id, 10);
@@ -194,6 +197,8 @@ export function buildGraphFromGeoJson(geojson: {
   }
   //console.log(`Confirming Edge Generations: \n${graph.edges.size}`);
   //console.log(graph.edges);
+  //console.log(`Confirming Edge Generations: \n${graph.edges.size}`);
+  //console.log(graph.edges);
   return graph;
 }
 
@@ -202,18 +207,19 @@ export function findShortestPath(
   geojson: Parameters<typeof buildGraphFromGeoJson>[0],
   startRoomId: string | null,
   endRoomId: string | null,
-): LngLat[] {
+): Array<{ coords: LngLat, level: string }> {
+  const emptyDefault: Array<{ coords: LngLat, level: string }> = [{ coords: [0, 0], level: "" }];
   if(!startRoomId || !endRoomId) {
     console.log("Missing Routing Information");
-    return [];
+    return emptyDefault;
   }
   const graph = buildGraphFromGeoJson(geojson);
   const start = graph.roomToNode.get(startRoomId);
   const end = graph.roomToNode.get(endRoomId);
-  console.log(`Start: ${start}, End: ${end}`);
+  //console.log(`Start: ${start}, End: ${end}`);
   if (!start || !end) {
     !start ? console.log(`Starting Point is: ${start}`) : console.log(`Ending Point is: ${end}`);
-    return [];
+    return emptyDefault;
   }
 
   const dist = new Map<string, number>();
@@ -251,15 +257,16 @@ export function findShortestPath(
 
   if ((dist.get(end) ?? Infinity) === Infinity) {
     console.log("ERROR: Infinite distance");
-    return [];
+    return emptyDefault;
   }
 
   const pathIds: string[] = [];
   let cur: string | null = end;
   while (cur) {
     pathIds.push(cur);
+    //console.log(`\n\nAdding ${cur.substring(0, 18)} to pathLine list\n\n`);
     cur = prev.get(cur) ?? null;
   }
   pathIds.reverse();
-  return pathIds.map((id) => graph.nodes.get(id)!);
+  return pathIds.map((id) => ({ coords: graph.nodes.get(id)!, level: id.substring(0, 18) }));
 }

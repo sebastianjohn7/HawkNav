@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -6,9 +6,10 @@ import {
   StyleSheet,
   Text,
   View,
+  type LayoutChangeEvent,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import MapView, { PROVIDER_DEFAULT } from "react-native-maps";
+import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { apiUrl, supabase } from "../lib/config";
 import { UHCL_REGION } from "../widgets/ShuttleMapView";
 
@@ -37,6 +38,17 @@ type ParkingLotMetrics = {
 
 const SPOT_TYPES: SpotType[] = ["standard", "handicap", "EV"];
 
+const LOT_MARKER_LOCATIONS: Record<
+  number,
+  { latitude: number; longitude: number }
+> = {
+  1: { latitude: 29.5785, longitude: -95.10365 },
+  2: { latitude: 29.57745, longitude: -95.1046 },
+};
+
+type MapSize = { width: number; height: number };
+type MarkerCardPosition = { left: number; top: number };
+
 function availabilityColor(metric: ParkingMetric): string {
   if (metric.total_number <= 0) return "#666";
   if (metric.percentage < 0.3) return "#B42318";
@@ -49,11 +61,20 @@ export function ParkingCongestionScreen({
 }: {
   sheetBottom: number;
 }) {
+  const mapRef = useRef<MapView>(null);
+  const markerPositionRequest = useRef(0);
   const [lots, setLots] = useState<ParkingMetric[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [realtimeStatus, setRealtimeStatus] = useState("Connecting");
   const [expanded, setExpanded] = useState(true);
+  const [visibleMarkerMetrics, setVisibleMarkerMetrics] = useState<Set<number>>(
+    () => new Set(),
+  );
+  const [mapSize, setMapSize] = useState<MapSize>({ width: 0, height: 0 });
+  const [markerCardPositions, setMarkerCardPositions] = useState<
+    Record<number, MarkerCardPosition>
+  >({});
   const groupedLots = useMemo(() => {
     const groups = new Map<number, ParkingLotMetrics>();
     for (const metric of lots) {
@@ -115,6 +136,76 @@ export function ParkingCongestionScreen({
     }
   }, []);
 
+  function toggleMarkerMetrics(lotId: number) {
+    setVisibleMarkerMetrics((current) => {
+      const next = new Set(current);
+      if (next.has(lotId)) next.delete(lotId);
+      else next.add(lotId);
+      return next;
+    });
+  }
+
+  const updateMarkerCardPositions = useCallback(async () => {
+    const map = mapRef.current;
+    if (!map || mapSize.width === 0 || mapSize.height === 0) return;
+
+    const requestId = ++markerPositionRequest.current;
+    try {
+      const positions = await Promise.all(
+        groupedLots.flatMap((lot) => {
+          if (!visibleMarkerMetrics.has(lot.parking_lot_id)) return [];
+          const coordinate = LOT_MARKER_LOCATIONS[lot.parking_lot_id];
+          if (!coordinate) return [];
+
+          return [
+            map.pointForCoordinate(coordinate).then((point) => {
+              const cardWidth = 250;
+              const cardHeight = 110;
+              return [
+                lot.parking_lot_id,
+                {
+                  left: Math.max(
+                    8,
+                    Math.min(
+                      point.x - cardWidth / 2,
+                      mapSize.width - cardWidth - 8,
+                    ),
+                  ),
+                  top: Math.max(
+                    8,
+                    Math.min(
+                      point.y - cardHeight - 22,
+                      mapSize.height - cardHeight - 8,
+                    ),
+                  ),
+                },
+              ] as const;
+            }),
+          ];
+        }),
+      );
+
+      if (requestId === markerPositionRequest.current) {
+        setMarkerCardPositions(Object.fromEntries(positions));
+      }
+    } catch (positionError) {
+      console.error("Could not position parking metric cards", positionError);
+    }
+  }, [groupedLots, mapSize, visibleMarkerMetrics]);
+
+  function onMapLayout(event: LayoutChangeEvent) {
+    const { width, height } = event.nativeEvent.layout;
+    setMapSize((current) =>
+      current.width === width && current.height === height
+        ? current
+        : { width, height },
+    );
+  }
+
+  useEffect(() => {
+    void updateMarkerCardPositions();
+  }, [updateMarkerCardPositions]);
+
   useEffect(() => {
     void loadMetrics();
     if (!supabase) {
@@ -149,12 +240,119 @@ export function ParkingCongestionScreen({
         <Text style={styles.title}>Parking Congestion</Text>
         <Text style={styles.subtitle}>UHCL Campus Parking</Text>
       </View>
-      <MapView
-        style={styles.map}
-        provider={PROVIDER_DEFAULT}
-        initialRegion={UHCL_REGION}
-        mapType="standard"
-      />
+      <View style={styles.mapContainer} onLayout={onMapLayout}>
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          provider={PROVIDER_DEFAULT}
+          initialRegion={UHCL_REGION}
+          mapType="standard"
+          onRegionChangeComplete={() => void updateMarkerCardPositions()}
+        >
+          {groupedLots.map((lot) => {
+            const coordinate = LOT_MARKER_LOCATIONS[lot.parking_lot_id];
+            if (!coordinate) return null;
+            const selected = visibleMarkerMetrics.has(lot.parking_lot_id);
+
+            return (
+              <Marker
+                key={lot.parking_lot_id}
+                coordinate={coordinate}
+                anchor={{ x: 0.5, y: 0.5 }}
+                onPress={() => toggleMarkerMetrics(lot.parking_lot_id)}
+              >
+                <View style={styles.markerHitBox}>
+                  <View
+                    style={[
+                      styles.markerPin,
+                      selected
+                        ? styles.markerPinSelected
+                        : styles.markerPinIdle,
+                    ]}
+                  >
+                    <Ionicons
+                      name="car"
+                      size={selected ? 19 : 14}
+                      color="#fff"
+                    />
+                  </View>
+                </View>
+              </Marker>
+            );
+          })}
+        </MapView>
+        <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+          {groupedLots
+            .filter((lot) => visibleMarkerMetrics.has(lot.parking_lot_id))
+            .map((lot) => {
+              const position = markerCardPositions[lot.parking_lot_id];
+              if (!position) return null;
+
+              return (
+                <View
+                  key={lot.parking_lot_id}
+                  pointerEvents="box-none"
+                  style={[
+                    styles.markerCardPosition,
+                    { left: position.left, top: position.top },
+                  ]}
+                >
+                  <View style={styles.markerCard}>
+                    <View style={styles.markerCardHeader}>
+                      <View style={styles.markerCardTitleGroup}>
+                        <Text style={styles.markerCardTitle}>
+                          {lot.unofficial_name || lot.uhcl_name}
+                        </Text>
+                        <Text style={styles.markerCardSubtitle}>
+                          {lot.building} · {lot.uhcl_name}
+                        </Text>
+                      </View>
+                      <Pressable
+                        onPress={() => toggleMarkerMetrics(lot.parking_lot_id)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Hide ${lot.uhcl_name} metrics`}
+                        hitSlop={8}
+                      >
+                        <Ionicons name="close" size={18} color="#555" />
+                      </Pressable>
+                    </View>
+                    <View style={styles.markerMetricRow}>
+                      {SPOT_TYPES.map((spotType) => {
+                        const metric = lot.spot_types[spotType];
+                        return (
+                          <View key={spotType} style={styles.markerMetric}>
+                            <Text style={styles.markerSpotType}>
+                              {spotType === "handicap"
+                                ? "Handicap"
+                                : spotType === "EV"
+                                  ? "EV"
+                                  : "Standard"}
+                            </Text>
+                            <Text
+                              style={[
+                                styles.markerPercentage,
+                                metric && { color: availabilityColor(metric) },
+                              ]}
+                            >
+                              {metric
+                                ? `${(metric.percentage * 100).toFixed(0)}%`
+                                : "—"}
+                            </Text>
+                            <Text style={styles.markerCount}>
+                              {metric
+                                ? `${metric.number_available}/${metric.total_number}`
+                                : "No data"}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+        </View>
+      </View>
       <View
         style={[
           styles.panel,
@@ -280,7 +478,70 @@ const styles = StyleSheet.create({
   },
   title: { fontWeight: "700" },
   subtitle: { fontSize: 12, color: "#555" },
+  mapContainer: { flex: 1 },
   map: { flex: 1 },
+  markerHitBox: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  markerPin: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#fff",
+    backgroundColor: "#1565C0",
+    elevation: 4,
+  },
+  markerPinIdle: { width: 26, height: 26 },
+  markerPinSelected: { width: 36, height: 36 },
+  markerCardPosition: {
+    position: "absolute",
+    zIndex: 5,
+  },
+  markerCard: {
+    width: 250,
+    height: 110,
+    padding: 10,
+    gap: 8,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#ccc",
+    shadowColor: "#000",
+    shadowOpacity: 0.16,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+  },
+  markerCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  markerCardTitleGroup: { flex: 1, gap: 2 },
+  markerCardTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#111",
+    textAlign: "center",
+  },
+  markerCardSubtitle: { fontSize: 10, color: "#555", textAlign: "center" },
+  markerMetricRow: { flexDirection: "row", gap: 4 },
+  markerMetric: {
+    flex: 1,
+    alignItems: "center",
+    gap: 3,
+    paddingVertical: 5,
+    borderRadius: 5,
+    backgroundColor: "#f7f7f7",
+  },
+  markerSpotType: { fontSize: 9, color: "#333", textAlign: "center" },
+  markerPercentage: { fontSize: 13, fontWeight: "700", color: "#666" },
+  markerCount: { fontSize: 10, color: "#555" },
   panel: {
     position: "absolute",
     left: 12,
@@ -341,7 +602,12 @@ const styles = StyleSheet.create({
   },
   lotDetail: { fontSize: 12, color: "#555", textAlign: "center" },
   metricValue: { fontSize: 15, fontWeight: "700", color: "#666" },
-  updated: { fontSize: 11, color: "#666", textAlign: "center", alignSelf: "stretch"},
+  updated: {
+    fontSize: 11,
+    color: "#666",
+    textAlign: "center",
+    alignSelf: "stretch",
+  },
   note: { fontSize: 12, color: "#666" },
   messageRow: { gap: 6 },
   error: { fontSize: 12, color: "#9B1C1C" },

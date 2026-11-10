@@ -12,16 +12,18 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { SignInPage } from "./pages/SignInPage";
 import { MFA } from "./pages/MFA";
 
+type ScreenName = "nav" | "settings" | "admin";
+
 /** Expo port of Josh's Landing → Sign-in → NavModule shell, gated by sign-in. */
 function Screens() {
   const { session, guest, role, loading } = useAuth();
   const [started, setStarted] = useState(false);
-  const [screen, setScreen] = useState<"nav" | "settings" | "admin">("nav");
+  const [screen, setScreen] = useState<ScreenName>("nav");
   // Back sits in the same place on the next screen, so the finger release
   // would press it too. Ignore that second press.
   const ignoreBackUntil = useRef(0);
 
-  function show(next: "nav" | "settings" | "admin") {
+  function show(next: ScreenName) {
     const now = Date.now();
     if (now < ignoreBackUntil.current) return;
     // Leaving tools lands on Settings, whose back control is in that same spot.
@@ -59,12 +61,7 @@ function Screens() {
   } else if (screen === "admin" && role && ACCESS[role].canUseAdminTools) {
     content = <AdminPage onBack={() => show("settings")} />;
   } else if (screen === "settings") {
-    content = (
-      <SettingsPage
-        onBack={() => show("nav")}
-        onOpenAdmin={() => show("admin")}
-      />
-    );
+    content = <SettingsPage onBack={() => show("nav")} onOpenAdmin={() => show("admin")} />;
   } else {
     edgeToEdgeBottom = true;
     content = <NavModule onOpenSettings={() => show("settings")} />;
@@ -84,7 +81,7 @@ function Screens() {
           : ["top", "bottom", "left", "right"]
       }
     >
-      {content}
+      {!loading && session ? <MFA key={session.user.id}>{content}</MFA> : content}
     </SafeAreaView>
   );
 }

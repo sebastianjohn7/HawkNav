@@ -36,7 +36,6 @@
     "plugins": [
       "expo-status-bar",
       "expo-font"
-
     ],
     "extra": {
       "eas": {

@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Dimensions, Pressable } from 'react-native'
 import React from 'react'
+import PanoramaLinks from './PanoramaLinks'
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -13,6 +14,7 @@ const DisplayPointInfo = ({object, setEndNode, setDisplayInfo }
   if(name === '1' || name === '2' || !object) return null;
 
   return (
+    <>
     <View style={styles.displayBox}>
       <Text style={styles.title}>Location Information</Text>
       <Text style={styles.displayText}>Name: {object.properties?.NAME}</Text>
@@ -28,6 +30,8 @@ const DisplayPointInfo = ({object, setEndNode, setDisplayInfo }
             // set new startNode to current user position !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }}><Text style={{color: 'white'}}>Route To</Text></Pressable>
     </View>
+    <PanoramaLinks object={object} />
+    </>
   )
 }
 

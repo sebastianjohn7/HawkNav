@@ -106,19 +106,19 @@ export function RiderScreen({
       },
     })
       .then((r) => {
-        console.log(`HTTP Status: ${r.status} ${r.statusText}`);
+        //console.log(`HTTP Status: ${r.status} ${r.statusText}`);
         return r.json()
       })
       .then((body) => {
         const list = (body.stops as Stop[]) ?? [];
-        console.log(`\n\nCurrent Stops: `, body.stops);
+        //console.log(`\n\nCurrent Stops: `, body.stops);
         setStops(list);
         const firstToday = list.find((stop) => stop.runs_today) ?? list[0];
         if (firstToday) setSelected(firstToday.stop_id);
       })
       .catch((e) => {
+        //console.log("\nAPI Request Processing error occured.");
         setScheduleText(`API error: ${String(e)}`);
-        console.log("\nAPI Request Processing error occured.");
   }); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }, []);
 

@@ -16,6 +16,12 @@ const LEVELS: Array<{ id: LevelId; label: string }> = [
   { id: "UHCL.MAIN.DELTA.L2", label: "Level 2" },
 ];
 
+const rooms: string[] = [];
+  for(const f of deltaFloorplan.features){
+    const name = f.properties?.NAME;
+    if(name && !rooms.includes(name)) rooms.push(f.properties?.NAME);
+  }
+
 /** Fit map to extracted Delta bbox (lng/lat → MapView region). */
 const bbox = deltaFloorplan.bbox as [number, number, number, number];
 const DELTA_REGION = {
@@ -27,67 +33,17 @@ const DELTA_REGION = {
 
 type FC = GeoJSON.FeatureCollection;
 
-/** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
-export function IndoorMapScreen({tab} : {tab: string}) {
-  const [displayInfo, setDisplayInfo] = useState<GeoJSON.Feature | null>(null);
-  const [displayStartOptions, setDisplayStartOptions] = useState<Boolean>(false);
-  const [startNode, setStartNode] = useState<string | null>("205");
-  const [endNode, setEndNode] = useState<string | null>(null);
-  const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
-  const [userLevel, setUserLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
-
-  const [location, setLocation] = useState<Location.LocationObject>({
-  coords: {
-    latitude: DELTA_REGION.latitude,
-    longitude: DELTA_REGION.longitude,
-    altitude: 0,
-    accuracy: null,
-    altitudeAccuracy: null,
-    heading: null,
-    speed: null,
-  },
-  timestamp: 0, // Initial epoch fallback
-});
-
-useEffect(() => {
-  // Get permission for user location tracking
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.error('Permission to access location was denied');
-      }
-    })();
-  }, []);
-
-  const fetchLocation = async () => {
-      try {
-        // Fetch precise current position
-        let currentLocation = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
-        if(currentLocation.coords.latitude !== location?.coords.latitude && currentLocation.coords.longitude !== location?.coords.longitude){
-          setLocation(currentLocation);
-        }
-      } catch (error) {
-        console.error('Could not fetch location. Make sure GPS is enabled.');
-      } finally {
-      }
-    };
-
-  const { walls, units, hallways } = useMemo(() => {
-    // hallways is used for viewing hallway pathlines
-    const features = (deltaFloorplan.features as GeoJSON.Feature[]).filter(
-      (f) => (f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID === level,
-    );
+function floorDataEval(levelId: string) {
+  // hallways is used for viewing hallway pathlines
     const wallFeats: GeoJSON.Feature[] = [];
     const unitFeats: GeoJSON.Feature[] = [];
-    const moveFeats: GeoJSON.Feature[] = [];
     const hallwayFeats: GeoJSON.Feature[] = [];
-    for (const f of features) {
+
+    for (const f of deltaFloorplan.features) {
+      // Skip unnecessary floors
+      if((f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID !== levelId) continue;
+
       const t = f.geometry?.type;
-      if(f.properties?.USE_TYPE === "movePoint" && (t === "Polygon" || t === "MultiPolygon" || t === "Point")) {
-        moveFeats.push(f);
-      }
       if(f.properties?.USE_TYPE === "HALLWAY"){
         hallwayFeats.push(f);
       }
@@ -106,23 +62,78 @@ useEffect(() => {
     return {
       walls: { type: "FeatureCollection", features: wallFeats } as FC,
       units: { type: "FeatureCollection", features: unitFeats } as FC,
-      movePoints: { type: "FeatureCollection", features: moveFeats } as FC,
+      hallways: { type: "FeatureCollection", features: hallwayFeats } as FC,
+    };
+}
+
+const Floor_Data = {
+  "UHCL.MAIN.DELTA.L1": floorDataEval("UHCL.MAIN.DELTA.L1"),
+  "UHCL.MAIN.DELTA.L2": floorDataEval("UHCL.MAIN.DELTA.L2")
+};
+
+/** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
+export function IndoorMapScreen({tab} : {tab: string}) {
+  const [displayInfo, setDisplayInfo] = useState<GeoJSON.Feature | null>(null);
+  const [displayStartOptions, setDisplayStartOptions] = useState<Boolean>(false);
+  const [startNode, setStartNode] = useState<string | null>("205");
+  const [endNode, setEndNode] = useState<string | null>(null);
+  const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
+  const [userLevel, setUserLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
+
+  const [location, setLocation] = useState<Location.LocationObject>({
+    coords: {
+      latitude: DELTA_REGION.latitude,
+      longitude: DELTA_REGION.longitude,
+      altitude: 0,
+      accuracy: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+    },
+    timestamp: 0, // Initial epoch fallback
+  });
+
+  /*
+  const { walls, units, hallways } = useMemo(() => {
+    // hallways is used for viewing hallway pathlines
+    const features = (deltaFloorplan.features as GeoJSON.Feature[]).filter(
+      (f) => (f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID === level,
+    );
+    const wallFeats: GeoJSON.Feature[] = [];
+    const unitFeats: GeoJSON.Feature[] = [];
+    const hallwayFeats: GeoJSON.Feature[] = [];
+    for (const f of features) {
+      const t = f.geometry?.type;
+      if(f.properties?.USE_TYPE === "HALLWAY"){
+        hallwayFeats.push(f);
+      }
+      else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
+        unitFeats.push(f);
+      } else if (
+        t === "LineString" ||
+        t === "MultiLineString"
+      ) {
+        if(f.properties?.USE_TYPE === 'movePoint'){
+        }
+        wallFeats.push(f);
+      }
+    }
+
+    return {
+      walls: { type: "FeatureCollection", features: wallFeats } as FC,
+      units: { type: "FeatureCollection", features: unitFeats } as FC,
       hallways: { type: "FeatureCollection", features: hallwayFeats } as FC,
     };
   }, [level]);
+  */
 
-  const rooms: string[] = [];
-  for(const f of deltaFloorplan.features){
-    const name = f.properties?.NAME;
-    if(name && !rooms.includes(name)) rooms.push(f.properties?.NAME);
-  }
 
   // Check for endNode selection, if non-null -> begin routing using current position and endNode
     const [pathLine1, pathLine2] = useMemo(() => {
       // Add checking portion to differentiate floor filtered nodes
       //console.log("EndNode", endNode);
       if(!endNode) {
-        console.log("\nThere is no endNode!\n");
+        //console.log("\nThere is no endNode!\n");
         return [];
       }
       // Current user position will be updated by displayPointInfo --> Push new user location into delta_Floorplan features
@@ -151,17 +162,14 @@ useEffect(() => {
         return [pathL1, pathL2];
     }, [endNode]);
 
-  // constantly refind user_location
-  useEffect(() => {
-    setTimeout(() => fetchLocation(), 5000);
-  });
-
   // Custom Room Marker 
   const RoomMarker = () => (
     <View style={styles.markerContainer}>
       <Text style={styles.roomMarkerText}>R</Text>
     </View>
   );
+
+  const currentFloor = Floor_Data[level];
 
   return (tab === "find" && (
     <View style={styles.container}>
@@ -177,7 +185,9 @@ useEffect(() => {
               <Pressable
                 key={l.id}
                 style={[styles.levelBtn, on && styles.levelBtnOn]}
-                onPress={() => setLevel(l.id)}
+                onPress={() => {
+                  setLevel(l.id)
+                }}
               >
                 <Text style={[styles.levelText, on && styles.levelTextOn]}>
                   {l.label}
@@ -198,28 +208,6 @@ useEffect(() => {
         appleLogoInsets={{ left: 8, bottom: 8, right: 0, top: 0 }}
         legalLabelInsets={{ top: 0, right: 0, bottom: 8, left: 8 }}
       >
-        <Marker 
-          coordinate={{
-          longitude: location.coords.longitude ?? 0,
-          latitude: location.coords.latitude ?? 0}}
-          title={"USER_LOCATION"}
-          description={''}
-        />
-        {/* Points*/}
-        <Geojson
-          geojson={units}
-          strokeColor="#1E3A8A"
-          strokeWidth={1}
-          fillColor="rgba(147, 197, 253, 0.35)"
-          color= "#9094a0"
-          markerComponent={<RoomMarker />}
-          onPress={(object) => {
-            setDisplayInfo(object.feature);
-            console.log("Object", object.feature.properties?.NAME);
-            //console.log("\n Object Type: ", typeof object);
-          }}
-        />
-
         { /* Hallways LineString Display
         <Geojson
           geojson={hallways}
@@ -228,10 +216,19 @@ useEffect(() => {
           fillColor= "transparent"
         />
         */}
-
+        
+        {/* Points*/}
+        {<Geojson
+          geojson={currentFloor.units}
+          strokeColor={"#1E3A8A"}
+          strokeWidth={1}
+          fillColor={"rgba(147, 197, 253, 0.35)"}
+          color= {"#9094a0"}
+          onPress={(object) => setDisplayInfo(object.feature)}
+        />}
         <Geojson
-          geojson={walls}
-          strokeColor="#33553a"
+          geojson={currentFloor.walls}
+          strokeColor={"#33553a"}
           strokeWidth={1.5}
           fillColor="transparent"
         />

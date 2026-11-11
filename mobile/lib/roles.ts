@@ -4,7 +4,7 @@
 // Matches the app_role enum in supabase/schema.sql.
 export type Role = "visitor" | "student" | "faculty" | "driver" | "admin";
 
-export type Tab = "shuttle" | "find" | "alerts";
+export type Tab = "shuttle" | "find" | "parking" | "alerts";
 
 type Access = {
   tabs: Tab[];
@@ -21,7 +21,7 @@ type Access = {
 const ALL_TABS: Tab[] = ["shuttle", "find", "alerts"];
 
 const STUDENT: Access = {
-  tabs: ALL_TABS,
+  tabs: ["shuttle", "find", "parking", "alerts"],
   canDrive: false,
   canUseAdminTools: false,
   canComposeAlerts: false,
@@ -38,28 +38,18 @@ export const ACCESS: Record<Role, Access> = {
     canApproveAlerts: false,
   },
   student: STUDENT,
-  // Faculty: same tabs as students, but can submit alerts for admin approval.
-  faculty: {
-    tabs: ALL_TABS,
-    canDrive: false,
-    canUseAdminTools: false,
-    canComposeAlerts: true,
-    canApproveAlerts: false,
-  },
+  // Faculty match students for now.
+  faculty: STUDENT,
   driver: {
-    tabs: ALL_TABS,
+    tabs: ["shuttle", "find", "parking", "alerts"],
     canDrive: true,
     canUseAdminTools: false,
-    canComposeAlerts: true,
-    canApproveAlerts: false,
   },
-  // Admin sees everything; posts alerts live and reviews pending.
+  // Admin sees everything.
   admin: {
-    tabs: ALL_TABS,
+    tabs: ["shuttle", "find", "parking", "alerts"],
     canDrive: true,
     canUseAdminTools: true,
-    canComposeAlerts: true,
-    canApproveAlerts: true,
   },
 };
 

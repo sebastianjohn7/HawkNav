@@ -123,16 +123,17 @@ If you switch machines (Mac ↔ Windows), update `"dev"` to the matching line be
 
 ### 4. Supabase (sign-in, roles, live GPS)
 
-Skip this if you only need schedules/API. You need a free Supabase project before sign-in and Driver/Rider realtime work:
+Skip this if you only need schedules. You need a free Supabase project for sign-in, Driver/Rider realtime, and parking metrics:
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Copy `mobile/.env.example` → `mobile/.env` and set `EXPO_PUBLIC_SUPABASE_*` from the project **URL** and **publishable (anon) key** — never commit secrets
-3. In the SQL editor, run [`supabase/schema.sql`](supabase/schema.sql) (one file: accounts, roles, shuttle GPS, security). It is not carried over by git, so every project needs it once. Full details (accounts and roles, first admin, email confirmation) are in [`supabase/SETUP.md`](supabase/SETUP.md)
-4. Confirm Realtime is enabled for `shuttle_positions` (Dashboard → Database → Publications, or the SQL already adds it)
+2. Copy `mobile/.env.example` → `mobile/.env` and set `EXPO_PUBLIC_SUPABASE_*` from the project **URL** and **publishable (anon) key**. Copy `api/.env.example` → `api/.env` and set `SUPABASE_URL` and `SUPABASE_ANON_KEY` for the backend API. Never commit `.env` files or put a secret / `service_role` key in the mobile app.
+3. In the SQL editor, run these **in order**: [`schema.sql`](supabase/schema.sql), [`profiles.sql`](supabase/profiles.sql), [`shuttle_rls.sql`](supabase/shuttle_rls.sql), [`admin_roles.sql`](supabase/admin_roles.sql), [`parking_metrics.sql`](supabase/parking_metrics.sql). Import `data/parking_lots.csv` into `public.parking_lots` after the parking SQL if the lot rows are not already there. They are not carried over by git, so every project needs them. Full details (roles, first admin, allowlist, test accounts per role) are in [`supabase/SETUP.md`](supabase/SETUP.md)
+4. Confirm Realtime is enabled for `shuttle_positions` and `parking_spot_updates` (Dashboard → Database → Publications, or the SQL already adds them)
 
 - **Sign in** with email + password, or **Continue as Visitor** (Delta map only, no account)
 - **Driver** tab (drivers and admins only) streams GPS every ~4s into `shuttle_positions`
 - **Rider** tab subscribes via Realtime and can call `GET /eta`
+- **Parking** tab reads `GET /parking/metrics`, grouped by lot and spot type, and refreshes on Realtime spot updates
 
 ### 5. Phone (physical device) — recommended everyday boot
 

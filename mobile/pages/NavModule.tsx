@@ -21,6 +21,7 @@ import { useAuth } from "../lib/auth";
 import { GlassCircleButton } from "../lib/glass";
 import { ACCESS, type Tab } from "../lib/roles";
 import { IndoorMapScreen } from "../screens/IndoorMapScreen";
+import { ParkingCongestionScreen } from "../screens/ParkingCongestionScreen";
 import { AlertsModule } from "./AlertsModule";
 import { ShuttleModule } from "./ShuttleModule";
 
@@ -37,6 +38,7 @@ const TABS: Array<{
 }> = [
   { id: "shuttle", label: "Shuttle", icon: "bus", sf: "bus", sfOn: "bus.fill" },
   { id: "find", label: "Map", icon: "map", sf: "map", sfOn: "map.fill" },
+  { id: "parking", label: "Parking", icon: "car", sf: "car", sfOn: "car.fill" },
   {
     id: "alerts",
     label: "Alerts",
@@ -85,8 +87,9 @@ function TabBody({
   active: boolean;
 }) {
   if (id === "shuttle") return <ShuttleModule sheetBottom={sheetBottom} />;
-  if (id === "find") return <IndoorMapScreen tab={id} />;
-  return <AlertsModule bottomInset={sheetBottom} active={active} />;
+  if (id === "find") return <IndoorMapScreen tab = {id} />;
+  if (id === "parking") return <ParkingCongestionScreen sheetBottom={sheetBottom} />;
+  return <AlertsModule bottomInset={sheetBottom} />;
 }
 
 /** Bottom tabs + settings. Visitors have one tab, so they get no bar. */

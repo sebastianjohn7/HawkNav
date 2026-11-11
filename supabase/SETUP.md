@@ -4,17 +4,20 @@ Do this once per Supabase project (ideally one shared project for the team).
 
 ## Setup
 
-1. Create a free project at [supabase.com](https://supabase.com).
-2. Project Settings → API Keys → copy the **Project URL** and **publishable key** into `mobile/.env` as `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-3. Also copy those two into `api/.env`. Then copy the **service_role** secret (or “secret” key) into `api/.env` only as `SUPABASE_SERVICE_ROLE_KEY`. The API uses that key to write shuttle GPS. Do not put the service role key in `mobile/.env` or commit it.
-4. SQL Editor → paste all of [`schema.sql`](schema.sql) → **Run** (confirm any warning). It includes the MFA policies and is safe to re-run. Re-running also migrates alert audience from `students|staff|all` → `staff|all` (any old `students` rows become `all`).
-5. Authentication → Sign In / Providers → Email → password **minimum 8**, require **lowercase, uppercase, digits, symbols**.
-6. Authentication → Providers → Email → **Confirm email**: off while testing, **on** for the demo and real use. The built-in sender allows only ~2 emails/hour, so real use needs custom SMTP.
-7. Database → Publications → confirm `shuttle_positions`, `alerts`, and `alert_comments` are in `supabase_realtime` (the SQL tries to add them)
+1. Create a free project at https://supabase.com
+2. Project Settings → API Keys → copy the **Project URL** and the **publishable key** (older projects call it the **anon public** key) into `mobile/.env` as `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` (see `mobile/.env.example`) and into `api/.env` as `SUPABASE_URL` and `SUPABASE_ANON_KEY` (see `api/.env.example`). The API needs the latter values for `GET /parking/metrics`. Never put the secret / `service_role` key in the mobile app, and never commit `.env`.
+3. SQL Editor → paste each file's contents and run, **in this order**:
+   1. [`schema.sql`](schema.sql) — `shuttle_positions` (live GPS) and a `shuttle_stops` stub
+   2. [`profiles.sql`](profiles.sql) — `profiles`, `role_allowlist`, `login_log`, and the signup trigger that assigns roles
+   3. [`shuttle_rls.sql`](shuttle_rls.sql) — shuttle GPS: any signed-in user reads, only drivers/admins write
+   4. [`admin_roles.sql`](admin_roles.sql) — `set_admin()` so admins can promote / demote accounts from the app, plus a `role_changes` log
+   5. [`parking_metrics.sql`](parking_metrics.sql) — parking lots, spot updates, and the live lot summary queried by the Parking tab
 
-## If driver check-in says Supabase upsert 401 / permission denied
+   These scripts are safe to re-run. If Supabase warns about destructive operations (the `drop policy` lines), confirm; if it offers to enable RLS on `shuttle_stops`, choose **Run and enable RLS**. After running `parking_metrics.sql`, import `data/parking_lots.csv` into `public.parking_lots` if it does not already contain the lot rows.
+4. Database → Publications → confirm `shuttle_positions` and `parking_spot_updates` are in `supabase_realtime` (the SQL tries to add them)
+5. For testing, turn off Authentication → Providers → Email → **Confirm email** (turn it back on for the demo).
 
-The Bun API must write with the service role key in `api/.env`:
+Then start the API (`cd api && bun run dev`) and Expo (`cd mobile && npx expo start`). `GET /parking/metrics` returns `{ "metrics": [...] }`, with one row per lot and spot type. `percentage` is a ratio from `0` to `1`; the Parking tab formats it as a percent. Metrics are computed from the latest updates in `public.parking_spot_updates`; insert spot updates to see availability change.
 
 ```env
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-secret

@@ -239,16 +239,27 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           fillColor="transparent"
           tappable={false}
         />
-        {pathLine && (
+        { /*Route clipping through floor fix*/(pathLine1 && level.includes("L1")) ? (
           <Polyline
-            coordinates={pathLine}
+            coordinates={pathLine1}
             strokeColor="#2563EB"
             strokeWidth={4}
             lineCap="round"
             lineJoin="round"
             zIndex={10}
           />
-        )}
+        ) : null}
+
+        { /*Route clipping through floor fix*/(pathLine2 && level.includes("L2")) ? (
+          <Polyline
+            coordinates={pathLine2}
+            strokeColor="#2563EB"
+            strokeWidth={4}
+            lineCap="round"
+            lineJoin="round"
+            zIndex={10}
+          />
+        ) : null}
       </MapView>
 
       {displayStartOptions && (
@@ -267,7 +278,11 @@ export function IndoorMapScreen({tab} : {tab: string}) {
             style={styles.backdrop}
             onPress={() => setDisplayInfo(null)}
           />
-          <DisplayPointInfo object={displayInfo} setEndNode={setEndNode} />
+          <DisplayPointInfo
+            object={displayInfo}
+            setEndNode={setEndNode}
+            setDisplayInfo={setDisplayInfo}
+        />
         </>
       )}
     </View>

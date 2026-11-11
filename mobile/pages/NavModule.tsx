@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  InteractionManager,
   Platform,
   Pressable,
   StyleSheet,
@@ -86,7 +85,7 @@ function TabBody({
   active: boolean;
 }) {
   if (id === "shuttle") return <ShuttleModule sheetBottom={sheetBottom} />;
-  if (id === "find") return <IndoorMapScreen />;
+  if (id === "find") return <IndoorMapScreen tab={id} />;
   return <AlertsModule bottomInset={sheetBottom} active={active} />;
 }
 
@@ -183,13 +182,11 @@ export function NavModule({ onOpenSettings }: Props) {
     floatingTabRef.current = next;
     if (floatingSwitchTimer.current) clearTimeout(floatingSwitchTimer.current);
     // Wait for the tab pane to settle, then a beat so bounce / 2nd finger dies.
-    InteractionManager.runAfterInteractions(() => {
-      floatingSwitchTimer.current = setTimeout(() => {
-        floatingSwitchLock.current = false;
-        setFloatBusy(false);
-        floatingSwitchTimer.current = null;
-      }, 500);
-    });
+    floatingSwitchTimer.current = setTimeout(() => {
+      floatingSwitchLock.current = false;
+      setFloatBusy(false);
+      floatingSwitchTimer.current = null;
+    }, 500);
   }
 
   return (
@@ -255,19 +252,12 @@ export function NavModule({ onOpenSettings }: Props) {
       ) : (
         <View style={styles.body}>
           {/* Keep all floating tabs mounted so rapid switches don't remount/flicker. */}
-          {allowed.map((t) => (
-            <View
-              key={t.id}
-              style={[styles.tabPane, tab !== t.id && styles.tabPaneHidden]}
-              pointerEvents={tab === t.id ? "auto" : "none"}
-            >
-              <TabBody
-                id={t.id}
-                sheetBottom={sheetBottom}
-                active={tab === t.id}
-              />
-            </View>
-          ))}
+          <TabBody
+          key={tab}
+          id={tab}
+          sheetBottom={sheetBottom}
+          active={true}
+        />
         </View>
       )}
 
@@ -357,8 +347,12 @@ const styles = StyleSheet.create({
   signInText: { color: "#fff", fontWeight: "700" },
   body: { flex: 1 },
   tabPane: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  position: "absolute",
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+},
   tabPaneHidden: {
     opacity: 0,
   },

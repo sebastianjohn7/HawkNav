@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
-import { findShortestPath } from "../utils/aStarRouting.ts";
+import {
+  findShortestPath,
+  buildGraphFromGeoJson,
+} from "../utils/aStarRouting";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
 
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";

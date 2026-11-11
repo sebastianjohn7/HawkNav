@@ -1,13 +1,5 @@
 import { useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Button,
-  Text,
-  TextInput,
-  View,
-  Pressable,
-  Platform,
-} from "react-native";
+import { Text, View, Pressable, Platform } from "react-native";
 import { supabase } from "../lib/config";
 import { SvgXml } from "react-native-svg";
 
@@ -21,7 +13,7 @@ export function EnrollMFA({ onVerified, onBusyChange }: Props) {
   const [secret, setSecret] = useState("");
   const [qrCode, setQrCode] = useState("");
   const [showKey, setShowKey] = useState(false);
-  const [copied, setCopied] = useState(false);
+
   const [busy, setBusy] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState("");
@@ -52,7 +44,7 @@ export function EnrollMFA({ onVerified, onBusyChange }: Props) {
       setSecret(data.totp.secret);
       setQrCode(data.totp.qr_code.replace(/^data:image\/svg\+xml;utf-8,/, ""));
       setShowKey(false);
-      setCopied(false);
+
       setStep("setup");
     } catch (err) {
       setError(verificationMessage(err));
@@ -72,84 +64,61 @@ export function EnrollMFA({ onVerified, onBusyChange }: Props) {
     onVerified();
   }
 
-  async function copyKey() {
-    try {
-      const copied = await Clipboard.setStringAsync(secret);
-      if (!copied) throw new Error("Copy is unavailable. Press and hold the key to copy it.");
-      setCopied(true);
-      setError("");
-    } catch {
-      setError("Copy is unavailable. Press and hold the key to copy it.");
-    }
-  }
-
   return (
-    <View>
-      <Text>Set up two-factor authentication</Text>
-      <Text>Add HawkNav to Duo Mobile, then enter its code.</Text>
-      <Text>If you restarted setup, replace the old HawkNav entry in your authenticator with the new setup key.</Text>
+    <View style={mfaStyles.stack}>
+      <Text style={mfaStyles.eyebrow}>ACCOUNT SECURITY</Text>
+      <MFAError message={error} />
 
-      {error !== "" && <Text>{error}</Text>}
-
-      {qrCode !== "" && (
-        <View style={{ alignItems: "center", padding: 10, backgroundColor: "#fff" }}>
-          <SvgXml xml={qrCode} width={200} height={200} />
-        </View>
-      )}
-
-      {secret !== "" && (
-        <View>
-          <Pressable onPress = {() => setShowSetupKey((shown) => !shown)} 
-            accessibilityRole="button"
-            accessibilityState={{ expanded: showSetupKey }}
-            style={{ padding: 10}}
-             >
-
-            <Text style={{ fontSize: 16, color: "red", textDecorationLine: "underline" }}>
-            
-            Manual Setup Key
-            </Text>
-            </Pressable>
-
-          {showSetupKey && (
-          <Text selectable style={{ fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }), color: "blue", fontSize: 16 }}>
-            {secret}
+      {step === "intro" && (
+        <>
+          <Text accessibilityRole="header" style={mfaStyles.title}>Set up two-factor authentication</Text>
+          <Text style={mfaStyles.body}>
+            Add HawkNav to Duo Mobile, Google Authenticator, or another authenticator. Then enter its six-digit code to finish setup.
           </Text>
+          <MFAButton title="Start Enrollment" onPress={startEnrollment} loading={busy} />
+        </>
+      )}
+
+      {step === "setup" && (
+        <>
+          <Text accessibilityRole="header" style={mfaStyles.title}>Add HawkNav to your authenticator</Text>
+          <Text style={mfaStyles.body}>Scan this QR code using your authenticator on another device.</Text>
+          {qrCode !== "" && (
+            <View style={{ alignItems: "center", padding: 10, backgroundColor: "#fff" }}>
+              <SvgXml xml={qrCode} width={200} height={200} />
+            </View>
           )}
-        </View>
+          <Text style={mfaStyles.hint}>
+            Using the same phone? Reveal the manual setup key, press and hold to copy it, then add it in your authenticator as a time-based account.
+          </Text>
+          <Pressable onPress={() => setShowKey(shown => !shown)}
+            accessibilityRole="button" accessibilityState={{ expanded: showKey }}>
+            <Text style={mfaStyles.link}>{showKey ? "Hide manual setup key" : "Manual setup key"}</Text>
+          </Pressable>
+          {showKey && (
+            <Text selectable style={{ fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }), color: "#142D4E", fontSize: 16 }}>
+              {secret}
+            </Text>
+          )}
+          <Text style={mfaStyles.hint}>If you restarted enrollment, replace the old HawkNav entry with this new setup key.</Text>
+          <MFAButton title="Continue" onPress={() => { setShowKey(false); setStep("verify"); }} />
+        </>
       )}
 
-        {factorId !== null && (
-        
-      
-        <TextInput
-          style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}
-          value={code}
-          onChangeText={setCode}
-          placeholder="6-digit code"
-          keyboardType="number-pad"
-          maxLength={6}
-          editable={!loading}
-        />
-        )}
-
-
-      {loading && <ActivityIndicator />}
-
-      {!factorId ? (
-        <Button
-          title="Start Enrollment"
-          onPress={startEnrollment}
-          disabled={loading}
-        />
-      ) : (
-        <Button
-          title="Verify Code"
-          onPress={verifyEnrollment}
-          disabled={loading}
-       />  
+      {step === "verify" && (
+        <>
+          <Text accessibilityRole="header" style={mfaStyles.title}>Confirm your authenticator</Text>
+          <Text style={mfaStyles.body}>Enter the six-digit code for HawkNav to finish setup.</Text>
+          <MFACodeEntry onVerify={verify} onBusyChange={value => {
+            setVerifying(value);
+            onBusyChange?.(value);
+          }} />
+          <Pressable accessibilityRole="button" disabled={verifying}
+            accessibilityState={{ disabled: verifying }} onPress={() => setStep("setup")}>
+            <Text style={[mfaStyles.link, verifying && { opacity: 0.5 }]}>Back to setup</Text>
+          </Pressable>
+        </>
       )}
- 
     </View>
   );
 }

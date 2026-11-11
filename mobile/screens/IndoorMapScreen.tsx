@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
@@ -7,6 +7,8 @@ import {
   buildGraphFromGeoJson,
 } from "../utils/aStarRouting";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
+import * as Location from 'expo-location';
+
 
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";
 

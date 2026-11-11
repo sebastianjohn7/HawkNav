@@ -270,11 +270,9 @@ export function ParkingCongestionScreen({
                         : styles.markerPinIdle,
                     ]}
                   >
-                    <Ionicons
-                      name="car"
-                      size={selected ? 19 : 14}
-                      color="#fff"
-                    />
+                    <Text style={styles.markerLabel}>
+                      {lot.uhcl_name.replace(/^Lot\s+/i, "")}
+                    </Text>
                   </View>
                 </View>
               </Marker>
@@ -495,6 +493,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1565C0",
     elevation: 4,
   },
+  markerLabel: { color: "#fff", fontSize: 12, fontWeight: "700" },
   markerPinIdle: { width: 26, height: 26 },
   markerPinSelected: { width: 36, height: 36 },
   markerCardPosition: {

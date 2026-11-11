@@ -35,11 +35,9 @@ temp/
 *.local
 .direnv/
 .cursor/plans
+PROJECT_CONTEXT.md
 mobile/pnpm-lock.yaml
 
 # JetBrains IDE settings
 .idea/
 PROJECT_CONTEXT.md
-
-# JetBrains IDE settings
-.idea/

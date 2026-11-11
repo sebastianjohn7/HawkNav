@@ -1,11 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
 import { findShortestPath } from "../utils/aStarRouting.ts";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
 import StartRoomSelectionTesting from "./hooks/startRoomSelectionTesting.tsx";
-import FloorSelectionPrompt from "./hooks/floorSelectionPrompt.tsx";
 import * as Location from 'expo-location';
 
 
@@ -78,9 +77,19 @@ export function IndoorMapScreen({tab} : {tab: string}) {
   const [startNode, setStartNode] = useState<string | null>("205");
   const [endNode, setEndNode] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
-  const [userLevel, setUserLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
   const [location, setLocation] = useState<Location.LocationObject>({
+    coords: {
+      latitude: DELTA_REGION.latitude,
+      longitude: DELTA_REGION.longitude,
+      altitude: 0,
+      accuracy: null,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+    },
+    timestamp: 0, // Initial epoch fallback
+  });
     coords: {
       latitude: DELTA_REGION.latitude,
       longitude: DELTA_REGION.longitude,
@@ -176,7 +185,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
       {/*Parent Container */}
       <View style={styles.banner}>
         {/*Screen Header*/}
-        <Text style={styles.bannerTitle}>Delta floor plan</Text>
         <Text style={styles.bannerTitle}>Delta</Text>
         <View style={styles.levelRow}>
           {LEVELS.map((l) => {
@@ -197,7 +205,7 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           })}
         </View>
       </View>
-      
+
       <MapView
         style={styles.map}
         provider={PROVIDER_DEFAULT}
@@ -236,7 +244,8 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           tappable={false}
         />
 
-        { /*Route clipping through floor fix*/(pathLine1 && level.includes("L1")) ? (
+        {/* Only the active floor's leg of the route is mounted. */}
+        {pathLine1 && level.includes("L1") ? (
           <Polyline
             coordinates={pathLine1}
             strokeColor="#2563EB"
@@ -247,7 +256,7 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           />
         ) : null}
 
-        { /*Route clipping through floor fix*/(pathLine2 && level.includes("L2")) ? (
+        {pathLine2 && level.includes("L2") ? (
           <Polyline
             coordinates={pathLine2}
             strokeColor="#2563EB"
@@ -261,8 +270,8 @@ export function IndoorMapScreen({tab} : {tab: string}) {
 
       {displayStartOptions && (
         <>
-          <StartRoomSelectionTesting rooms={rooms} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
-          <Pressable 
+          <StartRoomSelectionTesting rooms={ROOMS} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
+          <Pressable
             style={styles.backdrop}
             onPress={() => setDisplayStartOptions(false)}
           ></Pressable>
@@ -315,9 +324,9 @@ const styles = StyleSheet.create({
   map: { flex: 1 },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "transparent",
-    height: "100%",
-    width: "100%",
+    backgroundColor: 'transparent',
+    height: '100%',
+    width: '100%',
     opacity: 0.1,
     zIndex: 997
   },
@@ -333,14 +342,14 @@ const styles = StyleSheet.create({
     zIndex: 997
   },
   routeButton: {
-        marginTop: 5,
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '30%',
-        width: '80%',
-        backgroundColor: '#784be8',
-        borderRadius: 10
-    },
+    marginTop: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '30%',
+    width: '80%',
+    backgroundColor: '#784be8',
+    borderRadius: 10
+  },
   markerContainer: {
     backgroundColor: '#573dec',
     padding: 10,

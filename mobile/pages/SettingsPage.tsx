@@ -8,10 +8,9 @@ import { ACCESS } from "../lib/roles";
 type Props = {
   onBack: () => void;
   onOpenAdmin: () => void;
-  onOpenPanorama: () => void;
 };
 
-export function SettingsPage({ onBack, onOpenAdmin, onOpenPanorama }: Props) {
+export function SettingsPage({ onBack, onOpenAdmin }: Props) {
   const { session, role, signOut } = useAuth();
 
   return (
@@ -31,9 +30,6 @@ export function SettingsPage({ onBack, onOpenAdmin, onOpenPanorama }: Props) {
             <Text>Admin tools</Text>
           </Pressable>
         )}
-        <Pressable style={styles.btn} onPress={onOpenPanorama}>
-          <Text>360° tour (preview)</Text>
-        </Pressable>
         <Pressable style={styles.btn} onPress={signOut}>
           <Text>Sign Out</Text>
         </Pressable>

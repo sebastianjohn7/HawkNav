@@ -11,6 +11,9 @@ import { NavModule } from "./pages/NavModule";
 import { SettingsPage } from "./pages/SettingsPage";
 import { SignInPage } from "./pages/SignInPage";
 import { MFA } from "./pages/MFA";
+import { PanoramaScreen } from "./screens/PanoramaScreen";
+
+type ScreenName = "nav" | "settings" | "admin" | "panorama";
 
 type ScreenName = "nav" | "settings" | "admin";
 
@@ -27,7 +30,7 @@ function Screens() {
     const now = Date.now();
     if (now < ignoreBackUntil.current) return;
     // Leaving tools lands on Settings, whose back control is in that same spot.
-    if (screen === "admin" && next === "settings") {
+    if ((screen === "admin" || screen === "panorama") && next === "settings") {
       ignoreBackUntil.current = now + 400;
     }
     setScreen(next);
@@ -60,6 +63,9 @@ function Screens() {
     content = <NavModule onOpenSettings={() => {}} />;
   } else if (screen === "admin" && role && ACCESS[role].canUseAdminTools) {
     content = <AdminPage onBack={() => show("settings")} />;
+  } else if (screen === "panorama") {
+    // Temporary entry from Settings until the map screen gets its own "Look around" button.
+    content = <PanoramaScreen onBack={() => show("settings")} />;
   } else if (screen === "settings") {
     content = <SettingsPage onBack={() => show("nav")} onOpenAdmin={() => show("admin")} />;
   } else {

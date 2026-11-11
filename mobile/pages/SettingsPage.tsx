@@ -2,22 +2,24 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useAuth } from "../lib/auth";
+import { GlassCircleButton } from "../lib/glass";
 import { ACCESS } from "../lib/roles";
 
 type Props = {
   onBack: () => void;
   onOpenAdmin: () => void;
+  onOpenPanorama: () => void;
 };
 
-export function SettingsPage({ onBack, onOpenAdmin }: Props) {
+export function SettingsPage({ onBack, onOpenAdmin, onOpenPanorama }: Props) {
   const { session, role, signOut } = useAuth();
 
   return (
     <View style={styles.root}>
       <View style={styles.bar}>
-        <Pressable onPress={onBack} hitSlop={12} accessibilityLabel="Back">
-          <Ionicons name="chevron-back" size={32} color="#1565C0" />
-        </Pressable>
+        <GlassCircleButton onPress={onBack} accessibilityLabel="Back">
+          <Ionicons name="chevron-back" size={22} color="#1565C0" />
+        </GlassCircleButton>
         <Text style={styles.title}>Settings</Text>
       </View>
       <View style={styles.body}>
@@ -29,6 +31,9 @@ export function SettingsPage({ onBack, onOpenAdmin }: Props) {
             <Text>Admin tools</Text>
           </Pressable>
         )}
+        <Pressable style={styles.btn} onPress={onOpenPanorama}>
+          <Text>360° tour (preview)</Text>
+        </Pressable>
         <Pressable style={styles.btn} onPress={signOut}>
           <Text>Sign Out</Text>
         </Pressable>

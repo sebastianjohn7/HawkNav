@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
@@ -210,10 +210,12 @@ export function IndoorMapScreen({tab} : {tab: string}) {
       >
         { /* Hallways LineString Display
         <Geojson
-          geojson={hallways}
+          key={`${level}-hallways`}
+          geojson={layers.hallways}
           strokeColor="#f4f9f6"
           strokeWidth={1.5}
-          fillColor= "transparent"
+          fillColor="transparent"
+          tappable={false}
         />
         */}
         
@@ -231,6 +233,7 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           strokeColor={"#33553a"}
           strokeWidth={1.5}
           fillColor="transparent"
+          tappable={false}
         />
 
         { /*Route clipping through floor fix*/(pathLine1 && level.includes("L1")) ? (
@@ -312,9 +315,9 @@ const styles = StyleSheet.create({
   map: { flex: 1 },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'transparent',
-    height: '100%',
-    width: '100%',
+    backgroundColor: "transparent",
+    height: "100%",
+    width: "100%",
     opacity: 0.1,
     zIndex: 997
   },

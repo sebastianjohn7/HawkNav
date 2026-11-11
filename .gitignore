@@ -34,8 +34,11 @@ tmp/
 temp/
 *.local
 .direnv/
-.cursor/rules/authorship-and-style.mdc
 .cursor/plans
+mobile/pnpm-lock.yaml
+
+# JetBrains IDE settings
+.idea/
 PROJECT_CONTEXT.md
 
 # JetBrains IDE settings

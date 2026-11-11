@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useAuth } from "../lib/auth";
+import { GlassCircleButton } from "../lib/glass";
 import { ACCESS } from "../lib/roles";
 
 type Props = {
@@ -15,9 +16,9 @@ export function SettingsPage({ onBack, onOpenAdmin }: Props) {
   return (
     <View style={styles.root}>
       <View style={styles.bar}>
-        <Pressable onPress={onBack} hitSlop={12} accessibilityLabel="Back">
-          <Ionicons name="chevron-back" size={32} color="#1565C0" />
-        </Pressable>
+        <GlassCircleButton onPress={onBack} accessibilityLabel="Back">
+          <Ionicons name="chevron-back" size={22} color="#1565C0" />
+        </GlassCircleButton>
         <Text style={styles.title}>Settings</Text>
       </View>
       <View style={styles.body}>

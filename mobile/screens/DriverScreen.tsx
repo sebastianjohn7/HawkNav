@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { GlassView } from "expo-glass-effect";
 import { apiUrl } from "../lib/config";
+import { canUseLiquidGlass, GLASS_WHITE_TINT } from "../lib/glass";
 
 type Shuttle = { id: string; name: string; polling: boolean };
 
@@ -154,12 +156,29 @@ export function DriverScreen({
         reportCover();
       }}
     >
-      {!open && (
-        <Pressable style={styles.handle} onPress={() => setOpen(true)}>
-          <Ionicons name="bus" size={18} color="#1565C0" />
-          <Text style={styles.handleText}>Drive</Text>
-        </Pressable>
-      )}
+      {!open &&
+        (canUseLiquidGlass() ? (
+          <GlassView
+            style={styles.handleGlass}
+            glassEffectStyle="regular"
+            isInteractive
+            tintColor={GLASS_WHITE_TINT}
+          >
+            <Pressable
+              style={styles.handleHit}
+              onPress={() => setOpen(true)}
+              accessibilityLabel="Open check-in"
+            >
+              <Ionicons name="bus" size={18} color="#1565C0" />
+              <Text style={styles.handleText}>Drive</Text>
+            </Pressable>
+          </GlassView>
+        ) : (
+          <Pressable style={styles.handle} onPress={() => setOpen(true)}>
+            <Ionicons name="bus" size={18} color="#1565C0" />
+            <Text style={styles.handleText}>Drive</Text>
+          </Pressable>
+        ))}
 
       {open && (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
@@ -168,55 +187,122 @@ export function DriverScreen({
             style={[styles.sidebarSlot, { paddingBottom: sheetBottom }]}
             pointerEvents="box-none"
           >
-            <View
-              style={styles.sidebar}
-              onLayout={(event) => {
-                panelWidth.current = event.nativeEvent.layout.width;
-                reportCover();
-              }}
-            >
-            <View style={styles.sidebarHeader}>
-              <Pressable onPress={() => setOpen(false)} hitSlop={8}>
-                <Ionicons name="chevron-forward" size={22} color="#1565C0" />
-              </Pressable>
-              <Text style={styles.sidebarTitle}>Check-in</Text>
-            </View>
-            <View style={styles.body}>
-              <Text style={styles.meta}>Status: {status}</Text>
-              {shuttles.map((shuttle) => {
-                const selected = shuttle.id === shuttleId;
-                return (
-                  <Pressable
-                    key={shuttle.id}
-                    style={[styles.choice, selected && styles.choiceOn]}
-                    onPress={() => choose(shuttle.id)}
-                    disabled={polling}
-                  >
-                    <Text style={styles.choiceText}>{shuttle.name}</Text>
-                    {selected && (
-                      <Ionicons name="checkmark" size={18} color="#0B6E4F" />
-                    )}
-                  </Pressable>
-                );
-              })}
-              {last && (
-                <Text style={styles.meta}>
-                  {last.lat.toFixed(5)}, {last.lng.toFixed(5)} heading=
-                  {last.heading?.toFixed(0) ?? "—"}
-                </Text>
-              )}
-              <Pressable
-                style={[styles.btn, polling && styles.btnOff]}
-                onPress={polling ? stop : start}
+            {canUseLiquidGlass() ? (
+              <GlassView
+                style={[styles.sidebar, styles.sidebarGlass]}
+                glassEffectStyle="regular"
+                isInteractive
+                tintColor={GLASS_WHITE_TINT}
+                onLayout={(event) => {
+                  panelWidth.current = event.nativeEvent.layout.width;
+                  reportCover();
+                }}
               >
-                <Text style={styles.btnText}>{polling ? "Stop" : "Start"}</Text>
-              </Pressable>
-            </View>
-            </View>
+                <CheckinPanelBody
+                  glass
+                  status={status}
+                  shuttles={shuttles}
+                  shuttleId={shuttleId}
+                  polling={polling}
+                  last={last}
+                  onClose={() => setOpen(false)}
+                  onChoose={choose}
+                  onToggle={polling ? stop : start}
+                />
+              </GlassView>
+            ) : (
+              <View
+                style={styles.sidebar}
+                onLayout={(event) => {
+                  panelWidth.current = event.nativeEvent.layout.width;
+                  reportCover();
+                }}
+              >
+                <CheckinPanelBody
+                  status={status}
+                  shuttles={shuttles}
+                  shuttleId={shuttleId}
+                  polling={polling}
+                  last={last}
+                  onClose={() => setOpen(false)}
+                  onChoose={choose}
+                  onToggle={polling ? stop : start}
+                />
+              </View>
+            )}
           </View>
         </View>
       )}
     </View>
+  );
+}
+
+function CheckinPanelBody({
+  glass,
+  status,
+  shuttles,
+  shuttleId,
+  polling,
+  last,
+  onClose,
+  onChoose,
+  onToggle,
+}: {
+  glass?: boolean;
+  status: string;
+  shuttles: Shuttle[];
+  shuttleId: string;
+  polling: boolean;
+  last: { lat: number; lng: number; heading: number | null } | null;
+  onClose: () => void;
+  onChoose: (id: string) => void;
+  onToggle: () => void;
+}) {
+  return (
+    <>
+      <View style={[styles.sidebarHeader, glass && styles.sidebarHeaderGlass]}>
+        <Pressable onPress={onClose} hitSlop={8}>
+          <Ionicons name="chevron-forward" size={22} color="#1565C0" />
+        </Pressable>
+        <Text style={styles.sidebarTitle}>Check-in</Text>
+      </View>
+      <View style={styles.body}>
+        <Text style={styles.meta}>Status: {status}</Text>
+        {shuttles.map((shuttle) => {
+          const selected = shuttle.id === shuttleId;
+          return (
+            <Pressable
+              key={shuttle.id}
+              style={[
+                styles.choice,
+                selected && styles.choiceOn,
+                glass && styles.choiceGlass,
+                glass && selected && styles.choiceOnGlass,
+              ]}
+              onPress={() => onChoose(shuttle.id)}
+              disabled={polling}
+            >
+              <Text style={styles.choiceText}>{shuttle.name}</Text>
+              {selected && (
+                <Ionicons name="checkmark" size={18} color="#0B6E4F" />
+              )}
+            </Pressable>
+          );
+        })}
+        {last && (
+          <Text style={styles.meta}>
+            {last.lat.toFixed(5)}, {last.lng.toFixed(5)} heading=
+            {last.heading?.toFixed(0) ?? "—"}
+          </Text>
+        )}
+        <Pressable
+          style={[styles.btn, polling && styles.btnOff]}
+          onPress={onToggle}
+        >
+          <Text style={styles.btnText}>{polling ? "Stop" : "Start"}</Text>
+        </Pressable>
+      </View>
+    </>
   );
 }
 
@@ -235,6 +321,19 @@ const styles = StyleSheet.create({
     gap: 4,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#ddd",
+  },
+  handleGlass: {
+    position: "absolute",
+    right: 0,
+    top: "38%",
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+  },
+  handleHit: {
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    gap: 4,
   },
   handleText: {
     color: "#1565C0",
@@ -257,6 +356,10 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 16,
     overflow: "hidden",
   },
+  sidebarGlass: {
+    backgroundColor: "transparent",
+    overflow: "visible",
+  },
   sidebarHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -266,6 +369,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ddd",
   },
+  sidebarHeaderGlass: { borderBottomColor: "rgba(0,0,0,0.12)" },
   sidebarTitle: { fontSize: 16, fontWeight: "700" },
   body: { padding: 10, gap: 6 },
   meta: { fontSize: 13, color: "#333" },
@@ -278,7 +382,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#eee",
   },
+  choiceGlass: { backgroundColor: "rgba(255,255,255,0.28)" },
   choiceOn: { backgroundColor: "#cfe8dc" },
+  choiceOnGlass: { backgroundColor: "rgba(11, 110, 79, 0.22)" },
   choiceText: { flex: 1, fontWeight: "600", fontSize: 14, paddingRight: 8 },
   btn: {
     backgroundColor: "#0b6e4f",

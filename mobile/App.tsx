@@ -67,11 +67,6 @@ function Screens() {
     content = <NavModule onOpenSettings={() => show("settings")} />;
   }
 
-  // Signed-in screens stay behind the MFA gate.
-  if (session) {
-    content = <MFA key={session.user.id}>{content}</MFA>;
-  }
-
   return (
     <SafeAreaView
       style={styles.root}

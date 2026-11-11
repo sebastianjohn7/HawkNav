@@ -7,6 +7,7 @@ import {
   buildGraphFromGeoJson,
 } from "../utils/aStarRouting";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
+import StartRoomSelectionTesting from "./hooks/startRoomSelectionTesting.tsx";
 import * as Location from 'expo-location';
 
 

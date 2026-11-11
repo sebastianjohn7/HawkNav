@@ -1,10 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
 import { buildGraphFromGeoJson, findShortestPath } from "../utils/aStarRouting.ts";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
-import type { LatLng } from "react-native-maps";
 
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";
 
@@ -22,20 +21,47 @@ const DELTA_REGION = {
   longitudeDelta: Math.max((bbox[2] - bbox[0]) * 1.6, 0.001),
 };
 
-
 const deltaGraph = buildGraphFromGeoJson(deltaFloorplan);
 
-/*
-console.log("Start Node:", startNode);
-console.log("Start Node Edges:", deltaGraph.edges.get(startNode ?? ""));
-console.log("End Node:", endNode);
-console.log("End Node Edges:", deltaGraph.edges.get(endNode ?? ""));
-*/
-//console.log(deltaGraph);
-//const pathLine: LatLng[] = findShortestPath(deltaFloorplan, "133", "145").map(([longitude, latitude]) => ({latitude, longitude}));
-//console.log(pathLine);
-
 type FC = GeoJSON.FeatureCollection;
+
+type FloorLayers = {
+  walls: FC;
+  units: FC;
+  hallways: FC;
+};
+
+/** Split once at module load so floor switches reuse stable FeatureCollection refs. */
+function splitFloor(levelId: LevelId): FloorLayers {
+  const wallFeats: GeoJSON.Feature[] = [];
+  const unitFeats: GeoJSON.Feature[] = [];
+  const hallwayFeats: GeoJSON.Feature[] = [];
+
+  for (const f of deltaFloorplan.features as GeoJSON.Feature[]) {
+    if ((f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID !== levelId) {
+      continue;
+    }
+    const t = f.geometry?.type;
+    if (f.properties?.USE_TYPE === "HALLWAY") {
+      hallwayFeats.push(f);
+    } else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
+      unitFeats.push(f);
+    } else if (t === "LineString" || t === "MultiLineString") {
+      wallFeats.push(f);
+    }
+  }
+
+  return {
+    walls: { type: "FeatureCollection", features: wallFeats },
+    units: { type: "FeatureCollection", features: unitFeats },
+    hallways: { type: "FeatureCollection", features: hallwayFeats },
+  };
+}
+
+const FLOOR_LAYERS: Record<LevelId, FloorLayers> = {
+  "UHCL.MAIN.DELTA.L1": splitFloor("UHCL.MAIN.DELTA.L1"),
+  "UHCL.MAIN.DELTA.L2": splitFloor("UHCL.MAIN.DELTA.L2"),
+};
 
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
 export function IndoorMapScreen() {
@@ -44,52 +70,16 @@ export function IndoorMapScreen() {
   const [endNode, setEndNode] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
-  const { walls, units, hallways } = useMemo(() => {
-    const features = (deltaFloorplan.features as GeoJSON.Feature[]).filter(
-      (f) => (f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID === level,
+  // Only mount the active floor. Dual-mount + style toggle froze the UI
+  // (react-native-maps rewrites thousands of native overlays on each style change).
+  const layers = FLOOR_LAYERS[level];
+
+  const pathLine = useMemo(() => {
+    if (!endNode) return null;
+    return findShortestPath(deltaFloorplan, startNode, endNode).map(
+      ([longitude, latitude]) => ({ latitude, longitude }),
     );
-    const wallFeats: GeoJSON.Feature[] = [];
-    const unitFeats: GeoJSON.Feature[] = [];
-    const moveFeats: GeoJSON.Feature[] = [];
-    const hallwayFeats: GeoJSON.Feature[] = [];
-    for (const f of features) {
-      const t = f.geometry?.type;
-      if(f.properties?.USE_TYPE === "movePoint" && (t === "Polygon" || t === "MultiPolygon" || t === "Point")) {
-        moveFeats.push(f);
-        //console.log(`\n\n YERRRRRRRRRRRRRRRRRRR ${f.properties?.NAME}`);
-      }
-      if(f.properties?.USE_TYPE === "HALLWAY"){
-        hallwayFeats.push(f);
-      }
-      else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
-        //console.log(`${f.properties?.NAME} pushed into UNITS`);
-        unitFeats.push(f);
-      } else if (
-        t === "LineString" ||
-        t === "MultiLineString"
-      ) {
-        if(f.properties?.USE_TYPE === 'movePoint'){
-        }
-        wallFeats.push(f);
-      }
-    }
-    //console.log("Hallways: ", hallwayFeats);
-
-    return {
-      walls: { type: "FeatureCollection", features: wallFeats } as FC,
-      units: { type: "FeatureCollection", features: unitFeats } as FC,
-      movePoints: { type: "FeatureCollection", features: moveFeats } as FC,
-      hallways: { type: "FeatureCollection", features: hallwayFeats } as FC,
-    };
-  }, [level]);
-
-  // Check for endNode selection, if non-null -> begin routing using current position and endNode
-    const pathLine = useMemo(() => {
-      console.log("EndNode", endNode);
-      if(endNode) return findShortestPath(deltaFloorplan, startNode, endNode).map(([longitude, latitude]) => ({latitude, longitude}));
-    }, [endNode]);
-
-    if(!pathLine) console.log("PATHLINE NOT CREATED");
+  }, [endNode, startNode]);
 
   return (
     <View style={styles.container}>
@@ -102,7 +92,10 @@ export function IndoorMapScreen() {
               <Pressable
                 key={l.id}
                 style={[styles.levelBtn, on && styles.levelBtnOn]}
-                onPress={() => setLevel(l.id)}
+                onPress={() => {
+                  setLevel(l.id);
+                  setDisplayInfo(null);
+                }}
               >
                 <Text style={[styles.levelText, on && styles.levelTextOn]}>
                   {l.label}
@@ -122,50 +115,53 @@ export function IndoorMapScreen() {
         appleLogoInsets={{ left: 8, bottom: 8 }}
         legalLabelInsets={{ top: 0, right: 0, bottom: 8, left: 8 }}
       >
-        {/* Points*/}
         <Geojson
-          geojson={units}
+          key={`${level}-units`}
+          geojson={layers.units}
           strokeColor="#1E3A8A"
           strokeWidth={1}
           fillColor="rgba(147, 197, 253, 0.35)"
-          color= "#9094a0"
+          color="#9094a0"
           onPress={(object) => {
             setDisplayInfo(object.feature);
-            console.log("Object", object.feature.properties?.NAME);
-            //console.log("\n Object Type: ", typeof object);
           }}
         />
-        {
         <Geojson
-          geojson={hallways}
+          key={`${level}-hallways`}
+          geojson={layers.hallways}
           strokeColor="#f4f9f6"
           strokeWidth={1.5}
-          fillColor= "transparent"
+          fillColor="transparent"
+          tappable={false}
         />
-        }
         <Geojson
-          geojson={walls}
+          key={`${level}-walls`}
+          geojson={layers.walls}
           strokeColor="#33553a"
           strokeWidth={1.5}
           fillColor="transparent"
+          tappable={false}
         />
-        {pathLine && (<Polyline
-          coordinates={pathLine}
-          strokeColor="#2563EB"
-          strokeWidth={4}
-          lineCap="round"
-          lineJoin="round"
-          zIndex={10}
-      />)}
+        {pathLine && (
+          <Polyline
+            coordinates={pathLine}
+            strokeColor="#2563EB"
+            strokeWidth={4}
+            lineCap="round"
+            lineJoin="round"
+            zIndex={10}
+          />
+        )}
       </MapView>
       {displayInfo && (
         <>
-        <Pressable 
-        style={styles.backdrop}
-        onPress={() => setDisplayInfo(null)}
-        ></Pressable>
-        <DisplayPointInfo object={displayInfo} setEndNode={setEndNode}/>
-        </>)}
+          <Pressable
+            style={styles.backdrop}
+            onPress={() => setDisplayInfo(null)}
+          />
+          <DisplayPointInfo object={displayInfo} setEndNode={setEndNode} />
+        </>
+      )}
     </View>
   );
 }
@@ -196,10 +192,10 @@ const styles = StyleSheet.create({
   map: { flex: 1 },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'transparent',
-    height: '100%',
-    width: '100%',
+    backgroundColor: "transparent",
+    height: "100%",
+    width: "100%",
     opacity: 0.1,
-    zIndex: 998
-  }
+    zIndex: 998,
+  },
 });

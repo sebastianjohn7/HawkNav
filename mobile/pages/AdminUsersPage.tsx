@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth, type Role } from "../lib/auth";
 import { supabase } from "../lib/config";
+import { GlassCircleButton } from "../lib/glass";
 
 type Row = { id: string; email: string; role: Role };
 type Action = "make_admin" | "make_driver" | "demote";
@@ -92,9 +93,9 @@ export function AdminUsersPage({ onBack }: Props) {
     <View style={styles.root}>
       <View style={styles.bar}>
         <View style={styles.titleRow}>
-          <Pressable onPress={onBack} hitSlop={12} accessibilityLabel="Back">
-            <Ionicons name="chevron-back" size={32} color="#1565C0" />
-          </Pressable>
+          <GlassCircleButton onPress={onBack} accessibilityLabel="Back">
+            <Ionicons name="chevron-back" size={22} color="#1565C0" />
+          </GlassCircleButton>
           <Text style={styles.title}>Manage users</Text>
         </View>
         <TextInput
@@ -114,7 +115,7 @@ export function AdminUsersPage({ onBack }: Props) {
         data={rows}
         keyExtractor={(r) => r.id}
         ListEmptyComponent={
-          loading ? null : <Text style={styles.empty}>No accounts found.</Text>
+          loading ? undefined : <Text style={styles.empty}>No accounts found.</Text>
         }
         renderItem={({ item }) => {
           const isMe = item.id === myId;

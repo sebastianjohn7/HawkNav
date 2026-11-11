@@ -1,0 +1,1282 @@
+{
+  "nodes": [
+    {
+      "id": "delta-l2-conf-1ab",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Conference 1A/1B",
+      "image": "delta-l2-conf-1ab.jpg",
+      "preview": "delta-l2-conf-1ab_preview.jpg",
+      "floorPlanRef": [
+        "205A",
+        "205B"
+      ],
+      "lat": 29.577973,
+      "lng": -95.104474,
+      "northOffset": -171,
+      "links": [
+        {
+          "to": "delta-l2-d208",
+          "yaw": -62,
+          "pitch": -8
+        },
+        {
+          "to": "delta-l2-d204",
+          "yaw": 34,
+          "pitch": -4
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 205A+205B in delta_floorplan_copy.json (3.4 m away)",
+      "title": "Conference 1A/1B"
+    },
+    {
+      "id": "delta-l2-d201",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 201",
+      "image": "delta-l2-d201.jpg",
+      "preview": "delta-l2-d201_preview.jpg",
+      "floorPlanRef": [
+        "201",
+        "214"
+      ],
+      "lat": 29.577755,
+      "lng": -95.104263,
+      "northOffset": 57,
+      "links": [
+        {
+          "to": "delta-l2-d202",
+          "yaw": -14,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-stairs-center",
+          "yaw": 168,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-room-d201",
+          "yaw": -137,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-room-d214",
+          "yaw": 47,
+          "pitch": 0
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 201 in delta_floorplan_copy.json (2.1 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d202",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 202",
+      "image": "delta-l2-d202.jpg",
+      "preview": "delta-l2-d202_preview.jpg",
+      "floorPlanRef": [
+        "202"
+      ],
+      "lat": 29.577779,
+      "lng": -95.104344,
+      "northOffset": 68,
+      "links": [
+        {
+          "to": "delta-l2-d203",
+          "yaw": 4,
+          "pitch": -12
+        },
+        {
+          "to": "delta-l2-d201",
+          "yaw": 177,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-d208",
+          "yaw": 62,
+          "pitch": -3
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 202 in delta_floorplan_copy.json (0.8 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d203",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 203",
+      "image": "delta-l2-d203.jpg",
+      "preview": "delta-l2-d203_preview.jpg",
+      "floorPlanRef": [
+        "203"
+      ],
+      "lat": 29.577817,
+      "lng": -95.104431,
+      "northOffset": 65,
+      "links": [
+        {
+          "to": "delta-l2-d204",
+          "yaw": -3,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-d202",
+          "yaw": -178,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-room-d203",
+          "yaw": -105,
+          "pitch": 0
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 203 in delta_floorplan_copy.json (1.1 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d204",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 204",
+      "image": "delta-l2-d204.jpg",
+      "preview": "delta-l2-d204_preview.jpg",
+      "floorPlanRef": [
+        "204"
+      ],
+      "lat": 29.577848,
+      "lng": -95.10452,
+      "northOffset": 14,
+      "links": [
+        {
+          "to": "delta-l2-d203",
+          "yaw": 126,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-conf-1ab",
+          "yaw": 39,
+          "pitch": -4
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 204 in delta_floorplan_copy.json (0.4 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d208",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 208",
+      "image": "delta-l2-d208.jpg",
+      "preview": "delta-l2-d208_preview.jpg",
+      "floorPlanRef": [
+        "208"
+      ],
+      "lat": 29.57792,
+      "lng": -95.104294,
+      "northOffset": 160,
+      "links": [
+        {
+          "to": "delta-l2-d202",
+          "yaw": -3,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-conf-1ab",
+          "yaw": 107,
+          "pitch": -2
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 208 in delta_floorplan_copy.json (1.8 m away)",
+      "title": "Lab"
+    },
+    {
+      "id": "delta-l2-d219",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 219",
+      "image": "delta-l2-d219.jpg",
+      "preview": "delta-l2-d219_preview.jpg",
+      "floorPlanRef": [
+        "219"
+      ],
+      "lat": 29.577802,
+      "lng": -95.104043,
+      "northOffset": -101,
+      "links": [
+        {
+          "to": "delta-l2-restrooms",
+          "yaw": 104,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-d225",
+          "yaw": 13,
+          "pitch": 0
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 219 in delta_floorplan_copy.json (2.4 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d225",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 225",
+      "image": "delta-l2-d225.jpg",
+      "preview": "delta-l2-d225_preview.jpg",
+      "floorPlanRef": [
+        "225"
+      ],
+      "lat": 29.57776,
+      "lng": -95.103936,
+      "northOffset": -120,
+      "links": [
+        {
+          "to": "delta-l2-d219",
+          "yaw": 174,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-d229",
+          "yaw": -5,
+          "pitch": 0
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 225 in delta_floorplan_copy.json (2.6 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d229",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 229",
+      "image": "delta-l2-d229.jpg",
+      "preview": "delta-l2-d229_preview.jpg",
+      "floorPlanRef": [
+        "229"
+      ],
+      "lat": 29.577736,
+      "lng": -95.103877,
+      "northOffset": -119,
+      "links": [
+        {
+          "to": "delta-l2-d225",
+          "yaw": 176,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-d235",
+          "yaw": 76,
+          "pitch": 0
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 229 in delta_floorplan_copy.json (2.1 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d235",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 235",
+      "image": "delta-l2-d235.jpg",
+      "preview": "delta-l2-d235_preview.jpg",
+      "floorPlanRef": [
+        "235"
+      ],
+      "lat": 29.577665,
+      "lng": -95.103899,
+      "northOffset": 155,
+      "links": [
+        {
+          "to": "delta-l2-d229",
+          "yaw": 170,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-room-d236",
+          "yaw": 5,
+          "pitch": -12
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 235 in delta_floorplan_copy.json (1.6 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d237",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 237",
+      "image": "delta-l2-d237.jpg",
+      "preview": "delta-l2-d237_preview.jpg",
+      "floorPlanRef": [
+        "237"
+      ],
+      "lat": 29.57766,
+      "lng": -95.104049,
+      "northOffset": 122,
+      "links": [
+        {
+          "to": "delta-l2-d247",
+          "yaw": 54,
+          "pitch": -14
+        },
+        {
+          "to": "delta-l2-d242",
+          "yaw": -120,
+          "pitch": -11
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 237 in delta_floorplan_copy.json (3.0 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d242",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 242",
+      "image": "delta-l2-d242.jpg",
+      "preview": "delta-l2-d242_preview.jpg",
+      "floorPlanRef": [
+        "242",
+        "241",
+        "234",
+        "236"
+      ],
+      "lat": 29.577599,
+      "lng": -95.103961,
+      "northOffset": -138,
+      "links": [
+        {
+          "to": "delta-l2-d237",
+          "yaw": 160,
+          "pitch": -9
+        },
+        {
+          "to": "delta-l2-room-d234",
+          "yaw": -167,
+          "pitch": -7
+        },
+        {
+          "to": "delta-l2-room-d236",
+          "yaw": -38,
+          "pitch": -10
+        },
+        {
+          "to": "delta-l2-room-d241",
+          "yaw": 103,
+          "pitch": -8
+        },
+        {
+          "to": "delta-l2-room-d242",
+          "yaw": 30,
+          "pitch": -10
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 242 in delta_floorplan_copy.json (0.5 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d247",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 247",
+      "image": "delta-l2-d247.jpg",
+      "preview": "delta-l2-d247_preview.jpg",
+      "floorPlanRef": [
+        "247"
+      ],
+      "lat": 29.577674,
+      "lng": -95.104095,
+      "northOffset": 17,
+      "links": [
+        {
+          "to": "delta-l2-d249",
+          "yaw": 2,
+          "pitch": -11
+        },
+        {
+          "to": "delta-l2-d237",
+          "yaw": 99,
+          "pitch": -12
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 247 in delta_floorplan_copy.json (1.6 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-d249",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Room 249",
+      "image": "delta-l2-d249.jpg",
+      "preview": "delta-l2-d249_preview.jpg",
+      "floorPlanRef": [
+        "249"
+      ],
+      "lat": 29.577691,
+      "lng": -95.10411,
+      "northOffset": -64,
+      "links": [
+        {
+          "to": "delta-l2-elevator",
+          "yaw": -121,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-d247",
+          "yaw": 78,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-restrooms",
+          "yaw": -35,
+          "pitch": 0
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 249 in delta_floorplan_copy.json (1.9 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l2-elevator",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Elevator",
+      "image": "delta-l2-elevator.jpg",
+      "preview": "delta-l2-elevator_preview.jpg",
+      "floorPlanRef": [
+        "T2007"
+      ],
+      "lat": 29.577716,
+      "lng": -95.104154,
+      "northOffset": -17,
+      "links": [
+        {
+          "to": "delta-l2-stairs-center",
+          "yaw": -76,
+          "pitch": -13
+        },
+        {
+          "to": "delta-l2-d249",
+          "yaw": 102,
+          "pitch": -15
+        },
+        {
+          "to": "delta-l1-science-1",
+          "yaw": -22,
+          "pitch": -7,
+          "label": "Elevator to floor 1"
+        }
+      ],
+      "positionSource": "nearest hallway vertex to T2007 in delta_floorplan_copy.json (4.0 m away)",
+      "title": "Elevator"
+    },
+    {
+      "id": "delta-l2-restrooms",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Restrooms",
+      "image": "delta-l2-restrooms.jpg",
+      "preview": "delta-l2-restrooms_preview.jpg",
+      "floorPlanRef": [
+        "217",
+        "218"
+      ],
+      "lat": 29.577772,
+      "lng": -95.104059,
+      "northOffset": 147,
+      "links": [
+        {
+          "to": "delta-l2-d249",
+          "yaw": -4,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-d219",
+          "yaw": 172,
+          "pitch": 0
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 217+218 in delta_floorplan_copy.json (2.9 m away)",
+      "title": "Restrooms"
+    },
+    {
+      "id": "delta-l2-stairs-center",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Center staircase",
+      "image": "delta-l2-stairs-center.jpg",
+      "preview": "delta-l2-stairs-center_preview.jpg",
+      "floorPlanRef": [
+        "STAIR_1",
+        "STAIR_2"
+      ],
+      "lat": 29.577739,
+      "lng": -95.104215,
+      "northOffset": 102,
+      "links": [
+        {
+          "to": "delta-l2-d201",
+          "yaw": 33,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l2-elevator",
+          "yaw": -137,
+          "pitch": -9
+        },
+        {
+          "to": "delta-l1-second-entrance",
+          "yaw": -21,
+          "pitch": -26,
+          "label": "Stairs down to Second Entrance"
+        },
+        {
+          "to": "delta-l1-main-hallway",
+          "yaw": 103,
+          "pitch": -28,
+          "label": "Stairs down to Main Hallway"
+        }
+      ],
+      "positionSource": "nearest hallway vertex to STAIR_1+STAIR_2 in delta_floorplan_copy.json (0.3 m away)",
+      "title": "Staircase"
+    },
+    {
+      "id": "delta-l2-room-d236",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Inside room 236 (conference room)",
+      "image": "delta-l2-room-d236.jpg",
+      "preview": "delta-l2-room-d236_preview.jpg",
+      "floorPlanRef": [
+        "236"
+      ],
+      "lat": 29.5776425,
+      "lng": -95.103918,
+      "northOffset": -27,
+      "links": [
+        {
+          "to": "delta-l2-d242",
+          "yaw": -32,
+          "pitch": -9
+        },
+        {
+          "to": "delta-l2-d235",
+          "yaw": -136,
+          "pitch": -11
+        }
+      ],
+      "positionSource": "centre of 236 in josh_floorplan.json",
+      "title": "Room 236"
+    },
+    {
+      "id": "delta-l1-engineer-1",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Engineer 1 (floor 1)",
+      "image": "delta-l1-engineer-1.jpg",
+      "preview": "delta-l1-engineer-1_preview.jpg",
+      "floorPlanRef": [
+        "133",
+        "130"
+      ],
+      "lat": 29.577954,
+      "lng": -95.104328,
+      "northOffset": -23,
+      "links": [
+        {
+          "to": "delta-l1-main-entrance",
+          "yaw": 92,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l1-engineer-2",
+          "yaw": -86,
+          "pitch": -6
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 133+130 in josh_floorplan.json (1.1 m away)",
+      "title": "Computer Engineering Hallway"
+    },
+    {
+      "id": "delta-l1-engineer-2",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Engineer 2 (floor 1)",
+      "image": "delta-l1-engineer-2.jpg",
+      "preview": "delta-l1-engineer-2_preview.jpg",
+      "floorPlanRef": [
+        "132",
+        "125"
+      ],
+      "lat": 29.577975,
+      "lng": -95.104476,
+      "northOffset": -30,
+      "links": [
+        {
+          "to": "delta-l1-engineer-1",
+          "yaw": 87,
+          "pitch": -13
+        },
+        {
+          "to": "delta-l1-engineer-3",
+          "yaw": 178,
+          "pitch": -17
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 132+125 in josh_floorplan.json (2.3 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-engineer-3",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Engineer 3 (floor 1)",
+      "image": "delta-l1-engineer-3.jpg",
+      "preview": "delta-l1-engineer-3_preview.jpg",
+      "floorPlanRef": [
+        "125"
+      ],
+      "lat": 29.577909,
+      "lng": -95.104509,
+      "northOffset": -30,
+      "links": [
+        {
+          "to": "delta-l1-engineer-2",
+          "yaw": -5,
+          "pitch": -17
+        },
+        {
+          "to": "delta-l1-engineer-4",
+          "yaw": 174,
+          "pitch": -17
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 125 in josh_floorplan.json (2.0 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-engineer-4",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Engineer 4 (floor 1)",
+      "image": "delta-l1-engineer-4.jpg",
+      "preview": "delta-l1-engineer-4_preview.jpg",
+      "floorPlanRef": [
+        "109"
+      ],
+      "lat": 29.577738,
+      "lng": -95.104448,
+      "northOffset": -23,
+      "links": [
+        {
+          "to": "delta-l1-engineer-3",
+          "yaw": 0,
+          "pitch": -18
+        },
+        {
+          "to": "delta-l1-engineer-5",
+          "yaw": 92,
+          "pitch": -11
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 109 in josh_floorplan.json (1.3 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-engineer-5",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Engineer 5 (floor 1)",
+      "image": "delta-l1-engineer-5.jpg",
+      "preview": "delta-l1-engineer-5_preview.jpg",
+      "floorPlanRef": [
+        "109",
+        "126A"
+      ],
+      "lat": 29.577822,
+      "lng": -95.104375,
+      "northOffset": -28,
+      "links": [
+        {
+          "to": "delta-l1-engineer-4",
+          "yaw": -92,
+          "pitch": -13
+        },
+        {
+          "to": "delta-l1-engineer-6",
+          "yaw": 85,
+          "pitch": -13
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 109+126A in josh_floorplan.json (2.5 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-engineer-6",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Engineer 6 (floor 1)",
+      "image": "delta-l1-engineer-6.jpg",
+      "preview": "delta-l1-engineer-6_preview.jpg",
+      "floorPlanRef": [
+        "128"
+      ],
+      "lat": 29.577783,
+      "lng": -95.104283,
+      "northOffset": -32,
+      "links": [
+        {
+          "to": "delta-l1-engineer-5",
+          "yaw": -97,
+          "pitch": -14
+        },
+        {
+          "to": "delta-l1-main-hallway-2",
+          "yaw": 85,
+          "pitch": -12
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 128 in josh_floorplan.json (3.0 m away)",
+      "title": "Computer Engineering Hallway"
+    },
+    {
+      "id": "delta-l1-main-entrance",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Main Entrance (floor 1)",
+      "image": "delta-l1-main-entrance.jpg",
+      "preview": "delta-l1-main-entrance_preview.jpg",
+      "floorPlanRef": [
+        "136",
+        "139"
+      ],
+      "lat": 29.577902,
+      "lng": -95.104199,
+      "northOffset": -30,
+      "links": [
+        {
+          "to": "delta-l1-main-hallway",
+          "yaw": 171,
+          "pitch": -12
+        },
+        {
+          "to": "delta-l1-engineer-1",
+          "yaw": -134,
+          "pitch": -7
+        },
+        {
+          "to": "delta-l1-science-8",
+          "yaw": 119,
+          "pitch": -8
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 136+139 in josh_floorplan.json (4.1 m away)",
+      "title": "Main Entrance"
+    },
+    {
+      "id": "delta-l1-main-hallway",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Main Hallway (floor 1)",
+      "image": "delta-l1-main-hallway.jpg",
+      "preview": "delta-l1-main-hallway_preview.jpg",
+      "floorPlanRef": [
+        "128",
+        "137"
+      ],
+      "lat": 29.577818,
+      "lng": -95.104153,
+      "northOffset": -12,
+      "links": [
+        {
+          "to": "delta-l1-main-entrance",
+          "yaw": 14,
+          "pitch": -4
+        },
+        {
+          "to": "delta-l1-main-hallway-2",
+          "yaw": -171,
+          "pitch": -11
+        },
+        {
+          "to": "delta-l2-stairs-center",
+          "yaw": -151,
+          "pitch": 5,
+          "label": "Stairs up to floor 2"
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 128+137 in josh_floorplan.json (2.9 m away)",
+      "title": "Main Hallway"
+    },
+    {
+      "id": "delta-l1-main-hallway-2",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Main Hallway 2 (floor 1)",
+      "image": "delta-l1-main-hallway-2.jpg",
+      "preview": "delta-l1-main-hallway-2_preview.jpg",
+      "floorPlanRef": [
+        "101"
+      ],
+      "lat": 29.577757,
+      "lng": -95.104282,
+      "northOffset": -24,
+      "links": [
+        {
+          "to": "delta-l1-main-hallway",
+          "yaw": 3,
+          "pitch": -11
+        },
+        {
+          "to": "delta-l1-second-entrance",
+          "yaw": -177,
+          "pitch": -8
+        },
+        {
+          "to": "delta-l1-engineer-6",
+          "yaw": -86,
+          "pitch": -12
+        },
+        {
+          "to": "delta-l1-science-1",
+          "yaw": 89,
+          "pitch": -11
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 101 in josh_floorplan.json (3.7 m away)",
+      "title": "Main Hallway"
+    },
+    {
+      "id": "delta-l2-room-d214",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Inside room 214",
+      "image": "delta-l2-room-d214.jpg",
+      "preview": "delta-l2-room-d214_preview.jpg",
+      "floorPlanRef": [
+        "214"
+      ],
+      "lat": 29.577789,
+      "lng": -95.10427,
+      "northOffset": -27,
+      "links": [
+        {
+          "to": "delta-l2-d201",
+          "yaw": -156,
+          "pitch": -5
+        }
+      ],
+      "positionSource": "centre of 214 in josh_floorplan.json",
+      "title": "Room 214"
+    },
+    {
+      "id": "delta-l2-room-d201",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Inside room 201",
+      "image": "delta-l2-room-d201.jpg",
+      "preview": "delta-l2-room-d201_preview.jpg",
+      "floorPlanRef": [
+        "201"
+      ],
+      "lat": 29.577737,
+      "lng": -95.104258,
+      "northOffset": -27,
+      "links": [
+        {
+          "to": "delta-l2-d201",
+          "yaw": 33,
+          "pitch": -4
+        }
+      ],
+      "positionSource": "centre of 201 in josh_floorplan.json",
+      "title": "Room 201"
+    },
+    {
+      "id": "delta-l2-room-d203",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Inside room 203",
+      "image": "delta-l2-room-d203.jpg",
+      "preview": "delta-l2-room-d203_preview.jpg",
+      "floorPlanRef": [
+        "203"
+      ],
+      "lat": 29.577807,
+      "lng": -95.104433,
+      "northOffset": -27,
+      "links": [
+        {
+          "to": "delta-l2-d203",
+          "yaw": 32,
+          "pitch": -4
+        }
+      ],
+      "positionSource": "centre of 203 in josh_floorplan.json",
+      "title": "Room 203"
+    },
+    {
+      "id": "delta-l2-room-d234",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Inside room 234",
+      "image": "delta-l2-room-d234.jpg",
+      "preview": "delta-l2-room-d234_preview.jpg",
+      "floorPlanRef": [
+        "234"
+      ],
+      "lat": 29.57766,
+      "lng": -95.103979,
+      "northOffset": -30,
+      "links": [
+        {
+          "to": "delta-l2-d242",
+          "yaw": -144,
+          "pitch": -5
+        }
+      ],
+      "positionSource": "centre of 234 in josh_floorplan.json",
+      "title": "Room 234"
+    },
+    {
+      "id": "delta-l2-room-d241",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Inside room 241",
+      "image": "delta-l2-room-d241.jpg",
+      "preview": "delta-l2-room-d241_preview.jpg",
+      "floorPlanRef": [
+        "241"
+      ],
+      "lat": 29.577626,
+      "lng": -95.104114,
+      "northOffset": -12,
+      "links": [
+        {
+          "to": "delta-l2-d242",
+          "yaw": 61,
+          "pitch": -3
+        }
+      ],
+      "positionSource": "centre of 241 in josh_floorplan.json",
+      "title": "Room 241"
+    },
+    {
+      "id": "delta-l2-room-d242",
+      "building": "Delta",
+      "floor": 2,
+      "label": "Inside room 242",
+      "image": "delta-l2-room-d242.jpg",
+      "preview": "delta-l2-room-d242_preview.jpg",
+      "floorPlanRef": [
+        "242"
+      ],
+      "lat": 29.577603,
+      "lng": -95.103963,
+      "northOffset": -29,
+      "links": [
+        {
+          "to": "delta-l2-d242",
+          "yaw": -47,
+          "pitch": -4
+        }
+      ],
+      "positionSource": "centre of 242 in josh_floorplan.json",
+      "title": "Room 242"
+    },
+    {
+      "id": "delta-l1-science-1",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 1 (floor 1)",
+      "image": "delta-l1-science-1.jpg",
+      "preview": "delta-l1-science-1_preview.jpg",
+      "floorPlanRef": [
+        "158A",
+        "160"
+      ],
+      "lat": 29.577704,
+      "lng": -95.104084,
+      "northOffset": -38,
+      "links": [
+        {
+          "to": "delta-l1-science-2",
+          "yaw": 75,
+          "pitch": -13
+        },
+        {
+          "to": "delta-l1-main-hallway-2",
+          "yaw": -99,
+          "pitch": -14
+        },
+        {
+          "to": "delta-l2-elevator",
+          "yaw": -58,
+          "pitch": -8,
+          "label": "Elevator to floor 2"
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 158A+160 in josh_floorplan.json (1.2 m away)",
+      "title": "Computer Science Hallway"
+    },
+    {
+      "id": "delta-l1-science-2",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 2 (floor 1)",
+      "image": "delta-l1-science-2.jpg",
+      "preview": "delta-l1-science-2_preview.jpg",
+      "floorPlanRef": [
+        "158B",
+        "159"
+      ],
+      "lat": 29.577671,
+      "lng": -95.104003,
+      "northOffset": -24,
+      "links": [
+        {
+          "to": "delta-l1-science-3",
+          "yaw": 91,
+          "pitch": -14
+        },
+        {
+          "to": "delta-l1-science-1",
+          "yaw": -89,
+          "pitch": -14
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 158B+159 in josh_floorplan.json (2.1 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-science-3",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 3 (floor 1)",
+      "image": "delta-l1-science-3.jpg",
+      "preview": "delta-l1-science-3_preview.jpg",
+      "floorPlanRef": [
+        "156",
+        "158B"
+      ],
+      "lat": 29.577641,
+      "lng": -95.103933,
+      "northOffset": -23,
+      "links": [
+        {
+          "to": "delta-l1-science-4",
+          "yaw": 2,
+          "pitch": -16
+        },
+        {
+          "to": "delta-l1-science-2",
+          "yaw": -88,
+          "pitch": -13
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 156+158B in josh_floorplan.json (0.4 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-science-4",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 4 (floor 1)",
+      "image": "delta-l1-science-4.jpg",
+      "preview": "delta-l1-science-4_preview.jpg",
+      "floorPlanRef": [
+        "155"
+      ],
+      "lat": 29.577676,
+      "lng": -95.103898,
+      "northOffset": -22,
+      "links": [
+        {
+          "to": "delta-l1-science-5",
+          "yaw": 2,
+          "pitch": -13
+        },
+        {
+          "to": "delta-l1-science-3",
+          "yaw": -175,
+          "pitch": -14
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 155 in josh_floorplan.json (1.0 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-science-5",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 5 (floor 1)",
+      "image": "delta-l1-science-5.jpg",
+      "preview": "delta-l1-science-5_preview.jpg",
+      "floorPlanRef": [
+        "150"
+      ],
+      "lat": 29.577816,
+      "lng": -95.103892,
+      "northOffset": -23,
+      "links": [
+        {
+          "to": "delta-l1-science-6",
+          "yaw": -85,
+          "pitch": -15
+        },
+        {
+          "to": "delta-l1-science-4",
+          "yaw": -177,
+          "pitch": -14
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 150 in josh_floorplan.json (0.8 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-science-6",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 6 (floor 1)",
+      "image": "delta-l1-science-6.jpg",
+      "preview": "delta-l1-science-6_preview.jpg",
+      "floorPlanRef": [
+        "140",
+        "150"
+      ],
+      "lat": 29.577829,
+      "lng": -95.103922,
+      "northOffset": -28,
+      "links": [
+        {
+          "to": "delta-l1-science-7",
+          "yaw": -93,
+          "pitch": -16
+        },
+        {
+          "to": "delta-l1-science-5",
+          "yaw": 88,
+          "pitch": -13
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 140+150 in josh_floorplan.json (1.5 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-science-7",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 7 (floor 1)",
+      "image": "delta-l1-science-7.jpg",
+      "preview": "delta-l1-science-7_preview.jpg",
+      "floorPlanRef": [
+        "139",
+        "140"
+      ],
+      "lat": 29.577862,
+      "lng": -95.104011,
+      "northOffset": -26,
+      "links": [
+        {
+          "to": "delta-l1-science-8",
+          "yaw": -153,
+          "pitch": -12
+        },
+        {
+          "to": "delta-l1-science-6",
+          "yaw": 89,
+          "pitch": -16
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 139+140 in josh_floorplan.json (1.7 m away)",
+      "title": "Hallway"
+    },
+    {
+      "id": "delta-l1-science-8",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 8 (floor 1)",
+      "image": "delta-l1-science-8.jpg",
+      "preview": "delta-l1-science-8_preview.jpg",
+      "floorPlanRef": [
+        "139"
+      ],
+      "lat": 29.577853,
+      "lng": -95.104084,
+      "northOffset": -39,
+      "links": [
+        {
+          "to": "delta-l1-main-entrance",
+          "yaw": -103,
+          "pitch": 0
+        },
+        {
+          "to": "delta-l1-science-7",
+          "yaw": 15,
+          "pitch": -18
+        },
+        {
+          "to": "delta-l1-science-9",
+          "yaw": -141,
+          "pitch": -5
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 139+137 in josh_floorplan.json (1.2 m away)",
+      "title": "Computer Science Hallway"
+    },
+    {
+      "id": "delta-l1-science-9",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Science 9 (floor 1)",
+      "image": "delta-l1-science-9.jpg",
+      "preview": "delta-l1-science-9_preview.jpg",
+      "floorPlanRef": [
+        "137"
+      ],
+      "lat": 29.5778475,
+      "lng": -95.104077,
+      "northOffset": -16,
+      "links": [
+        {
+          "to": "delta-l1-science-8",
+          "yaw": 43,
+          "pitch": -11
+        }
+      ],
+      "positionSource": "centre of unit 137 (vending area has no hallway)",
+      "title": "Vending Area"
+    },
+    {
+      "id": "delta-l1-second-entrance",
+      "building": "Delta",
+      "floor": 1,
+      "label": "Second Entrance (floor 1)",
+      "image": "delta-l1-second-entrance.jpg",
+      "preview": "delta-l1-second-entrance_preview.jpg",
+      "floorPlanRef": [
+        "102",
+        "158A"
+      ],
+      "lat": 29.577719,
+      "lng": -95.104202,
+      "northOffset": -29,
+      "links": [
+        {
+          "to": "delta-l1-main-hallway-2",
+          "yaw": -4,
+          "pitch": -7
+        },
+        {
+          "to": "delta-l2-stairs-center",
+          "yaw": -29,
+          "pitch": 4,
+          "label": "Stairs up to floor 2"
+        }
+      ],
+      "positionSource": "nearest hallway vertex to 102+158A in josh_floorplan.json (0.2 m away)",
+      "title": "Second Entrance"
+    }
+  ]
+}

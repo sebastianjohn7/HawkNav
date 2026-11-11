@@ -9,7 +9,9 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { GlassView } from "expo-glass-effect";
 import { apiUrl } from "../lib/config";
+import { canUseLiquidGlass, GLASS_WHITE_TINT } from "../lib/glass";
 import {
   fallbackRouteEta,
   fetchDrivingRouteEta,
@@ -236,12 +238,29 @@ export function RiderScreen({
         reportCover();
       }}
     >
-      {!stopsOpen && (
-        <Pressable style={styles.handle} onPress={() => setStopsOpen(true)}>
-          <Ionicons name="list" size={18} color="#1565C0" />
-          <Text style={styles.handleText}>Stops</Text>
-        </Pressable>
-      )}
+      {!stopsOpen &&
+        (canUseLiquidGlass() ? (
+          <GlassView
+            style={styles.handleGlass}
+            glassEffectStyle="regular"
+            isInteractive
+            tintColor={GLASS_WHITE_TINT}
+          >
+            <Pressable
+              style={styles.handleHit}
+              onPress={() => setStopsOpen(true)}
+              accessibilityLabel="Open stops"
+            >
+              <Ionicons name="list" size={18} color="#1565C0" />
+              <Text style={styles.handleText}>Stops</Text>
+            </Pressable>
+          </GlassView>
+        ) : (
+          <Pressable style={styles.handle} onPress={() => setStopsOpen(true)}>
+            <Ionicons name="list" size={18} color="#1565C0" />
+            <Text style={styles.handleText}>Stops</Text>
+          </Pressable>
+        ))}
 
       <View style={[styles.card, { bottom: sheetBottom }]}>
         <Text style={styles.eta} numberOfLines={3}>
@@ -275,58 +294,111 @@ export function RiderScreen({
             style={[styles.sidebarSlot, { paddingBottom: sheetBottom }]}
             pointerEvents="box-none"
           >
-            <View
-              style={styles.sidebar}
-              onLayout={(event) => {
-                panelWidth.current = event.nativeEvent.layout.width;
-                reportCover();
-              }}
-            >
-              <View style={styles.sidebarHeader}>
-                <Text style={styles.sidebarTitle}>Stops</Text>
-                <Pressable onPress={() => setStopsOpen(false)} hitSlop={8}>
-                  <Ionicons name="chevron-back" size={22} color="#1565C0" />
-                </Pressable>
-              </View>
-              <ScrollView
-                style={styles.list}
-                contentContainerStyle={styles.listContent}
-                keyboardShouldPersistTaps="handled"
+            {canUseLiquidGlass() ? (
+              <GlassView
+                style={[styles.sidebar, styles.sidebarGlass]}
+                glassEffectStyle="regular"
+                isInteractive
+                tintColor={GLASS_WHITE_TINT}
+                onLayout={(event) => {
+                  panelWidth.current = event.nativeEvent.layout.width;
+                  reportCover();
+                }}
               >
-                {stops.map((item) => {
-                  const on = selected === item.stop_id;
-                  return (
-                    <Pressable
-                      key={item.stop_id}
-                      style={[styles.row, on && styles.rowSelected]}
-                      onPress={() => {
-                        setSelected(item.stop_id);
-                        onFocusStop?.(item.stop_id);
-                      }}
-                    >
-                      <View style={styles.rowMain}>
-                        {item.runs_today ? (
-                          <View
-                            style={styles.todayDot}
-                            accessibilityLabel="Runs today"
-                          />
-                        ) : (
-                          <View style={styles.todayDotSpacer} />
-                        )}
-                        <Text style={styles.rowText}>{item.name}</Text>
-                      </View>
-                      {on && (
-                        <Ionicons name="checkmark" size={18} color="#0B6E4F" />
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
+                <StopsPanelBody
+                  stops={stops}
+                  selected={selected}
+                  glass
+                  onClose={() => setStopsOpen(false)}
+                  onSelect={(stopId) => {
+                    setSelected(stopId);
+                    onFocusStop?.(stopId);
+                  }}
+                />
+              </GlassView>
+            ) : (
+              <View
+                style={styles.sidebar}
+                onLayout={(event) => {
+                  panelWidth.current = event.nativeEvent.layout.width;
+                  reportCover();
+                }}
+              >
+                <StopsPanelBody
+                  stops={stops}
+                  selected={selected}
+                  onClose={() => setStopsOpen(false)}
+                  onSelect={(stopId) => {
+                    setSelected(stopId);
+                    onFocusStop?.(stopId);
+                  }}
+                />
+              </View>
+            )}
           </View>
         </View>
       )}
     </View>
+  );
+}
+
+function StopsPanelBody({
+  stops,
+  selected,
+  glass,
+  onClose,
+  onSelect,
+}: {
+  stops: Stop[];
+  selected: string;
+  glass?: boolean;
+  onClose: () => void;
+  onSelect: (stopId: string) => void;
+}) {
+  return (
+    <>
+      <View
+        style={[styles.sidebarHeader, glass && styles.sidebarHeaderGlass]}
+      >
+        <Text style={styles.sidebarTitle}>Stops</Text>
+        <Pressable onPress={onClose} hitSlop={8}>
+          <Ionicons name="chevron-back" size={22} color="#1565C0" />
+        </Pressable>
+      </View>
+      <ScrollView
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        {stops.map((item) => {
+          const on = selected === item.stop_id;
+          return (
+            <Pressable
+              key={item.stop_id}
+              style={[
+                styles.row,
+                on && styles.rowSelected,
+                glass && on && styles.rowSelectedGlass,
+              ]}
+              onPress={() => onSelect(item.stop_id)}
+            >
+              <View style={styles.rowMain}>
+                {item.runs_today ? (
+                  <View
+                    style={styles.todayDot}
+                    accessibilityLabel="Runs today"
+                  />
+                ) : (
+                  <View style={styles.todayDotSpacer} />
+                )}
+                <Text style={styles.rowText}>{item.name}</Text>
+              </View>
+              {on && <Ionicons name="checkmark" size={18} color="#0B6E4F" />}
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </>
   );
 }
 
@@ -345,6 +417,19 @@ const styles = StyleSheet.create({
     gap: 4,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#ddd",
+  },
+  handleGlass: {
+    position: "absolute",
+    left: 0,
+    top: "38%",
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  handleHit: {
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    gap: 4,
   },
   handleText: {
     color: "#1565C0",
@@ -388,6 +473,11 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 16,
     overflow: "hidden",
   },
+  // No solid fill / overflow clip — those blank out Liquid Glass.
+  sidebarGlass: {
+    backgroundColor: "transparent",
+    overflow: "visible",
+  },
   sidebarHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -397,6 +487,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ddd",
   },
+  sidebarHeaderGlass: { borderBottomColor: "rgba(0,0,0,0.12)" },
   sidebarTitle: { fontSize: 16, fontWeight: "700" },
   list: { flex: 1 },
   listContent: { flexGrow: 0 },
@@ -425,4 +516,5 @@ const styles = StyleSheet.create({
   todayDotSpacer: { width: 8, height: 8 },
   rowText: { flex: 1 },
   rowSelected: { backgroundColor: "#e8f5ef" },
+  rowSelectedGlass: { backgroundColor: "rgba(11, 110, 79, 0.18)" },
 });

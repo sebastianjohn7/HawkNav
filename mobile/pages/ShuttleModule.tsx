@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { GlassView } from "expo-glass-effect";
 import { useAuth } from "../lib/auth";
 import { apiUrl, DEFAULT_SHUTTLE_ID, supabase } from "../lib/config";
+import { canUseLiquidGlass, GLASS_WHITE_TINT } from "../lib/glass";
 import { ACCESS } from "../lib/roles";
 import { DriverScreen } from "../screens/DriverScreen";
 import { RiderScreen } from "../screens/RiderScreen";
@@ -126,34 +128,73 @@ export function ShuttleModule({ sheetBottom }: Props) {
 
       {canDrive && (
         <View style={styles.toggleWrap} pointerEvents="box-none">
-          <View style={styles.toggle}>
-            <Pressable
-              style={[styles.toggleSide, mode === "rider" && styles.toggleOn]}
-              onPress={() => setMode("rider")}
-              accessibilityRole="button"
-              accessibilityState={{ selected: mode === "rider" }}
-              accessibilityLabel="Rider"
+          {canUseLiquidGlass() ? (
+            <GlassView
+              style={styles.toggleGlass}
+              glassEffectStyle="regular"
+              isInteractive
+              tintColor={GLASS_WHITE_TINT}
             >
-              <Ionicons
-                name="walk"
-                size={18}
-                color={mode === "rider" ? "#0B6E4F" : "#666"}
-              />
-            </Pressable>
-            <Pressable
-              style={[styles.toggleSide, mode === "driver" && styles.toggleOn]}
-              onPress={() => setMode("driver")}
-              accessibilityRole="button"
-              accessibilityState={{ selected: mode === "driver" }}
-              accessibilityLabel="Driver"
-            >
-              <Ionicons
-                name="bus"
-                size={18}
-                color={mode === "driver" ? "#0B6E4F" : "#666"}
-              />
-            </Pressable>
-          </View>
+              <Pressable
+                style={[styles.toggleSide, mode === "rider" && styles.toggleOnGlass]}
+                onPress={() => setMode("rider")}
+                accessibilityRole="button"
+                accessibilityState={{ selected: mode === "rider" }}
+                accessibilityLabel="Rider"
+              >
+                <Ionicons
+                  name="walk"
+                  size={18}
+                  color={mode === "rider" ? "#0B6E4F" : "#666"}
+                />
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.toggleSide,
+                  mode === "driver" && styles.toggleOnGlass,
+                ]}
+                onPress={() => setMode("driver")}
+                accessibilityRole="button"
+                accessibilityState={{ selected: mode === "driver" }}
+                accessibilityLabel="Driver"
+              >
+                <Ionicons
+                  name="bus"
+                  size={18}
+                  color={mode === "driver" ? "#0B6E4F" : "#666"}
+                />
+              </Pressable>
+            </GlassView>
+          ) : (
+            <View style={styles.toggle}>
+              <Pressable
+                style={[styles.toggleSide, mode === "rider" && styles.toggleOn]}
+                onPress={() => setMode("rider")}
+                accessibilityRole="button"
+                accessibilityState={{ selected: mode === "rider" }}
+                accessibilityLabel="Rider"
+              >
+                <Ionicons
+                  name="walk"
+                  size={18}
+                  color={mode === "rider" ? "#0B6E4F" : "#666"}
+                />
+              </Pressable>
+              <Pressable
+                style={[styles.toggleSide, mode === "driver" && styles.toggleOn]}
+                onPress={() => setMode("driver")}
+                accessibilityRole="button"
+                accessibilityState={{ selected: mode === "driver" }}
+                accessibilityLabel="Driver"
+              >
+                <Ionicons
+                  name="bus"
+                  size={18}
+                  color={mode === "driver" ? "#0B6E4F" : "#666"}
+                />
+              </Pressable>
+            </View>
+          )}
         </View>
       )}
 
@@ -209,10 +250,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     elevation: 3,
   },
+  // No border / solid fill — those blank out Liquid Glass.
+  toggleGlass: {
+    flexDirection: "row",
+    borderRadius: 999,
+    padding: 3,
+  },
   toggleSide: {
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
   },
   toggleOn: { backgroundColor: "#cfe8dc" },
+  toggleOnGlass: { backgroundColor: "rgba(11, 110, 79, 0.22)" },
 });

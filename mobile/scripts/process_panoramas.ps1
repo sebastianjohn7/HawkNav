@@ -28,10 +28,41 @@ $special = @{
 }
 
 # refs are NAME values of units in the floor plan GeoJSON; fill_panorama_positions.mjs reads them for lat/lng.
+# Names:  D<floor><room>              a room, e.g. D119            -> delta-l1-d119
+#         <Kind>_L<floor>[_<Detail>]  anything else, e.g. Elevator_L1, Hall_L1_East -> delta-l1-elevator, delta-l1-hall-east
+# The second form has no floor plan unit yet: set its floorPlanRef (or lat/lng) in panorama_nodes.json by hand.
+#         Engineer<n> / Science<n>    floor 1 hallway spots, numbered on the printed plan (engineering side / science side)
+#         MainEntrance, MainHallway, MainHallway2, SecondEntrance   floor 1 spots on the central hallway
+#         Room<D>###, ConferenceRoom  inside a room (position = that room, not the hallway)
+$floor1 = @{
+  'Engineer1' = @('133', '130');   'Engineer2' = @('132', '125');   'Engineer3' = @('125')
+  'Engineer4' = @('109');         'Engineer5' = @('109', '126A'); 'Engineer6' = @('128')
+  'Science1'  = @('158A', '160');  'Science2'  = @('158B', '159');  'Science3'  = @('156', '158B')
+  'Science4'  = @('155');          'Science5'  = @('150');          'Science6'  = @('140', '150')
+  'Science7'  = @('139', '140');   'Science8'  = @('139');   'Science9'  = @('137')
+  'MainEntrance' = @('136', '139'); 'MainHallway' = @('128', '137'); 'MainHallway2' = @('101')
+  'SecondEntrance' = @('102', '158A')
+}
 function Get-NodeInfo([string]$base) {
   if ($special.ContainsKey($base)) { return $special[$base] }
+  if ($floor1.ContainsKey($base)) {
+    $slug = ($base -creplace '([a-z])([A-Z0-9])', '$1-$2').ToLower()
+    return @{ id = "delta-l1-$slug"; floor = 1; label = ($base -creplace '([a-z])([A-Z0-9])', '$1 $2') + ' (floor 1)'; refs = $floor1[$base] }
+  }
+  if ($base -eq 'ConferenceRoom') { return @{ id = 'delta-l2-room-d236'; floor = 2; label = 'Inside room 236 (conference room)'; refs = @('236') } }
+  if ($base -match '^RoomD?(\d)(\d\d)$') {
+    return @{ id = "delta-l$($Matches[1])-room-d$($Matches[1])$($Matches[2])"; floor = [int]$Matches[1]; label = "Inside room $($Matches[1])$($Matches[2])"; refs = @("$($Matches[1])$($Matches[2])") }
+  }
   if ($base -match '^D(\d)(\d\d)$') {
     return @{ id = "delta-l$($Matches[1])-d$($Matches[1])$($Matches[2])"; floor = [int]$Matches[1]; label = "Room $($Matches[1])$($Matches[2])"; refs = @("$($Matches[1])$($Matches[2])") }
+  }
+  if ($base -match '^([A-Za-z]+)_L(\d)(?:_(.+))?$') {
+    $kind = $Matches[1].ToLower()
+    $floor = [int]$Matches[2]
+    $detail = $Matches[3]
+    $slug = if ($detail) { '-' + ($detail.ToLower() -replace '[^a-z0-9]+', '-').Trim('-') } else { '' }
+    $words = (Get-Culture).TextInfo.ToTitleCase($kind) + $(if ($detail) { ' ' + ($detail -replace '_', ' ') } else { '' })
+    return @{ id = "delta-l$floor-$kind$slug"; floor = $floor; label = "$words (floor $floor)"; refs = @() }
   }
   return $null
 }

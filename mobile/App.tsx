@@ -65,13 +65,7 @@ function Screens() {
     // Temporary entry from Settings until the map screen gets its own "Look around" button.
     content = <PanoramaScreen onBack={() => show("settings")} />;
   } else if (screen === "settings") {
-    content = (
-      <SettingsPage
-        onBack={() => show("nav")}
-        onOpenAdmin={() => show("admin")}
-        onOpenPanorama={() => show("panorama")}
-      />
-    );
+    content = <SettingsPage onBack={() => show("nav")} onOpenAdmin={() => show("admin")} onOpenPanorama={() => show("panorama")} />;
   } else {
     edgeToEdgeBottom = true;
     content = <NavModule onOpenSettings={() => show("settings")} />;

@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  InteractionManager,
   Platform,
   Pressable,
   StyleSheet,
@@ -16,7 +17,9 @@ import {
   type TabSelectedEvent,
   type TabSelectionRejectedEvent,
 } from "react-native-screens";
+import { useAlertsUnreadBadge } from "../lib/alertsUnread";
 import { useAuth } from "../lib/auth";
+import { GlassCircleButton } from "../lib/glass";
 import { ACCESS, type Tab } from "../lib/roles";
 import { IndoorMapScreen } from "../screens/IndoorMapScreen";
 import { AlertsModule } from "./AlertsModule";
@@ -73,10 +76,18 @@ function systemTabBarAvailable(): boolean {
   }
 }
 
-function TabBody({ id, sheetBottom }: { id: Tab; sheetBottom: number }) {
+function TabBody({
+  id,
+  sheetBottom,
+  active,
+}: {
+  id: Tab;
+  sheetBottom: number;
+  active: boolean;
+}) {
   if (id === "shuttle") return <ShuttleModule sheetBottom={sheetBottom} />;
-  if (id === "find") return <IndoorMapScreen tab={id}/>;
-  return <AlertsModule bottomInset={sheetBottom} />;
+  if (id === "find") return <IndoorMapScreen />;
+  return <AlertsModule bottomInset={sheetBottom} active={active} />;
 }
 
 /** Bottom tabs + settings. Visitors have one tab, so they get no bar. */
@@ -86,7 +97,31 @@ export function NavModule({ onOpenSettings }: Props) {
   const insets = useSafeAreaInsets();
   const [picked, setPicked] = useState<Tab | null>(null);
   const [floatingBarHeight, setFloatingBarHeight] = useState(64);
+  // Disables sibling tabs while a switch settles (ref alone wouldn't re-render).
+  const [floatBusy, setFloatBusy] = useState(false);
   const provenance = useRef(0);
+  // Sync gate so two onPressIn events in the same frame can't both win.
+  const floatingSwitchLock = useRef(false);
+  const floatingSwitchTimer = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const floatingTabRef = useRef<Tab | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (floatingSwitchTimer.current) clearTimeout(floatingSwitchTimer.current);
+    };
+  }, []);
+
+  const allowed = role
+    ? TABS.filter((t) => ACCESS[role].tabs.includes(t.id))
+    : [];
+  const tab =
+    allowed.length > 0 && allowed.some((t) => t.id === picked)
+      ? picked!
+      : (allowed[0]?.id ?? "find");
+  floatingTabRef.current = tab;
+  const alertsUnread = useAlertsUnreadBadge(role, tab === "alerts");
 
   if (!role) {
     return (
@@ -113,8 +148,6 @@ export function NavModule({ onOpenSettings }: Props) {
     );
   }
 
-  const allowed = TABS.filter((t) => ACCESS[role].tabs.includes(t.id));
-  const tab = allowed.some((t) => t.id === picked) ? picked! : allowed[0].id;
   const bar: BarKind =
     allowed.length <= 1
       ? "none"
@@ -134,10 +167,30 @@ export function NavModule({ onOpenSettings }: Props) {
       <Text style={styles.signInText}>Sign In</Text>
     </Pressable>
   ) : (
-    <Pressable style={styles.settingsBtn} onPress={onOpenSettings}>
-      <Ionicons name="settings" size={22} color="#fff" />
-    </Pressable>
+    <GlassCircleButton
+      onPress={onOpenSettings}
+      accessibilityLabel="Settings"
+    >
+      <Ionicons name="settings-outline" size={20} color="#333" />
+    </GlassCircleButton>
   );
+
+  function selectFloatingTab(next: Tab) {
+    if (next === floatingTabRef.current || floatingSwitchLock.current) return;
+    floatingSwitchLock.current = true;
+    setFloatBusy(true);
+    setPicked(next);
+    floatingTabRef.current = next;
+    if (floatingSwitchTimer.current) clearTimeout(floatingSwitchTimer.current);
+    // Wait for the tab pane to settle, then a beat so bounce / 2nd finger dies.
+    InteractionManager.runAfterInteractions(() => {
+      floatingSwitchTimer.current = setTimeout(() => {
+        floatingSwitchLock.current = false;
+        setFloatBusy(false);
+        floatingSwitchTimer.current = null;
+      }, 500);
+    });
+  }
 
   return (
     <View style={styles.root}>
@@ -190,14 +243,31 @@ export function NavModule({ onOpenSettings }: Props) {
               }}
             >
               <View style={styles.body}>
-                <TabBody id={t.id} sheetBottom={sheetBottom} />
+                <TabBody
+                  id={t.id}
+                  sheetBottom={sheetBottom}
+                  active={tab === t.id}
+                />
               </View>
             </Tabs.Screen>
           ))}
         </Tabs.Host>
       ) : (
         <View style={styles.body}>
-          <TabBody id={tab} sheetBottom={sheetBottom} />
+          {/* Keep all floating tabs mounted so rapid switches don't remount/flicker. */}
+          {allowed.map((t) => (
+            <View
+              key={t.id}
+              style={[styles.tabPane, tab !== t.id && styles.tabPaneHidden]}
+              pointerEvents={tab === t.id ? "auto" : "none"}
+            >
+              <TabBody
+                id={t.id}
+                sheetBottom={sheetBottom}
+                active={tab === t.id}
+              />
+            </View>
+          ))}
         </View>
       )}
 
@@ -213,17 +283,28 @@ export function NavModule({ onOpenSettings }: Props) {
         >
           {allowed.map((t) => {
             const on = tab === t.id;
+            const showUnread = t.id === "alerts" && alertsUnread && !on;
             return (
               <Pressable
                 key={t.id}
                 style={styles.floatItem}
-                onPress={() => setPicked(t.id)}
+                // onPressIn wins immediately; blocked while floatBusy / lock.
+                onPressIn={() => selectFloatingTab(t.id)}
+                disabled={floatBusy && !on}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: on }}
+                accessibilityLabel={
+                  showUnread ? `${t.label}, unread alerts` : t.label
+                }
               >
-                <Ionicons
-                  name={t.icon}
-                  size={22}
-                  color={on ? "#1565C0" : "#666"}
-                />
+                <View>
+                  <Ionicons
+                    name={t.icon}
+                    size={22}
+                    color={on ? "#1565C0" : "#666"}
+                  />
+                  {showUnread ? <View style={styles.unreadDot} /> : null}
+                </View>
                 <Text style={[styles.floatLabel, on && styles.floatLabelOn]}>
                   {t.label}
                 </Text>
@@ -274,12 +355,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   signInText: { color: "#fff", fontWeight: "700" },
-  settingsBtn: {
-    backgroundColor: "#1565C0",
-    padding: 8,
-    borderRadius: 20,
-  },
   body: { flex: 1 },
+  tabPane: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  tabPaneHidden: {
+    opacity: 0,
+  },
   floatBar: {
     position: "absolute",
     left: 16,
@@ -303,4 +385,13 @@ const styles = StyleSheet.create({
   },
   floatLabel: { fontSize: 11, color: "#666" },
   floatLabelOn: { color: "#1565C0", fontWeight: "700" },
+  unreadDot: {
+    position: "absolute",
+    top: -2,
+    right: -6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#c62828",
+  },
 });

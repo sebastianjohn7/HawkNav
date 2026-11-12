@@ -479,8 +479,8 @@ const styles = StyleSheet.create({
   mapContainer: { flex: 1 },
   map: { flex: 1 },
   markerHitBox: {
-    width: 44,
-    height: 44,
+    width: 56,
+    height: 56,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -494,8 +494,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   markerLabel: { color: "#fff", fontSize: 12, fontWeight: "700" },
-  markerPinIdle: { width: 26, height: 26 },
-  markerPinSelected: { width: 36, height: 36 },
+  markerPinIdle: { width: 34, height: 34 },
+  markerPinSelected: { width: 44, height: 44 },
   markerCardPosition: {
     position: "absolute",
     zIndex: 5,

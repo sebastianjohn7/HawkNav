@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  InteractionManager,
   Platform,
   Pressable,
   StyleSheet,
@@ -38,13 +37,7 @@ const TABS: Array<{
 }> = [
   { id: "shuttle", label: "Shuttle", icon: "bus", sf: "bus", sfOn: "bus.fill" },
   { id: "find", label: "Map", icon: "map", sf: "map", sfOn: "map.fill" },
-  {
-    id: "alerts",
-    label: "Alerts",
-    icon: "notifications",
-    sf: "bell",
-    sfOn: "bell.fill",
-  },
+  { id: "alerts", label: "Alerts", icon: "notifications", sf: "bell", sfOn: "bell.fill", },
 ];
 
 // Room for the floating pill, plus a gap so the shuttle sheet clears it.
@@ -182,8 +175,8 @@ export function NavModule({ onOpenSettings }: Props) {
     setPicked(next);
     floatingTabRef.current = next;
     if (floatingSwitchTimer.current) clearTimeout(floatingSwitchTimer.current);
-    // Wait for the tab pane to settle, then a beat so bounce / 2nd finger dies.
-    InteractionManager.runAfterInteractions(() => {
+    // Let the tab pane render, then wait a beat so bounce / 2nd finger dies.
+    requestAnimationFrame(() => {
       floatingSwitchTimer.current = setTimeout(() => {
         floatingSwitchLock.current = false;
         setFloatBusy(false);
@@ -357,7 +350,7 @@ const styles = StyleSheet.create({
   signInText: { color: "#fff", fontWeight: "700" },
   body: { flex: 1 },
   tabPane: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   tabPaneHidden: {
     opacity: 0,

@@ -12,6 +12,8 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { SignInPage } from "./pages/SignInPage";
 import { MFA } from "./pages/MFA";
 
+type ScreenName = "nav" | "settings" | "admin" | "panorama" | "find";
+
 /** Expo port of Josh's Landing → Sign-in → NavModule shell, gated by sign-in. */
 function Screens() {
   const { session, guest, role, loading } = useAuth();

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
@@ -71,7 +71,7 @@ const Floor_Data = {
 };
 
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
-export function IndoorMapScreen({tab} : {tab: string}) {
+export function IndoorMapScreen({tab} : {tab: string}): ReactNode {
   const [displayInfo, setDisplayInfo] = useState<GeoJSON.Feature | null>(null);
   const [displayStartOptions, setDisplayStartOptions] = useState<Boolean>(false);
   const [startNode, setStartNode] = useState<string | null>("205");
@@ -79,17 +79,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
   const [location, setLocation] = useState<Location.LocationObject>({
-    coords: {
-      latitude: DELTA_REGION.latitude,
-      longitude: DELTA_REGION.longitude,
-      altitude: 0,
-      accuracy: null,
-      altitudeAccuracy: null,
-      heading: null,
-      speed: null,
-    },
-    timestamp: 0, // Initial epoch fallback
-  });
     coords: {
       latitude: DELTA_REGION.latitude,
       longitude: DELTA_REGION.longitude,
@@ -170,13 +159,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
         }
         return [pathL1, pathL2];
     }, [endNode]);
-
-  // Custom Room Marker 
-  const RoomMarker = () => (
-    <View style={styles.markerContainer}>
-      <Text style={styles.roomMarkerText}>R</Text>
-    </View>
-  );
 
   const currentFloor = Floor_Data[level];
 
@@ -270,7 +252,7 @@ export function IndoorMapScreen({tab} : {tab: string}) {
 
       {displayStartOptions && (
         <>
-          <StartRoomSelectionTesting rooms={ROOMS} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
+          <StartRoomSelectionTesting rooms={rooms} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
           <Pressable
             style={styles.backdrop}
             onPress={() => setDisplayStartOptions(false)}

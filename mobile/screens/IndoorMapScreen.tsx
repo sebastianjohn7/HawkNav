@@ -2,10 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Geojson, Polyline, Marker, LatLng, PROVIDER_DEFAULT } from "react-native-maps";
 import deltaFloorplan from "../assets/maps/delta_floorplan_copy.json";
-import {
-  findShortestPath,
-  buildGraphFromGeoJson,
-} from "../utils/aStarRouting";
+import { findShortestPath } from "../utils/aStarRouting.ts";
 import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
 import StartRoomSelectionTesting from "./hooks/startRoomSelectionTesting.tsx";
 import * as Location from 'expo-location';
@@ -16,12 +13,6 @@ const LEVELS: Array<{ id: LevelId; label: string }> = [
   { id: "UHCL.MAIN.DELTA.L1", label: "Level 1" },
   { id: "UHCL.MAIN.DELTA.L2", label: "Level 2" },
 ];
-
-const rooms: string[] = [];
-  for(const f of deltaFloorplan.features){
-    const name = f.properties?.NAME;
-    if(name && !rooms.includes(name)) rooms.push(f.properties?.NAME);
-  }
 
 /** Fit map to extracted Delta bbox (lng/lat → MapView region). */
 const bbox = deltaFloorplan.bbox as [number, number, number, number];
@@ -170,8 +161,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
     return [pathL1, pathL2];
   }, [endNode, startNode]);
 
-  const currentFloor = Floor_Data[level];
-
   return (tab === "find" && (
     <View style={styles.container}>
       {/*Parent Container */}
@@ -186,7 +175,8 @@ export function IndoorMapScreen({tab} : {tab: string}) {
                 key={l.id}
                 style={[styles.levelBtn, on && styles.levelBtnOn]}
                 onPress={() => {
-                  setLevel(l.id)
+                  setLevel(l.id);
+                  setDisplayInfo(null);
                 }}
               >
                 <Text style={[styles.levelText, on && styles.levelTextOn]}>
@@ -223,6 +213,7 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           strokeWidth={1}
           fillColor="rgba(147, 197, 253, 0.35)"
           color="#9094a0"
+          markerComponent={<RoomMarker />}
           onPress={(object) => {
             setDisplayInfo(object.feature);
           }}
@@ -238,9 +229,11 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           tappable={false}
         />
         */}
+
         <Geojson
-          geojson={currentFloor.walls}
-          strokeColor={"#33553a"}
+          key={`${level}-walls`}
+          geojson={layers.walls}
+          strokeColor="#33553a"
           strokeWidth={1.5}
           fillColor="transparent"
           tappable={false}

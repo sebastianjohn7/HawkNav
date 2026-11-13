@@ -5,17 +5,21 @@ import PanoramaLinks from './PanoramaLinks'
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
-const DisplayPointInfo = ({object, setEndNode, setDisplayInfo } 
+const DisplayPointInfo = ({object, setEndNode, setDisplayInfo, top = 100, allowedPhotoIds }
     : {object: GeoJSON.Feature,
+         /** While a route is active: the only 360° photos that may be opened. */
+         allowedPhotoIds?: ReadonlySet<string> | null,
          setEndNode: React.Dispatch<React.SetStateAction<string | null>>,
-         setDisplayInfo: React.Dispatch<React.SetStateAction<GeoJSON.Feature | null>>
+         setDisplayInfo: React.Dispatch<React.SetStateAction<GeoJSON.Feature | null>>,
+         /** Distance from the top of the map; lets the card sit below the search panel. */
+         top?: number
         }) => {
   const name = object.properties?.NAME;
   if(name === '1' || name === '2' || !object) return null;
 
   return (
     <>
-    <View style={styles.displayBox}>
+    <View style={[styles.displayBox, { top }]}>
       <Text style={styles.title}>Location Information</Text>
       <Text style={styles.displayText}>Name: {object.properties?.NAME}</Text>
       <Text style={styles.displayText}>Description: {object.properties?.USE_TYPE}</Text>
@@ -30,7 +34,7 @@ const DisplayPointInfo = ({object, setEndNode, setDisplayInfo }
             // set new startNode to current user position !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }}><Text style={{color: 'white'}}>Route To</Text></Pressable>
     </View>
-    <PanoramaLinks object={object} />
+    <PanoramaLinks object={object} top={top} allowedIds={allowedPhotoIds} />
     </>
   )
 }

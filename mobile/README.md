@@ -14,6 +14,12 @@ The full UHCL GeoJSON (~118MB) stays local/gitignored; the Map tab loads the ext
 python3 scripts/extract_delta_floorplan.py
 ```
 
+The map draws walls, doors and windows from [`assets/maps/delta_walls.json`](assets/maps/delta_walls.json), the same lines joined into long polylines so the map has far fewer overlays to draw. It is generated: whenever the floor plan file changes, re-run this and commit the result.
+
+```bash
+node scripts/merge_wall_lines.mjs
+```
+
 360° photos and their positions live in [`assets/panoramas/`](assets/panoramas/). The scripts in [`scripts/`](scripts/) (`process_panoramas.ps1`, `fill_panorama_positions.mjs`, `suggest_panorama_links.mjs`, `check_panorama_links.mjs`) prepare and validate them.
 
 Boot: [`../README.md`](../README.md).

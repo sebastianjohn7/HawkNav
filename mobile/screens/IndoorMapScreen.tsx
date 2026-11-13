@@ -213,7 +213,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           strokeWidth={1}
           fillColor="rgba(147, 197, 253, 0.35)"
           color="#9094a0"
-          markerComponent={<RoomMarker />}
           onPress={(object) => {
             setDisplayInfo(object.feature);
           }}

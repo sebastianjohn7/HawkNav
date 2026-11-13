@@ -10,7 +10,6 @@ import DisplayPointInfo from "./hooks/displayPointInfo.tsx";
 import StartRoomSelectionTesting from "./hooks/startRoomSelectionTesting.tsx";
 import * as Location from 'expo-location';
 
-
 type LevelId = "UHCL.MAIN.DELTA.L1" | "UHCL.MAIN.DELTA.L2";
 
 const LEVELS: Array<{ id: LevelId; label: string }> = [
@@ -33,47 +32,62 @@ const DELTA_REGION = {
   longitudeDelta: Math.max((bbox[2] - bbox[0]) * 1.6, 0.001),
 };
 
-const deltaGraph = buildGraphFromGeoJson(deltaFloorplan);
-
 type FC = GeoJSON.FeatureCollection;
 
-function floorDataEval(levelId: string) {
-  // hallways is used for viewing hallway pathlines
-    const wallFeats: GeoJSON.Feature[] = [];
-    const unitFeats: GeoJSON.Feature[] = [];
-    const hallwayFeats: GeoJSON.Feature[] = [];
+type FloorLayers = {
+  walls: FC;
+  units: FC;
+  hallways: FC;
+};
 
-    for (const f of deltaFloorplan.features) {
-      // Skip unnecessary floors
-      if((f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID !== levelId) continue;
+/** Split once at module load so floor switches reuse stable FeatureCollection refs. */
+function splitFloor(levelId: LevelId): FloorLayers {
+  const wallFeats: GeoJSON.Feature[] = [];
+  const unitFeats: GeoJSON.Feature[] = [];
+  const hallwayFeats: GeoJSON.Feature[] = [];
 
-      const t = f.geometry?.type;
-      if(f.properties?.USE_TYPE === "HALLWAY"){
-        hallwayFeats.push(f);
-      }
-      else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
-        unitFeats.push(f);
-      } else if (
-        t === "LineString" ||
-        t === "MultiLineString"
-      ) {
-        if(f.properties?.USE_TYPE === 'movePoint'){
-        }
-        wallFeats.push(f);
-      }
+  for (const f of deltaFloorplan.features as GeoJSON.Feature[]) {
+    if ((f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID !== levelId) {
+      continue;
     }
+    const t = f.geometry?.type;
+    if (f.properties?.USE_TYPE === "HALLWAY") {
+      hallwayFeats.push(f);
+    } else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
+      unitFeats.push(f);
+    } else if (t === "LineString" || t === "MultiLineString") {
+      wallFeats.push(f);
+    }
+  }
 
-    return {
-      walls: { type: "FeatureCollection", features: wallFeats } as FC,
-      units: { type: "FeatureCollection", features: unitFeats } as FC,
-      hallways: { type: "FeatureCollection", features: hallwayFeats } as FC,
-    };
+  return {
+    walls: { type: "FeatureCollection", features: wallFeats },
+    units: { type: "FeatureCollection", features: unitFeats },
+    hallways: { type: "FeatureCollection", features: hallwayFeats },
+  };
 }
 
-const Floor_Data = {
-  "UHCL.MAIN.DELTA.L1": floorDataEval("UHCL.MAIN.DELTA.L1"),
-  "UHCL.MAIN.DELTA.L2": floorDataEval("UHCL.MAIN.DELTA.L2")
+const FLOOR_LAYERS: Record<LevelId, FloorLayers> = {
+  "UHCL.MAIN.DELTA.L1": splitFloor("UHCL.MAIN.DELTA.L1"),
+  "UHCL.MAIN.DELTA.L2": splitFloor("UHCL.MAIN.DELTA.L2"),
 };
+
+/** Room names for the start-node picker; static, so computed once. */
+const ROOMS: string[] = (() => {
+  const names: string[] = [];
+  for (const f of deltaFloorplan.features) {
+    const name = f.properties?.NAME;
+    if (name && !names.includes(name)) names.push(name);
+  }
+  return names;
+})();
+
+/** Custom Room Marker */
+const RoomMarker = () => (
+  <View style={styles.markerContainer}>
+    <Text style={styles.roomMarkerText}>R</Text>
+  </View>
+);
 
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
 export function IndoorMapScreen({tab} : {tab: string}) {
@@ -82,7 +96,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
   const [startNode, setStartNode] = useState<string | null>("205");
   const [endNode, setEndNode] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
-  const [userLevel, setUserLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
 
   const [location, setLocation] = useState<Location.LocationObject>({
     coords: {
@@ -97,81 +110,65 @@ export function IndoorMapScreen({tab} : {tab: string}) {
     timestamp: 0, // Initial epoch fallback
   });
 
-  /*
-  const { walls, units, hallways } = useMemo(() => {
-    // hallways is used for viewing hallway pathlines
-    const features = (deltaFloorplan.features as GeoJSON.Feature[]).filter(
-      (f) => (f.properties as { LEVEL_ID?: string } | null)?.LEVEL_ID === level,
-    );
-    const wallFeats: GeoJSON.Feature[] = [];
-    const unitFeats: GeoJSON.Feature[] = [];
-    const hallwayFeats: GeoJSON.Feature[] = [];
-    for (const f of features) {
-      const t = f.geometry?.type;
-      if(f.properties?.USE_TYPE === "HALLWAY"){
-        hallwayFeats.push(f);
+  // Get permission for user location tracking
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
       }
-      else if (t === "Polygon" || t === "MultiPolygon" || t === "Point") {
-        unitFeats.push(f);
-      } else if (
-        t === "LineString" ||
-        t === "MultiLineString"
-      ) {
-        if(f.properties?.USE_TYPE === 'movePoint'){
-        }
-        wallFeats.push(f);
+    })();
+  }, []);
+
+  // Refresh the user location every 5s, only while the Find tab is showing.
+  useEffect(() => {
+    if (tab !== "find") return;
+    let cancelled = false;
+    const fetchLocation = async () => {
+      try {
+        const current = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+        if (cancelled) return;
+        setLocation((prev) =>
+          current.coords.latitude === prev.coords.latitude &&
+          current.coords.longitude === prev.coords.longitude
+            ? prev
+            : current,
+        );
+      } catch {
+        console.error('Could not fetch location. Make sure GPS is enabled.');
+      }
+    };
+    const id = setInterval(fetchLocation, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [tab]);
+
+  // Only mount the active floor. Dual-mount + style toggle froze the UI
+  // (react-native-maps rewrites thousands of native overlays on each style change).
+  const layers = FLOOR_LAYERS[level];
+
+  // Route from startNode to endNode, split per floor so a line never clips through the other floor.
+  const [pathLine1, pathLine2] = useMemo(() => {
+    if (!endNode) return [];
+    const pathL1: LatLng[] = [];
+    const pathL2: LatLng[] = [];
+    for (const point of findShortestPath(deltaFloorplan, startNode, endNode)) {
+      const target = point.level.includes("L1")
+        ? pathL1
+        : point.level.includes("L2")
+          ? pathL2
+          : null;
+      if (target) {
+        const [longitude, latitude] = point.coords;
+        target.push({ latitude, longitude });
       }
     }
-
-    return {
-      walls: { type: "FeatureCollection", features: wallFeats } as FC,
-      units: { type: "FeatureCollection", features: unitFeats } as FC,
-      hallways: { type: "FeatureCollection", features: hallwayFeats } as FC,
-    };
-  }, [level]);
-  */
-
-
-  // Check for endNode selection, if non-null -> begin routing using current position and endNode
-    const [pathLine1, pathLine2] = useMemo(() => {
-      // Add checking portion to differentiate floor filtered nodes
-      //console.log("EndNode", endNode);
-      if(!endNode) {
-        //console.log("\nThere is no endNode!\n");
-        return [];
-      }
-      // Current user position will be updated by displayPointInfo --> Push new user location into delta_Floorplan features
-        if(location){
-          //deltaFloorplan = deltaFloorplan.features.map((f) => f.properties?.NAME.includes("USER") ? ({}))
-        }
-        const fullPath = findShortestPath(deltaFloorplan, startNode, endNode);
-        const pathL1: LatLng[] = [];
-        const pathL2: LatLng[] = [];
-        for (const point of fullPath) {
-          //console.log(`Current point's level:`, point.level);
-          const targetArray = point.level.includes("L1")
-            ? pathL1
-            : point.level.includes("L2")
-              ? pathL2
-              : null;
-          
-          if(targetArray){
-            const [longitude, latitude] = point.coords;
-            targetArray.push({latitude: latitude,
-              longitude: longitude
-            });
-          }
-          else console.log("\n\nTargetArray not selected\n\n");
-        }
-        return [pathL1, pathL2];
-    }, [endNode]);
-
-  // Custom Room Marker 
-  const RoomMarker = () => (
-    <View style={styles.markerContainer}>
-      <Text style={styles.roomMarkerText}>R</Text>
-    </View>
-  );
+    return [pathL1, pathL2];
+  }, [endNode, startNode]);
 
   const currentFloor = Floor_Data[level];
 
@@ -180,7 +177,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
       {/*Parent Container */}
       <View style={styles.banner}>
         {/*Screen Header*/}
-        <Text style={styles.bannerTitle}>Delta floor plan</Text>
         <Text style={styles.bannerTitle}>Delta</Text>
         <View style={styles.levelRow}>
           {LEVELS.map((l) => {
@@ -201,7 +197,7 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           })}
         </View>
       </View>
-      
+
       <MapView
         style={styles.map}
         provider={PROVIDER_DEFAULT}
@@ -212,7 +208,27 @@ export function IndoorMapScreen({tab} : {tab: string}) {
         appleLogoInsets={{ left: 8, bottom: 8, right: 0, top: 0 }}
         legalLabelInsets={{ top: 0, right: 0, bottom: 8, left: 8 }}
       >
-        { /* Hallways LineString Display
+        <Marker
+          coordinate={{
+            longitude: location.coords.longitude ?? 0,
+            latitude: location.coords.latitude ?? 0,
+          }}
+          title={"USER_LOCATION"}
+          description={''}
+        />
+        <Geojson
+          key={`${level}-units`}
+          geojson={layers.units}
+          strokeColor="#1E3A8A"
+          strokeWidth={1}
+          fillColor="rgba(147, 197, 253, 0.35)"
+          color="#9094a0"
+          onPress={(object) => {
+            setDisplayInfo(object.feature);
+          }}
+        />
+
+        {/* Hallways LineString display (off by default; re-enable to debug routing):
         <Geojson
           key={`${level}-hallways`}
           geojson={layers.hallways}
@@ -222,16 +238,6 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           tappable={false}
         />
         */}
-        
-        {/* Points*/}
-        {<Geojson
-          geojson={currentFloor.units}
-          strokeColor={"#1E3A8A"}
-          strokeWidth={1}
-          fillColor={"rgba(147, 197, 253, 0.35)"}
-          color= {"#9094a0"}
-          onPress={(object) => setDisplayInfo(object.feature)}
-        />}
         <Geojson
           geojson={currentFloor.walls}
           strokeColor={"#33553a"}
@@ -239,7 +245,9 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           fillColor="transparent"
           tappable={false}
         />
-        { /*Route clipping through floor fix*/(pathLine1 && level.includes("L1")) ? (
+
+        {/* Only the active floor's leg of the route is mounted. */}
+        {pathLine1 && level.includes("L1") ? (
           <Polyline
             coordinates={pathLine1}
             strokeColor="#2563EB"
@@ -250,7 +258,7 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           />
         ) : null}
 
-        { /*Route clipping through floor fix*/(pathLine2 && level.includes("L2")) ? (
+        {pathLine2 && level.includes("L2") ? (
           <Polyline
             coordinates={pathLine2}
             strokeColor="#2563EB"
@@ -264,8 +272,8 @@ export function IndoorMapScreen({tab} : {tab: string}) {
 
       {displayStartOptions && (
         <>
-          <StartRoomSelectionTesting rooms={rooms} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
-          <Pressable 
+          <StartRoomSelectionTesting rooms={ROOMS} setDisplayStartOptions={setDisplayStartOptions} setStartNode={setStartNode} />
+          <Pressable
             style={styles.backdrop}
             onPress={() => setDisplayStartOptions(false)}
           ></Pressable>
@@ -277,14 +285,17 @@ export function IndoorMapScreen({tab} : {tab: string}) {
           <Pressable
             style={styles.backdrop}
             onPress={() => setDisplayInfo(null)}
-          />
-          <DisplayPointInfo
-            object={displayInfo}
-            setEndNode={setEndNode}
-            setDisplayInfo={setDisplayInfo}
-        />
+          ></Pressable>
+          <DisplayPointInfo object={displayInfo} setEndNode={setEndNode} setDisplayInfo={setDisplayInfo}/>
         </>
       )}
+      <View style={styles.startSelectionBox}>
+        <Text>Purely For Testing, Removal Imminent</Text>
+        <Pressable style={styles.routeButton}
+          onPress={() => setDisplayStartOptions(true)}>
+            <Text>Select Start Node</Text>
+        </Pressable>
+      </View>
     </View>
   ));
 }
@@ -315,10 +326,41 @@ const styles = StyleSheet.create({
   map: { flex: 1 },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "transparent",
-    height: "100%",
-    width: "100%",
+    backgroundColor: 'transparent',
+    height: '100%',
+    width: '100%',
     opacity: 0.1,
-    zIndex: 998,
+    zIndex: 997
   },
+  startSelectionBox: {
+    height: '10%',
+    width: '40%',
+    backgroundColor: 'white',
+    outlineStyle: 'solid',
+    outlineWidth: 5,
+    outlineColor: 'black',
+    bottom: 90,
+    alignSelf: 'flex-end',
+    zIndex: 997
+  },
+  routeButton: {
+    marginTop: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '30%',
+    width: '80%',
+    backgroundColor: '#784be8',
+    borderRadius: 10
+  },
+  markerContainer: {
+    backgroundColor: '#573dec',
+    padding: 10,
+    borderRadius: 20,
+    borderColor: '#fff',
+    borderWidth: 1
+  },
+  roomMarkerText: {
+    fontSize: 15,
+    color: '#fff'
+  }
 });

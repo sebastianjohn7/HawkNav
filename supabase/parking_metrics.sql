@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS public.parking_lots (
 INSERT INTO public.parking_lots (id, uhcl_name, unofficial_name, building, total_priority_spots, num_standard_spots, num_handicap_spots, num_ev_spots)
 VALUES
     (1, 'Lot G', 'Delta Front', 'Delta', 38, 34, 4, 0),
-    (2, 'Lot J', 'Delta Back', 'Delta', 49, 43, 4, 2);
+    (2, 'Lot J', 'Delta Back', 'Delta', 45, 39, 4, 2)
 
 -- Store availability updates for individual priority spaces.
 CREATE TABLE IF NOT EXISTS public.parking_spot_updates (

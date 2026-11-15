@@ -82,7 +82,7 @@ export function ParkingCongestionScreen({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [realtimeStatus, setRealtimeStatus] = useState("Connecting");
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [selectedLotId, setSelectedLotId] = useState<number | null>(null);
   const [spotStatuses, setSpotStatuses] = useState<
     Record<number, Record<number, boolean>>
@@ -265,10 +265,6 @@ export function ParkingCongestionScreen({
 
   return (
     <View style={styles.container}>
-      <View style={styles.banner}>
-        <Text style={styles.title}>Parking Congestion</Text>
-        <Text style={styles.subtitle}>UHCL Campus Parking</Text>
-      </View>
       <View style={styles.mapContainer}>
         <MapView
           style={styles.map}

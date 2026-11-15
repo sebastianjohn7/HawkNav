@@ -44,6 +44,11 @@ type Props = {
   /** Node to open first; defaults to the first one. */
   nodeId?: string;
   onBack?: () => void;
+  /**
+   * When set, only these photos can be reached: links to any other photo are hidden. Used while a
+   * route is active so the viewer can't wander off the route.
+   */
+  allowedIds?: ReadonlySet<string> | null;
   /** Shows tools for measuring each photo's direction against the printed floor plan. */
   calibrate?: boolean;
 };
@@ -155,7 +160,7 @@ setInterval(function(){
 </script></body></html>`;
 }
 
-export function PanoramaScreen({ nodeId, onBack, calibrate }: Props) {
+export function PanoramaScreen({ nodeId, onBack, calibrate, allowedIds }: Props) {
   const [currentId, setCurrentId] = useState(nodeId ?? PANORAMA_NODES[0]?.id);
   const [marks, setMarks] = useState<Record<string, number>>({});
   // Calibrate mode: link positions placed by hand, keyed "from>to".
@@ -176,6 +181,7 @@ export function PanoramaScreen({ nodeId, onBack, calibrate }: Props) {
     if (!node) return [];
     const out: Hotspot[] = [];
     for (const l of node.links ?? []) {
+      if (allowedIds && !allowedIds.has(l.to)) continue;
       const target = PANORAMA_NODES.find((n) => n.id === l.to);
       if (!target) continue;
       const label = l.label
@@ -186,7 +192,7 @@ export function PanoramaScreen({ nodeId, onBack, calibrate }: Props) {
       out.push({ to: l.to, label, yaw: l.yaw, pitch: l.pitch ?? 0 });
     }
     return out;
-  }, [node]);
+  }, [node, allowedIds]);
 
   useEffect(() => {
     if (!node) return;

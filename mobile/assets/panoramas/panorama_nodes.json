@@ -11,8 +11,8 @@
         "205A",
         "205B"
       ],
-      "lat": 29.577973,
-      "lng": -95.104474,
+      "lat": 29.577944,
+      "lng": -95.104434,
       "northOffset": -171,
       "links": [
         {
@@ -26,7 +26,7 @@
           "pitch": -4
         }
       ],
-      "positionSource": "nearest hallway vertex to 205A+205B in delta_floorplan_copy.json (3.4 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 205A+205B in delta_floorplan_copy.json (3.4 m away))",
       "title": "Conference 1A/1B"
     },
     {
@@ -172,8 +172,8 @@
       "floorPlanRef": [
         "208"
       ],
-      "lat": 29.57792,
-      "lng": -95.104294,
+      "lat": 29.577914,
+      "lng": -95.104338,
       "northOffset": 160,
       "links": [
         {
@@ -187,7 +187,7 @@
           "pitch": -2
         }
       ],
-      "positionSource": "nearest hallway vertex to 208 in delta_floorplan_copy.json (1.8 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 208 in delta_floorplan_copy.json (1.8 m away))",
       "title": "Lab"
     },
     {
@@ -312,8 +312,8 @@
       "floorPlanRef": [
         "237"
       ],
-      "lat": 29.57766,
-      "lng": -95.104049,
+      "lat": 29.577649,
+      "lng": -95.104026,
       "northOffset": 122,
       "links": [
         {
@@ -327,7 +327,7 @@
           "pitch": -11
         }
       ],
-      "positionSource": "nearest hallway vertex to 237 in delta_floorplan_copy.json (3.0 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 237 in delta_floorplan_copy.json (3.0 m away))",
       "title": "Hallway"
     },
     {
@@ -343,8 +343,8 @@
         "234",
         "236"
       ],
-      "lat": 29.577599,
-      "lng": -95.103961,
+      "lat": 29.577622,
+      "lng": -95.103968,
       "northOffset": -138,
       "links": [
         {
@@ -373,7 +373,7 @@
           "pitch": -10
         }
       ],
-      "positionSource": "nearest hallway vertex to 242 in delta_floorplan_copy.json (0.5 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 242 in delta_floorplan_copy.json (0.5 m away))",
       "title": "Hallway"
     },
     {
@@ -580,8 +580,8 @@
         "133",
         "130"
       ],
-      "lat": 29.577954,
-      "lng": -95.104328,
+      "lat": 29.577934,
+      "lng": -95.104279,
       "northOffset": -23,
       "links": [
         {
@@ -595,7 +595,7 @@
           "pitch": -6
         }
       ],
-      "positionSource": "nearest hallway vertex to 133+130 in josh_floorplan.json (1.1 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 133+130 in josh_floorplan.json (1.1 m away))",
       "title": "Computer Engineering Hallway"
     },
     {
@@ -609,8 +609,8 @@
         "132",
         "125"
       ],
-      "lat": 29.577975,
-      "lng": -95.104476,
+      "lat": 29.578003,
+      "lng": -95.104454,
       "northOffset": -30,
       "links": [
         {
@@ -624,7 +624,7 @@
           "pitch": -17
         }
       ],
-      "positionSource": "nearest hallway vertex to 132+125 in josh_floorplan.json (2.3 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 132+125 in josh_floorplan.json (2.3 m away))",
       "title": "Hallway"
     },
     {
@@ -637,8 +637,8 @@
       "floorPlanRef": [
         "125"
       ],
-      "lat": 29.577909,
-      "lng": -95.104509,
+      "lat": 29.577951,
+      "lng": -95.104487,
       "northOffset": -30,
       "links": [
         {
@@ -652,7 +652,7 @@
           "pitch": -17
         }
       ],
-      "positionSource": "nearest hallway vertex to 125 in josh_floorplan.json (2.0 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 125 in josh_floorplan.json (2.0 m away))",
       "title": "Hallway"
     },
     {
@@ -665,8 +665,8 @@
       "floorPlanRef": [
         "109"
       ],
-      "lat": 29.577738,
-      "lng": -95.104448,
+      "lat": 29.577875,
+      "lng": -95.104507,
       "northOffset": -23,
       "links": [
         {
@@ -680,7 +680,7 @@
           "pitch": -11
         }
       ],
-      "positionSource": "nearest hallway vertex to 109 in josh_floorplan.json (1.3 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 109 in josh_floorplan.json (1.3 m away))",
       "title": "Hallway"
     },
     {
@@ -751,8 +751,8 @@
         "136",
         "139"
       ],
-      "lat": 29.577902,
-      "lng": -95.104199,
+      "lat": 29.57788,
+      "lng": -95.104118,
       "northOffset": -30,
       "links": [
         {
@@ -771,7 +771,7 @@
           "pitch": -8
         }
       ],
-      "positionSource": "nearest hallway vertex to 136+139 in josh_floorplan.json (4.1 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 136+139 in josh_floorplan.json (4.1 m away))",
       "title": "Main Entrance"
     },
     {
@@ -819,8 +819,8 @@
       "floorPlanRef": [
         "101"
       ],
-      "lat": 29.577757,
-      "lng": -95.104282,
+      "lat": 29.577735,
+      "lng": -95.104193,
       "northOffset": -24,
       "links": [
         {
@@ -844,7 +844,7 @@
           "pitch": -11
         }
       ],
-      "positionSource": "nearest hallway vertex to 101 in josh_floorplan.json (3.7 m away)",
+      "positionSource": "placed by hand on the floor plan map: swapped with Second Entrance, then raised 2 m (was: placed by hand on the floor plan map (was: nearest hallway vertex to 101 in josh_floorplan.json (3.7 m away)))",
       "title": "Main Hallway"
     },
     {
@@ -996,8 +996,8 @@
         "158A",
         "160"
       ],
-      "lat": 29.577704,
-      "lng": -95.104084,
+      "lat": 29.577714,
+      "lng": -95.10412,
       "northOffset": -38,
       "links": [
         {
@@ -1017,7 +1017,7 @@
           "label": "Elevator to floor 2"
         }
       ],
-      "positionSource": "nearest hallway vertex to 158A+160 in josh_floorplan.json (1.2 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 158A+160 in josh_floorplan.json (1.2 m away))",
       "title": "Computer Science Hallway"
     },
     {
@@ -1116,8 +1116,8 @@
       "floorPlanRef": [
         "150"
       ],
-      "lat": 29.577816,
-      "lng": -95.103892,
+      "lat": 29.577799,
+      "lng": -95.103847,
       "northOffset": -23,
       "links": [
         {
@@ -1131,7 +1131,7 @@
           "pitch": -14
         }
       ],
-      "positionSource": "nearest hallway vertex to 150 in josh_floorplan.json (0.8 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 150 in josh_floorplan.json (0.8 m away))",
       "title": "Hallway"
     },
     {
@@ -1202,8 +1202,8 @@
       "floorPlanRef": [
         "139"
       ],
-      "lat": 29.577853,
-      "lng": -95.104084,
+      "lat": 29.577843,
+      "lng": -95.104057,
       "northOffset": -39,
       "links": [
         {
@@ -1222,7 +1222,7 @@
           "pitch": -5
         }
       ],
-      "positionSource": "nearest hallway vertex to 139+137 in josh_floorplan.json (1.2 m away)",
+      "positionSource": "placed by hand on the floor plan map (was: nearest hallway vertex to 139+137 in josh_floorplan.json (1.2 m away))",
       "title": "Computer Science Hallway"
     },
     {
@@ -1235,8 +1235,8 @@
       "floorPlanRef": [
         "137"
       ],
-      "lat": 29.5778475,
-      "lng": -95.104077,
+      "lat": 29.577797,
+      "lng": -95.104102,
       "northOffset": -16,
       "links": [
         {
@@ -1245,7 +1245,7 @@
           "pitch": -11
         }
       ],
-      "positionSource": "centre of unit 137 (vending area has no hallway)",
+      "positionSource": "placed by hand on the floor plan map (was: centre of unit 137 (vending area has no hallway))",
       "title": "Vending Area"
     },
     {
@@ -1259,8 +1259,8 @@
         "102",
         "158A"
       ],
-      "lat": 29.577719,
-      "lng": -95.104202,
+      "lat": 29.577666,
+      "lng": -95.104239,
       "northOffset": -29,
       "links": [
         {
@@ -1275,7 +1275,7 @@
           "label": "Stairs up to floor 2"
         }
       ],
-      "positionSource": "nearest hallway vertex to 102+158A in josh_floorplan.json (0.2 m away)",
+      "positionSource": "placed by hand on the floor plan map: swapped with Main Hallway 2 (was: nearest hallway vertex to 102+158A in josh_floorplan.json (0.2 m away))",
       "title": "Second Entrance"
     }
   ]

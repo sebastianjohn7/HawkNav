@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -65,10 +66,6 @@ const LOT_BLOCKED_BAYS: Record<number, Record<number, number[]>> = {
   2: { 0: [9, 10, 11] },
 };
 
-const LOT_LEADING_SPACERS: Record<number, Record<number, number>> = {
-  2: { 0: 1 },
-};
-
 function availabilityColor(metric: ParkingMetric): string {
   if (metric.total_number <= 0) return "#666";
   if (metric.percentage < 0.3) return "#B42318";
@@ -89,6 +86,9 @@ export function ParkingCongestionScreen({
   const [selectedLotId, setSelectedLotId] = useState<number | null>(null);
   const [spotStatuses, setSpotStatuses] = useState<
     Record<number, Record<number, boolean>>
+  >({});
+  const [spotTypes, setSpotTypes] = useState<
+    Record<number, Record<number, SpotType>>
   >({});
   const [spotStatusError, setSpotStatusError] = useState<string | null>(null);
   const groupedLots = useMemo(() => {
@@ -155,6 +155,7 @@ export function ParkingCongestionScreen({
   const loadSpotStatuses = useCallback(async () => {
     if (!supabase) {
       setSpotStatuses({});
+      setSpotTypes({});
       setSpotStatusError(
         "Supabase is not configured; live stall data is unavailable.",
       );
@@ -163,6 +164,7 @@ export function ParkingCongestionScreen({
 
     try {
       const nextStatuses: Record<number, Record<number, boolean>> = {};
+      const nextSpotTypes: Record<number, Record<number, SpotType>> = {};
       const seenSpots = new Set<string>();
       const expectedSpots = new Set(
         Object.entries(LOT_LAYOUTS).flatMap(([lotId, rows]) =>
@@ -176,7 +178,9 @@ export function ParkingCongestionScreen({
       while (true) {
         const { data, error: statusError } = await supabase
           .from("parking_spot_updates")
-          .select("parking_lot_id,parking_spot_id,is_available,updated_at,id")
+          .select(
+            "parking_lot_id,parking_spot_id,parking_spot_type,is_available,updated_at,id",
+          )
           .order("updated_at", { ascending: false })
           .order("id", { ascending: false })
           .range(pageStart, pageStart + pageSize - 1);
@@ -187,6 +191,15 @@ export function ParkingCongestionScreen({
           const key = `${update.parking_lot_id}:${update.parking_spot_id}`;
           if (seenSpots.has(key)) continue;
           seenSpots.add(key);
+          if (
+            update.parking_spot_type === "standard" ||
+            update.parking_spot_type === "handicap" ||
+            update.parking_spot_type === "EV"
+          ) {
+            nextSpotTypes[update.parking_lot_id] ??= {};
+            nextSpotTypes[update.parking_lot_id][update.parking_spot_id] =
+              update.parking_spot_type;
+          }
           if (update.is_available === null) continue;
 
           nextStatuses[update.parking_lot_id] ??= {};
@@ -203,6 +216,7 @@ export function ParkingCongestionScreen({
         }
       }
       setSpotStatuses(nextStatuses);
+      setSpotTypes(nextSpotTypes);
       setSpotStatusError(null);
     } catch (statusLoadError) {
       setSpotStatusError(
@@ -298,10 +312,12 @@ export function ParkingCongestionScreen({
           <View style={styles.miniMapHeader}>
             <View style={styles.miniMapTitleGroup}>
               <Text style={styles.miniMapTitle}>
-                {selectedLot.unofficial_name || selectedLot.uhcl_name}
+                {selectedLot.uhcl_name}
               </Text>
               <Text style={styles.miniMapSubtitle}>
-                {selectedLot.building} · {selectedLot.uhcl_name}
+                {selectedLot.latest_updated_at
+                ? `Updated ${new Date(selectedLot.latest_updated_at).toLocaleTimeString()}`
+                : "Waiting for spot updates"}
               </Text>
             </View>
             <Pressable
@@ -314,7 +330,7 @@ export function ParkingCongestionScreen({
             </Pressable>
           </View>
           <Text style={styles.miniMapLegend}>
-            Green = Available · Red = Occupied · Gray = No data
+            Green = Available · Red = Occupied · Yellow = Unsure · Black = Blocked
           </Text>
           {spotStatusError && (
             <Text style={styles.error}>{spotStatusError}</Text>
@@ -323,48 +339,38 @@ export function ParkingCongestionScreen({
             const rows = LOT_LAYOUTS[String(selectedLot.parking_lot_id)] ?? [];
             const blockedBays =
               LOT_BLOCKED_BAYS[selectedLot.parking_lot_id] ?? {};
-            const leadingSpacers =
-              LOT_LEADING_SPACERS[selectedLot.parking_lot_id] ?? {};
             const maxCols = Math.max(
               1,
               ...rows.map(
-                (row, index) =>
-                  row.length +
-                  (blockedBays[index]?.length ?? 0) +
-                  (leadingSpacers[index] ?? 0),
+                (row, index) => row.length + (blockedBays[index]?.length ?? 0)
               ),
             );
             const renderRow = (row: number[], rowIndex: number) => {
               const blockedAfter = blockedBays[rowIndex] ?? [];
-              const leadingSpacerCount = leadingSpacers[rowIndex] ?? 0;
-              const spacerCount =
-                maxCols -
-                row.length -
-                blockedAfter.length -
-                leadingSpacerCount;
+              const spacerCount = maxCols - row.length - blockedAfter.length;
               const facesDown = rowIndex === 0 || rowIndex === 2;
 
               return (
                 <View key={`row-${rowIndex}`} style={styles.stallRow}>
-                  {Array.from(
-                    { length: leadingSpacerCount },
-                    (_, index) => (
-                      <View
-                        key={`leading-spacer-${index}`}
-                        style={styles.stallSpacer}
-                      />
-                    ),
-                  )}
                   {row.map((layoutSpotId, index) => {
                     const databaseSpotId = layoutSpotId + 1;
                     const isAvailable =
                       spotStatuses[selectedLot.parking_lot_id]?.[
                         databaseSpotId
                       ];
+                    const spotType =
+                      spotTypes[selectedLot.parking_lot_id]?.[databaseSpotId];
 
                     return (
                       <Fragment key={layoutSpotId}>
                         <View
+                          accessibilityLabel={`Spot ${databaseSpotId}, ${spotType ?? "type unknown"}, ${
+                            isAvailable === undefined
+                              ? "availability unsure"
+                              : isAvailable
+                                ? "available"
+                                : "occupied"
+                          }`}
                           style={[
                             styles.stall,
                             facesDown
@@ -373,16 +379,22 @@ export function ParkingCongestionScreen({
                             {
                               backgroundColor:
                                 isAvailable === undefined
-                                  ? "#64748b"
+                                  ? "#eab308"
                                   : isAvailable
                                     ? "#22c55e"
                                     : "#ef4444",
                             },
                           ]}
                         >
-                          <Text style={styles.stallLabel}>
-                            {databaseSpotId}
-                          </Text>
+                          {spotType === "handicap" ? (
+                            <Image
+                              source={require("../assets/img/parking-handicap.png")}
+                              style={styles.handicapIcon}
+                              accessibilityLabel="Accessible parking"
+                            />
+                          ) : spotType === "EV" ? (
+                            <Ionicons name="flash" size={14} color="#fff" />
+                          ) : null}
                         </View>
                         {blockedAfter.includes(index + 1) && (
                           <View
@@ -405,8 +417,8 @@ export function ParkingCongestionScreen({
               );
             };
 
-            return (
-              <View style={styles.asphaltCanvas}>
+            const stallGrid = (
+              <View style={styles.stallGrid}>
                 {rows[0] && renderRow(rows[0], 0)}
                 <View style={styles.drivingLane}>
                   <Text style={styles.laneLabel}>DRIVING LANE</Text>
@@ -418,6 +430,32 @@ export function ParkingCongestionScreen({
                   <Text style={styles.laneLabel}>DRIVING LANE</Text>
                 </View>
                 {rows[3] && renderRow(rows[3], 3)}
+              </View>
+            );
+
+            return (
+              <View style={styles.asphaltCanvas}>
+                {selectedLot.parking_lot_id === 2 && (
+                  <View
+                    style={styles.buildingTop}
+                    accessibilityLabel="Building side"
+                  >
+                    <Text style={styles.buildingLabel}>BUILDING</Text>
+                  </View>
+                )}
+                {selectedLot.parking_lot_id === 1 ? (
+                  <View style={styles.frontLotLayout}>
+                    <View
+                      style={styles.buildingLeft}
+                      accessibilityLabel="Building side"
+                    >
+                      <Text style={styles.buildingSideLabel}>BUILDING</Text>
+                    </View>
+                    {stallGrid}
+                  </View>
+                ) : (
+                  stallGrid
+                )}
               </View>
             );
           })()}
@@ -444,7 +482,7 @@ export function ParkingCongestionScreen({
           >
             <View style={styles.panelHandle} />
             <View style={styles.panelHeading}>
-              <Text style={styles.panelTitle}>Parking Availability</Text>
+              <Text style={styles.panelTitle}>Parking Metrics</Text>
               <Ionicons
                 name={expanded ? "chevron-down" : "chevron-up"}
                 size={20}
@@ -600,7 +638,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 8,
   },
-  miniMapTitleGroup: { flex: 1, gap: 2 },
+  miniMapTitleGroup: {
+    flex: 1,
+    gap: 2,
+    alignItems: "center",
+  },
   miniMapTitle: {
     fontSize: 15,
     fontWeight: "700",
@@ -609,10 +651,46 @@ const styles = StyleSheet.create({
   miniMapSubtitle: { fontSize: 11, color: "#555" },
   miniMapLegend: { fontSize: 10, color: "#555", marginTop: 6, marginBottom: 8 },
   asphaltCanvas: {
-    gap: 2,
     padding: 8,
     backgroundColor: "#334155",
     borderRadius: 8,
+  },
+  frontLotLayout: { flexDirection: "row", alignItems: "stretch", gap: 6 },
+  stallGrid: { flex: 1, gap: 2 },
+  buildingLeft: {
+    width: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    backgroundColor: "#64748b",
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 4,
+  },
+  buildingSideLabel: {
+    width: 100,
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 1,
+    textAlign: "center",
+    transform: [{ rotate: "-90deg" }],
+  },
+  buildingTop: {
+    height: 22,
+    marginBottom: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#64748b",
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 4,
+  },
+  buildingLabel: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 1,
   },
   stallRow: { flexDirection: "row", gap: 2 },
   stall: {
@@ -625,22 +703,18 @@ const styles = StyleSheet.create({
   },
   stallOpenBottom: { borderBottomWidth: 0 },
   stallOpenTop: { borderTopWidth: 0 },
-  stallLabel: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "700",
-  },
+  handicapIcon: { width: 20, height: 20, resizeMode: "contain" },
   blockedBay: {
     flex: 1,
     height: 32,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#1e293b",
+    backgroundColor: "#000",
     borderColor: "#94a3b8",
     borderWidth: 1,
     borderStyle: "dashed",
   },
-  blockedBayLabel: { color: "#cbd5e1", fontSize: 9, fontWeight: "700" },
+  blockedBayLabel: { color: "#fff", fontSize: 9, fontWeight: "700" },
   stallSpacer: { flex: 1, height: 32, backgroundColor: "transparent" },
   drivingLane: {
     height: 18,

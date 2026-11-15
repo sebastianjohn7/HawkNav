@@ -4,7 +4,7 @@
 // Matches the app_role enum in supabase/schema.sql.
 export type Role = "visitor" | "student" | "faculty" | "driver" | "admin";
 
-export type Tab = "shuttle" | "find" | "alerts";
+export type Tab = "shuttle" | "find" | "parking" | "alerts";
 
 type Access = {
   tabs: Tab[];
@@ -18,7 +18,7 @@ type Access = {
   canApproveAlerts: boolean;
 };
 
-const ALL_TABS: Tab[] = ["shuttle", "find", "alerts"];
+const ALL_TABS: Tab[] = ["shuttle", "find", "alerts", "parking"];
 
 const STUDENT: Access = {
   tabs: ALL_TABS,

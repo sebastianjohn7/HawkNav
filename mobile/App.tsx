@@ -12,7 +12,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { SignInPage } from "./pages/SignInPage";
 import { MFA } from "./pages/MFA";
 
-type ScreenName = "nav" | "settings" | "admin" | "panorama" | "find";
+type ScreenName = "nav" | "settings" | "admin";
 
 /** Expo port of Josh's Landing → Sign-in → NavModule shell, gated by sign-in. */
 function Screens() {
@@ -65,11 +65,6 @@ function Screens() {
   } else {
     edgeToEdgeBottom = true;
     content = <NavModule onOpenSettings={() => show("settings")} />;
-  }
-
-  // Signed-in screens stay behind the MFA gate.
-  if (session) {
-    content = <MFA key={session.user.id}>{content}</MFA>;
   }
 
   return (

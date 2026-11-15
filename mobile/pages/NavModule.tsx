@@ -89,7 +89,7 @@ function TabBody({
   if (id === "shuttle") return <ShuttleModule sheetBottom={sheetBottom} />;
   if (id === "find") return <IndoorMapScreen tab={id}/>;
   if (id === "parking") return <ParkingCongestionScreen sheetBottom={sheetBottom} />;
-  return <AlertsModule bottomInset={sheetBottom} />;
+  return <AlertsModule bottomInset={sheetBottom} active={active} />;
 }
 
 /** Bottom tabs + settings. Visitors have one tab, so they get no bar. */

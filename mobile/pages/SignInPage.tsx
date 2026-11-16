@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -56,15 +55,15 @@ export function SignInPage() {
 
   return (
     <ScrollView
+      style={styles.scroll}
       contentContainerStyle={styles.root}
       keyboardShouldPersistTaps="handled"
     >
       <View style={{ height: height / 12 }} />
-      <Image
-        source={require("../assets/img/odyssey.jpg")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+      <Text style={styles.brandTitle} accessibilityRole="header">
+        <Text style={styles.brandHawk}>Hawk</Text>
+        <Text style={styles.brandNav}>Nav</Text>
+      </Text>
       <TextInput
         style={[styles.input, { width: width * 0.95 }]}
         placeholder="Enter your UHCL email"
@@ -166,6 +165,8 @@ export function SignInPage() {
 }
 
 const styles = StyleSheet.create({
+  // Full white underlayer so the intro black fade never shows a split screen.
+  scroll: { flex: 1, backgroundColor: "#fff" },
   root: {
     flexGrow: 1,
     backgroundColor: "#fff",
@@ -173,7 +174,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingBottom: 24,
   },
-  logo: { width: 198, height: 198, marginBottom: 16 },
+  brandTitle: {
+    fontFamily: "DMSans_900Black",
+    fontSize: 52,
+    letterSpacing: -2,
+    marginBottom: 28,
+    transform: [{ skewX: "-8deg" }],
+  },
+  brandHawk: { color: "#1565C0" },
+  brandNav: { color: "#43A047" },
   input: {
     height: 50,
     borderWidth: 1,

@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { DMSans_700Bold, useFonts } from "@expo-google-fonts/dm-sans";
+import {
+  DMSans_600SemiBold,
+  DMSans_700Bold,
+  DMSans_900Black,
+  useFonts,
+} from "@expo-google-fonts/dm-sans";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "./lib/auth";
@@ -14,10 +19,11 @@ import { MFA } from "./pages/MFA";
 
 type ScreenName = "nav" | "settings" | "admin";
 
-/** Expo port of Josh's Landing → Sign-in → NavModule shell, gated by sign-in. */
+/** Landing intro → Sign-in → NavModule shell, gated by auth. */
 function Screens() {
   const { session, guest, role, loading } = useAuth();
   const [started, setStarted] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const [screen, setScreen] = useState<ScreenName>("nav");
   // Back sits in the same place on the next screen, so the finger release
   // would press it too. Ignore that second press.
@@ -41,6 +47,9 @@ function Screens() {
   let content: ReactNode;
   // The tab bar sits on the physical bottom, so the nav screen skips that inset.
   let edgeToEdgeBottom = false;
+  const onAuthGate = !session && !guest;
+  // Full-bleed black chrome while the intro runs (avoids white safe-area bars).
+  const introActive = onAuthGate && showIntro;
 
   if (loading) {
     content = (
@@ -48,11 +57,24 @@ function Screens() {
         <ActivityIndicator />
       </View>
     );
-  } else if (!session && !guest) {
-    content = started ? (
-      <SignInPage />
-    ) : (
-      <LandingPage onGetStarted={() => setStarted(true)} />
+  } else if (onAuthGate) {
+    // White Sign In fills the stack; intro is only a black veil on top.
+    content = (
+      <View style={styles.authStack}>
+        {started && (
+          <View
+            style={showIntro ? styles.signInUnderlay : styles.signInReady}
+          >
+            <SignInPage />
+          </View>
+        )}
+        {showIntro && (
+          <LandingPage
+            onReveal={() => setStarted(true)}
+            onFinished={() => setShowIntro(false)}
+          />
+        )}
+      </View>
     );
   } else if (!session) {
     // Guests only use navigation; account screens require a signed-in session.
@@ -69,11 +91,13 @@ function Screens() {
 
   return (
     <SafeAreaView
-      style={styles.root}
+      style={[styles.root, introActive && styles.rootIntro]}
       edges={
-        edgeToEdgeBottom
-          ? ["top", "left", "right"]
-          : ["top", "bottom", "left", "right"]
+        introActive
+          ? []
+          : edgeToEdgeBottom
+            ? ["top", "left", "right"]
+            : ["top", "bottom", "left", "right"]
       }
     >
       {!loading && session ? <MFA key={session.user.id}>{content}</MFA> : content}
@@ -84,7 +108,9 @@ function Screens() {
 export default function App() {
   // UHCL web headings use DM Sans — load once for the app bar title.
   const [fontsLoaded] = useFonts({
+    DMSans_600SemiBold,
     DMSans_700Bold,
+    DMSans_900Black,
   });
 
   if (!fontsLoaded) {
@@ -107,5 +133,15 @@ export default function App() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#fff" },
+  // Black only while the veil is up — avoids a leftover black band after fade.
+  rootIntro: { backgroundColor: "#000" },
+  authStack: { flex: 1, backgroundColor: "#fff" },
+  // Absolute while the veil fades so Sign In is a full white plane underneath.
+  signInUnderlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#fff",
+  },
+  // After intro, normal flex layout inside SafeArea insets.
+  signInReady: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
 });

@@ -41,12 +41,6 @@ const LEVELS: Array<{ id: LevelId; label: string }> = [
   { id: "UHCL.MAIN.DELTA.L2", label: "Level 2" },
 ];
 
-const rooms: string[] = [];
-  for(const f of deltaFloorplan.features){
-    const name = f.properties?.NAME;
-    if(name && !rooms.includes(name)) rooms.push(f.properties?.NAME);
-  }
-
 /** Fit map to extracted Delta bbox (lng/lat → MapView region). */
 const bbox = deltaFloorplan.bbox as [number, number, number, number];
 const DELTA_REGION = {
@@ -115,9 +109,9 @@ function splitFloor(levelId: LevelId): FloorLayers {
   };
 }
 
-const Floor_Data = {
-  "UHCL.MAIN.DELTA.L1": floorDataEval("UHCL.MAIN.DELTA.L1"),
-  "UHCL.MAIN.DELTA.L2": floorDataEval("UHCL.MAIN.DELTA.L2")
+const FLOOR_LAYERS: Record<LevelId, FloorLayers> = {
+  "UHCL.MAIN.DELTA.L1": splitFloor("UHCL.MAIN.DELTA.L1"),
+  "UHCL.MAIN.DELTA.L2": splitFloor("UHCL.MAIN.DELTA.L2"),
 };
 
 /**
@@ -168,7 +162,7 @@ const RoomMarker = () => (
 );
 
 /** Display-only Delta floor plan from UHCL Indoors GeoJSON. Custom paths come later. */
-export function IndoorMapScreen({tab} : {tab: string}): ReactNode {
+export function IndoorMapScreen({tab} : {tab: string}) {
   const [displayInfo, setDisplayInfo] = useState<GeoJSON.Feature | null>(null);
   const [endNode, setEndNode] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelId>("UHCL.MAIN.DELTA.L1");
@@ -439,19 +433,11 @@ export function IndoorMapScreen({tab} : {tab: string}): ReactNode {
           tappable={false}
         />
         */}
-        
-        {/* Points*/}
-        {<Geojson
-          geojson={currentFloor.units}
-          strokeColor={"#1E3A8A"}
-          strokeWidth={1}
-          fillColor={"rgba(147, 197, 253, 0.35)"}
-          color= {"#9094a0"}
-          onPress={(object) => setDisplayInfo(object.feature)}
-        />}
+
         <Geojson
-          geojson={currentFloor.walls}
-          strokeColor={"#33553a"}
+          key={`${level}-walls`}
+          geojson={layers.walls}
+          strokeColor="#33553a"
           strokeWidth={1.5}
           fillColor="transparent"
           tappable={false}

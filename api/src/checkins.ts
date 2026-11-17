@@ -6,7 +6,7 @@ import {
   type VehiclePlot,
 } from "./verizon";
 
-const POLL_MS = 500;
+const POLL_MS = 100;
 
 type Poll = {
   timer: ReturnType<typeof setInterval>;

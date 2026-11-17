@@ -33,11 +33,6 @@ export function DriverScreen({
   const [shuttleId, setShuttleId] = useState<string | null>(null);
   const [polling, setPolling] = useState(false);
   const [status, setStatus] = useState("Idle");
-  const [last, setLast] = useState<{
-    lat: number;
-    lng: number;
-    heading: number | null;
-  } | null>(null);
   const frameWidth = useRef(0);
   const panelWidth = useRef(0);
 
@@ -113,13 +108,11 @@ export function DriverScreen({
       const name = shuttles.find((shuttle) => shuttle.id === shuttleId)?.name;
       setStatus(body.note ?? `Polling ${name ?? shuttleId}`);
       if (body.position) {
-        const point = {
+        onLocalPosition?.({
           lat: body.position.lat as number,
           lng: body.position.lng as number,
           heading: (body.position.heading ?? null) as number | null,
-        };
-        setLast(point);
-        onLocalPosition?.(point);
+        });
       }
     } catch {
       setPolling(false);
@@ -204,7 +197,6 @@ export function DriverScreen({
                   shuttles={shuttles}
                   shuttleId={shuttleId}
                   polling={polling}
-                  last={last}
                   onClose={() => setOpen(false)}
                   onChoose={choose}
                   onToggle={polling ? stop : start}
@@ -223,7 +215,6 @@ export function DriverScreen({
                   shuttles={shuttles}
                   shuttleId={shuttleId}
                   polling={polling}
-                  last={last}
                   onClose={() => setOpen(false)}
                   onChoose={choose}
                   onToggle={polling ? stop : start}
@@ -243,7 +234,6 @@ function CheckinPanelBody({
   shuttles,
   shuttleId,
   polling,
-  last,
   onClose,
   onChoose,
   onToggle,
@@ -251,9 +241,8 @@ function CheckinPanelBody({
   glass?: boolean;
   status: string;
   shuttles: Shuttle[];
-  shuttleId: string;
+  shuttleId: string | null;
   polling: boolean;
-  last: { lat: number; lng: number; heading: number | null } | null;
   onClose: () => void;
   onChoose: (id: string) => void;
   onToggle: () => void;
@@ -289,12 +278,6 @@ function CheckinPanelBody({
             </Pressable>
           );
         })}
-        {last && (
-          <Text style={styles.meta}>
-            {last.lat.toFixed(5)}, {last.lng.toFixed(5)} heading=
-            {last.heading?.toFixed(0) ?? "—"}
-          </Text>
-        )}
         <Pressable
           style={[styles.btn, polling && styles.btnOff]}
           onPress={onToggle}

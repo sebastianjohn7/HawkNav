@@ -37,6 +37,7 @@ export function ShuttleModule({ sheetBottom }: Props) {
   const [stopFocus, setStopFocus] = useState<{ id: string; n: number } | null>(
     null,
   );
+  const [mapPick, setMapPick] = useState<{ id: string; n: number } | null>(null);
   const [coverFraction, setCoverFraction] = useState(0);
   const [driverShuttleId, setDriverShuttleId] = useState(DEFAULT_SHUTTLE_ID);
   const mapShuttleId = mode === "driver" ? driverShuttleId : DEFAULT_SHUTTLE_ID;
@@ -123,6 +124,21 @@ export function ShuttleModule({ sheetBottom }: Props) {
           focusStopId={stopFocus?.id}
           focusNonce={stopFocus?.n ?? 0}
           obscuredFraction={coverFraction}
+          onSelectStop={
+            mode === "rider"
+              ? (stopId) => {
+                  setSelectedStopId(stopId);
+                  setMapPick((current) => ({
+                    id: stopId,
+                    n: (current?.n ?? 0) + 1,
+                  }));
+                  setStopFocus((current) => ({
+                    id: stopId,
+                    n: (current?.n ?? 0) + 1,
+                  }));
+                }
+              : undefined
+          }
         />
       </View>
 
@@ -204,6 +220,8 @@ export function ShuttleModule({ sheetBottom }: Props) {
           shuttleLat={position?.lat}
           shuttleLng={position?.lng}
           onSelectedStop={setSelectedStopId}
+          mapPickStopId={mapPick?.id}
+          mapPickNonce={mapPick?.n ?? 0}
           onFocusStop={(stopId) =>
             setStopFocus((current) => ({ id: stopId, n: (current?.n ?? 0) + 1 }))
           }

@@ -29,6 +29,8 @@ type Props = {
   focusNonce?: number;
   /** Share of the map hidden by the open sidebar, measured from layout. */
   obscuredFraction?: number;
+  /** Rider tapped a stop pin — update selection (blue pin + ETA). */
+  onSelectStop?: (stopId: string) => void;
 };
 
 /** Standard campus map; plots the live shuttle when coords are present. */
@@ -40,6 +42,7 @@ export function ShuttleMapView({
   focusStopId,
   focusNonce = 0,
   obscuredFraction = 0,
+  onSelectStop,
 }: Props) {
   const mapRef = useRef<MapView>(null);
   const [showUser, setShowUser] = useState(false);
@@ -131,6 +134,7 @@ export function ShuttleMapView({
             coordinate={{ latitude: stop.lat, longitude: stop.lng }}
             title={stop.name}
             pinColor={stop.stop_id === selectedStopId ? "#1565C0" : "#C45C26"}
+            onPress={() => onSelectStop?.(stop.stop_id)}
           />
         ))}
         {hasShuttle && (

@@ -71,6 +71,9 @@ type Props = {
   onSelectedStop?: (stopId: string | null) => void;
   /** Move the map to this stop. Called only when the rider taps a row. */
   onFocusStop?: (stopId: string) => void;
+  /** Map pin pick — `nonce` bumps on every tap so repeats still apply. */
+  mapPickStopId?: string | null;
+  mapPickNonce?: number;
   /** Share of the screen the open sidebar covers, so the pin stays visible. */
   onCoverFraction?: (fraction: number) => void;
 };
@@ -81,6 +84,8 @@ export function RiderScreen({
   shuttleLng,
   onSelectedStop,
   onFocusStop,
+  mapPickStopId,
+  mapPickNonce = 0,
   onCoverFraction,
 }: Props) {
   const [stops, setStops] = useState<Stop[]>([]);
@@ -149,6 +154,12 @@ export function RiderScreen({
   useEffect(() => {
     if (selected) void loadEta(selected);
   }, [selected, loadEta]);
+
+  // One-way: map pin → rider selection (nonce avoids parent↔child loops).
+  useEffect(() => {
+    if (!mapPickStopId || mapPickNonce === 0) return;
+    setSelected(mapPickStopId);
+  }, [mapPickStopId, mapPickNonce]);
 
   useEffect(() => {
     onSelectedStop?.(selected);
@@ -362,7 +373,7 @@ function StopsPanelBody({
   onSelect,
 }: {
   stops: Stop[];
-  selected: string;
+  selected: string | null;
   glass?: boolean;
   onClose: () => void;
   onSelect: (stopId: string) => void;

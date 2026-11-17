@@ -140,6 +140,9 @@ export function DriverScreen({
     }
   }
 
+  // Red while checked in so the closed handle still shows "live".
+  const handleColor = polling ? "#C62828" : "#1565C0";
+
   return (
     <View
       style={styles.overlay}
@@ -162,14 +165,18 @@ export function DriverScreen({
               onPress={() => setOpen(true)}
               accessibilityLabel="Open check-in"
             >
-              <Ionicons name="bus" size={18} color="#1565C0" />
-              <Text style={styles.handleText}>Drive</Text>
+              <Ionicons name="bus" size={18} color={handleColor} />
+              <Text style={[styles.handleText, { color: handleColor }]}>
+                Drive
+              </Text>
             </Pressable>
           </GlassView>
         ) : (
           <Pressable style={styles.handle} onPress={() => setOpen(true)}>
-            <Ionicons name="bus" size={18} color="#1565C0" />
-            <Text style={styles.handleText}>Drive</Text>
+            <Ionicons name="bus" size={18} color={handleColor} />
+            <Text style={[styles.handleText, { color: handleColor }]}>
+              Drive
+            </Text>
           </Pressable>
         ))}
 

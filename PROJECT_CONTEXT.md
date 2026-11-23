@@ -76,32 +76,7 @@ Seven CS majors, organized into specialized sub-teams:
 
 ---
 
-## 3. This Workspace (Sebastian’s Clone)
-
-This clone (`HawkNav-seb`) is **Sebastian John’s** working tree.
-
-
-|                        |                                                                                                                                                      |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Default focus**      | **Entire Shuttle module (FR-5)** — everything riders and drivers need for live campus shuttles (see breakdown below)                                 |
-| **Product (full app)** | UHCL campus mobility — shuttle tracking, accessible navigation + 360° indoor path view, parking congestion, emergency alerts                         |
-| **Mobile client**      | Expo under `mobile/` (Josh shell + Shuttle/Find/Alerts); prior Flutter / ArcGIS experiment in `archive/mobile-flutter/` |
-| **Do not**             | Commit `.env` / secrets; invent live-camera AR or hardware beacons for indoor nav; bundle the full ~118MB UHCL Indoors GeoJSON into the app |
-
-
-**Shuttle module includes (in scope by default):**
-
-- Driver app: GPS stream every 3–5s (`expo-location`) → `shuttle_positions`
-- Rider / student UI: live position via Supabase Realtime on the Shuttle campus map + stop ETA
-- Routes, stops, and schedules (on-campus + off-campus / Pearland references in `shuttle-pdfs/` / `data/shuttle/`)
-- Predictive ETA (Hono): schedule-based ETA today; segment history / moving average later
-- Josh-shell tabs: Shuttle (map + Rider/Driver), Find (Delta floor plan), News & Alerts (placeholder)
-
-Prefer Shuttle-scoped changes unless the user asks for indoor path routing, 360°, or Parking CV.
-
----
-
-## 4. Technology Stack & Infrastructure
+## 3. Technology Stack & Infrastructure
 
 Designed to minimize hardware dependencies while supporting cross-platform mobile access, spatial graph processing, and real-time streaming.
 
@@ -117,11 +92,6 @@ Designed to minimize hardware dependencies while supporting cross-platform mobil
 | Parking CV                              | Python + OpenCV + YOLOv8-nano / TensorFlow Lite | Stationary drone / camera clips of lot entrance/exit (e.g. Delta & Arbor) |
 | Dev tunneling                           | Cloudflare quick tunnel (`cloudflared`)         | **Required** day-to-day: `cd api && bun run dev` → tunnel + write `EXPO_PUBLIC_API_URL` |
 | Push alerts                             | Expo push / FCM + Twilio SMS fallback (later)   | Emergency, weather, and service disruption alerts                         |
-
-### Maps in this clone (current vs target)
-
-- **Now:** Shuttle tab and Find tab each have their own `MapView` (campus live shuttle vs Delta floor plan).
-- **Target (SRS):** One shared MapView with layer stacks (shuttle / parking / indoor); floor filter; 360° as overlay. Don’t invent a second product map SDK without asking.
 
 
 ### UHCL ArcGIS Indoors (campus GIS reference)
@@ -150,7 +120,7 @@ Official UHCL floor-aware campus map — use as the institutional spatial backbo
 
 ---
 
-## 5. Functional Requirements (SRS)
+## 4. Functional Requirements (SRS)
 
 Format below follows the SRS. Implementation notes from the team’s technical plan are included where they add concrete design detail.
 
@@ -276,7 +246,7 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ---
 
-## 6. Nonfunctional Requirements (SRS)
+## 5. Nonfunctional Requirements (SRS)
 
 
 | Area                | Requirement                                                                 |
@@ -292,7 +262,7 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ---
 
-## 7. System Data Flow
+## 6. System Data Flow
 
 ```text
 [Driver Expo Go] ──(expo-location)──> [Supabase shuttle_positions] ──(Realtime)──> [Rider Expo map marker]
@@ -306,7 +276,7 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ---
 
-## 8. Definitions, Acronyms, and Abbreviations
+## 7. Definitions, Acronyms, and Abbreviations
 
 
 | Term   | Definition                          |
@@ -326,24 +296,12 @@ Format below follows the SRS. Implementation notes from the team’s technical p
 
 ---
 
-## 9. Operational & Team Ground Rules
+## 8. Operational & Team Ground Rules
 
-- **Scrum:** Weekly Kanban reviews every Tuesday before class and Thursday at 5:30 PM.
+- **Scrum:** Weekly Kanban reviews.
 - **Decisions:** Majority rule; consensus preferred.
 - **Individual reporting:** Each member submits a weekly report (research, meeting, design, coding, testing hours).
-- **Team reporting:** Executive summary, deliverables, risk logs, and schedule status via the CSCI 4388 Team Report template.
+- **Team reporting:** Executive summary, deliverables, risk logs, and schedule status via the Team Report template.
 
 ---
-
-## 10. Agent Working Guidelines
-
-When starting a new session on this repo:
-
-1. Prefer the **Shuttle module** (driver GPS, realtime rider map, stops/schedules, ETA) unless asked otherwise.
-2. Match the stack: **Expo** (`expo-location`, `@supabase/supabase-js`, `react-native-maps`), Bun + Hono, Supabase Realtime. Flutter notes only under [`archive/mobile-flutter/`](archive/mobile-flutter/). Boot: root [`README.md`](README.md).
-3. Do not commit secrets (`.env`, keys, credentials). Use `.env.example` patterns only.
-4. Keep changes scoped; do not invent parking CV or indoor 360° unless requested.
-5. **Always** use Cloudflare quick tunnel for device testing: `cd api && bun run dev` (writes `EXPO_PUBLIC_API_URL`). Supabase setup is required.
-6. Prefer small, reviewable commits only when the user asks to commit.
-7. Indoors now = Delta floor-plan extract; custom paths / A* / 360° later. Never bundle the full Indoors GeoJSON. No live-camera AR or beacons.
 
